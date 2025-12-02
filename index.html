@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="styles/base.css">
     <link rel="stylesheet" href="styles/theme-wiiu.css">
     <link rel="stylesheet" href="styles/theme-snes.css">
+    <link rel="stylesheet" href="styles/theme-nature.css">
 </head>
 
 <body data-theme="wiiu">
@@ -44,6 +45,14 @@
                         <button class="primary" id="downloadBtn" style="margin-bottom: 16px;">Descargar Todo</button>
                         <div id="songList" class="song-list"></div>
                     </div>
+
+                    <!-- Quick Play Section -->
+                    <div id="quickPlaySection" style="margin-top: 40px;">
+                        <h3 style="margin-bottom: 16px; opacity: 0.8;">Juego Rápido (Biblioteca)</h3>
+                        <div class="cartridge-grid" id="cartridgeGrid">
+                            <!-- Cartridges will be injected here -->
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Library View -->
@@ -51,6 +60,135 @@
                     <h2 style="margin-bottom: 16px;">Mis Carpetas</h2>
                     <div id="folderGrid" class="folder-grid"></div>
                 </div>
+
+                <!-- ... (rest of HTML) ... -->
+
+                <style>
+                    /* ... (existing styles) ... */
+
+                    /* 3DS Cartridge Styles */
+                    .cartridge-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                        gap: 15px;
+                        padding: 10px 5px;
+                        max-height: 400px;
+                        overflow-y: auto;
+                        scrollbar-width: thin;
+                    }
+
+                    .cartridge-grid::-webkit-scrollbar {
+                        width: 8px;
+                    }
+
+                    .cartridge-grid::-webkit-scrollbar-track {
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 4px;
+                    }
+
+                    .cartridge-grid::-webkit-scrollbar-thumb {
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 4px;
+                    }
+
+                    .cartridge-grid::-webkit-scrollbar-thumb:hover {
+                        background: rgba(255, 255, 255, 0.5);
+                    }
+
+                    .cartridge-item {
+                        width: 100%;
+                        height: 160px;
+                        background: #f0f0f0;
+                        position: relative;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                        cursor: pointer;
+                        transition: transform 0.2s;
+                        overflow: hidden;
+                        border: 1px solid #ccc;
+                        border-radius: 8px;
+                        background: #e0e0e0;
+                        padding: 8px 8px 20px 8px;
+                        /* Bottom padding for "contacts" area look */
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .cartridge-item::after {
+                        /* Contacts area visual */
+                        content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 10%;
+                        right: 10%;
+                        height: 10px;
+                        background: repeating-linear-gradient(90deg, #d4af37 0, #d4af37 5px, transparent 5px, transparent 8px);
+                        opacity: 0.5;
+                    }
+
+                    /* The "Sticker" */
+                    .cartridge-label {
+                        flex: 1;
+                        background: #333;
+                        border-radius: 4px;
+                        overflow: hidden;
+                        position: relative;
+                    }
+
+                    .cartridge-label img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+
+                    .cartridge-overlay {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        opacity: 0;
+                        transition: opacity 0.2s;
+                    }
+
+                    .cartridge-item:hover {
+                        transform: translateY(-5px);
+                    }
+
+                    .cartridge-item:hover .cartridge-overlay {
+                        opacity: 1;
+                    }
+
+                    .cartridge-play-btn {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.2);
+                        backdrop-filter: blur(4px);
+                        border: 2px solid rgba(255, 255, 255, 0.8);
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    /* Theme specific overrides */
+                    body[data-theme="snes"] .cartridge-item {
+                        background: #bbb;
+                        border: 2px solid #000;
+                        border-radius: 0;
+                        box-shadow: 4px 4px 0 #000;
+                    }
+
+                    body[data-theme="nature"] .cartridge-item {
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        backdrop-filter: blur(10px);
+                    }
+                </style>
 
                 <!-- Folder View -->
                 <div id="folderView" class="panel hidden">
@@ -122,6 +260,17 @@
                 </div>
 
                 <div class="controls-extra">
+                    <button class="control-icon-btn" id="queueBtn" title="Cola de Reproducción">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                    </button>
                     <button class="control-icon-btn" id="shuffleBtn" title="Aleatorio">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -132,13 +281,12 @@
                             <line x1="4" y1="4" x2="9" y2="9"></line>
                         </svg>
                     </button>
-                    <button class="control-icon-btn" id="bassBtn" title="Bass Boost">
+                    <button class="control-icon-btn" id="eqBtn" title="Ecualizador">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                            <line x1="12" y1="19" x2="12" y2="23"></line>
-                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                            <path d="M3 20v-8a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v8"></path>
+                            <path d="M11 20V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v16"></path>
+                            <path d="M19 20v-5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v5"></path>
                         </svg>
                     </button>
                     <div style="display: flex; align-items: center; gap: 5px;">
@@ -159,13 +307,110 @@
         </div>
     </div>
 
+    <!-- Queue Panel -->
+    <div class="queue-panel" id="queuePanel">
+        <div class="queue-header">
+            <h3>Cola de Reproducción</h3>
+            <button class="control-icon-btn" id="closeQueueBtn">✕</button>
+        </div>
+        <div class="queue-list" id="queueList">
+            <!-- Queue Items -->
+        </div>
+    </div>
+
+    <!-- Equalizer Panel -->
+    <div class="eq-panel" id="eqPanel">
+        <div class="eq-band">
+            <input type="range" class="eq-slider" data-freq="60" min="-12" max="12" value="0" step="1">
+            <span class="eq-label">60Hz</span>
+        </div>
+        <div class="eq-band">
+            <input type="range" class="eq-slider" data-freq="310" min="-12" max="12" value="0" step="1">
+            <span class="eq-label">310Hz</span>
+        </div>
+        <div class="eq-band">
+            <input type="range" class="eq-slider" data-freq="1000" min="-12" max="12" value="0" step="1">
+            <span class="eq-label">1kHz</span>
+        </div>
+        <div class="eq-band">
+            <input type="range" class="eq-slider" data-freq="6000" min="-12" max="12" value="0" step="1">
+            <span class="eq-label">6kHz</span>
+        </div>
+        <div class="eq-band">
+            <input type="range" class="eq-slider" data-freq="16000" min="-12" max="12" value="0" step="1">
+            <span class="eq-label">16kHz</span>
+        </div>
+    </div>
+
     <!-- Theme Selector -->
     <div class="theme-selector">
         <button class="theme-btn active" id="themeWiiU" title="Tema Wii U">🎮</button>
         <button class="theme-btn" id="themeSNES" title="Tema SNES">🕹️</button>
+        <button class="theme-btn" id="themeNature" title="Tema Puerto Montt">🌧️</button>
     </div>
 
     <audio id="audioPlayer" crossorigin="anonymous"></audio>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Añadido a la cola</div>
+
+    <style>
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(31, 41, 55, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Download Progress Styles */
+        .song-progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: #2ecc71;
+            width: 0%;
+            transition: width 0.3s linear;
+            z-index: 5;
+            box-shadow: 0 -1px 4px rgba(46, 204, 113, 0.4);
+        }
+
+        .song-status {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2ecc71;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2px 6px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .song-item.downloading .song-status,
+        .song-item.finished .song-status {
+            opacity: 1;
+        }
+
+        .song-item.finished .song-progress-bar {
+            background: #3498db;
+        }
+    </style>
 
     <script>
         let currentView = 'downloader';
@@ -175,16 +420,20 @@
         let displayedSongs = [];
         let currentSong = null;
         let currentSongIndex = -1;
+        let lastFolderIndex = -1; // Track position in folder playlist
         let isPlaying = false;
         let isShuffle = false;
-        let isBassBoost = false;
+        let pollInterval = null; // For download progress
 
-        // Audio Context
+        // Queue System
+        let songQueue = [];
+
+        // Audio Context & EQ
         let audioContext;
         let analyser;
         let source;
         let gainNode;
-        let bassFilter;
+        let eqBands = [];
         let canvas, ctx;
 
         // Preview Audio
@@ -222,13 +471,29 @@
         const progressContainer = document.getElementById('progressContainer');
         const currentTime = document.getElementById('currentTime');
         const duration = document.getElementById('duration');
+        const toast = document.getElementById('toast');
+        const cartridgeGrid = document.getElementById('cartridgeGrid');
 
         // New Controls
         const shuffleBtn = document.getElementById('shuffleBtn');
-        const bassBtn = document.getElementById('bassBtn');
+        const eqBtn = document.getElementById('eqBtn');
+        const queueBtn = document.getElementById('queueBtn');
+        const closeQueueBtn = document.getElementById('closeQueueBtn');
         const volumeSlider = document.getElementById('volumeSlider');
+        const queuePanel = document.getElementById('queuePanel');
+        const queueList = document.getElementById('queueList');
+        const eqPanel = document.getElementById('eqPanel');
+        const eqSliders = document.querySelectorAll('.eq-slider');
 
-        // Initialize Audio Chain
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Initialize Audio Chain with EQ
         function initAudioChain() {
             if (audioContext) return;
 
@@ -237,19 +502,30 @@
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 128;
 
-                bassFilter = audioContext.createBiquadFilter();
-                bassFilter.type = 'lowshelf';
-                bassFilter.frequency.value = 200;
-                bassFilter.gain.value = 0; // Start flat
-
                 gainNode = audioContext.createGain();
                 gainNode.gain.value = volumeSlider.value;
 
                 source = audioContext.createMediaElementSource(audioPlayer);
 
-                // Chain: Source -> Bass -> Gain -> Analyser -> Destination
-                source.connect(bassFilter);
-                bassFilter.connect(gainNode);
+                // Create EQ Bands
+                const freqs = [60, 310, 1000, 6000, 16000];
+                eqBands = freqs.map(f => {
+                    const filter = audioContext.createBiquadFilter();
+                    filter.type = 'peaking';
+                    filter.frequency.value = f;
+                    filter.Q.value = 1;
+                    filter.gain.value = 0;
+                    return filter;
+                });
+
+                // Connect Chain: Source -> EQ1 -> EQ2 ... -> Gain -> Analyser -> Destination
+                let currentNode = source;
+                eqBands.forEach(band => {
+                    currentNode.connect(band);
+                    currentNode = band;
+                });
+
+                currentNode.connect(gainNode);
                 gainNode.connect(analyser);
                 analyser.connect(audioContext.destination);
 
@@ -296,19 +572,85 @@
             }
         }
 
-        // Bass Boost Logic
-        bassBtn.addEventListener('click', () => {
-            if (!audioContext) initAudioChain();
-            isBassBoost = !isBassBoost;
-            bassBtn.classList.toggle('active', isBassBoost);
-
-            if (bassFilter) {
-                // Smooth transition
-                const currentTime = audioContext.currentTime;
-                bassFilter.gain.cancelScheduledValues(currentTime);
-                bassFilter.gain.linearRampToValueAtTime(isBassBoost ? 15 : 0, currentTime + 0.2);
-            }
+        // EQ Logic
+        eqBtn.addEventListener('click', () => {
+            eqPanel.classList.toggle('open');
+            eqBtn.classList.toggle('active');
         });
+
+        eqSliders.forEach((slider, index) => {
+            slider.addEventListener('input', (e) => {
+                if (!audioContext) initAudioChain();
+                const val = parseFloat(e.target.value);
+                if (eqBands[index]) {
+                    eqBands[index].gain.value = val;
+                }
+            });
+        });
+
+        // Queue Logic
+        queueBtn.addEventListener('click', () => {
+            queuePanel.classList.toggle('open');
+            queueBtn.classList.toggle('active');
+            renderQueue();
+        });
+
+        closeQueueBtn.addEventListener('click', () => {
+            queuePanel.classList.remove('open');
+            queueBtn.classList.remove('active');
+        });
+
+        function addToQueue(song) {
+            songQueue.push(song);
+            renderQueue();
+            showToast(`Añadido a la cola: ${song.title}`);
+
+            // Visual feedback on button
+            queueBtn.classList.add('active');
+            setTimeout(() => {
+                if (!queuePanel.classList.contains('open')) queueBtn.classList.remove('active');
+            }, 300);
+        }
+
+        function removeFromQueue(index) {
+            songQueue.splice(index, 1);
+            renderQueue();
+        }
+
+        function renderQueue() {
+            queueList.innerHTML = '';
+            if (songQueue.length === 0) {
+                queueList.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Cola vacía</div>';
+                return;
+            }
+
+            songQueue.forEach((song, index) => {
+                const item = document.createElement('div');
+                item.className = 'queue-item';
+                item.innerHTML = `
+                    <div style="flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                        <div style="font-weight: bold; font-size: 14px;">${song.title}</div>
+                        <div style="font-size: 12px; color: #666;">${song.filename}</div>
+                    </div>
+                    <button class="remove-btn" style="background: none; border: none; color: #999; cursor: pointer;">✕</button>
+                `;
+
+                // Play from queue
+                item.addEventListener('click', () => {
+                    playSong(song, -1); // -1 indicates playing from queue/custom
+                    removeFromQueue(index);
+                });
+
+                // Remove button
+                const removeBtn = item.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeFromQueue(index);
+                });
+
+                queueList.appendChild(item);
+            });
+        }
 
         // Volume Logic
         volumeSlider.addEventListener('input', (e) => {
@@ -324,6 +666,7 @@
         shuffleBtn.addEventListener('click', () => {
             isShuffle = !isShuffle;
             shuffleBtn.classList.toggle('active', isShuffle);
+            showToast(isShuffle ? 'Modo Aleatorio Activado' : 'Modo Aleatorio Desactivado');
         });
 
         // Seek Logic
@@ -414,12 +757,16 @@
                 playlist.songs.forEach(song => {
                     const item = document.createElement('div');
                     item.className = 'song-item';
+                    item.dataset.id = song.id; // Store ID for progress updates
+                    item.style.position = 'relative'; // Ensure relative positioning
                     item.innerHTML = `
                         <img src="${song.thumbnail || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%23e5e7eb\' width=\'48\' height=\'48\'/%3E%3C/svg%3E'}" class="song-thumb">
                         <div class="song-info">
                             <div class="song-title">${song.title}</div>
                             <div class="song-artist">${song.uploader || 'Desconocido'}</div>
                         </div>
+                        <div class="song-progress-bar"></div>
+                        <div class="song-status">Esperando...</div>
                     `;
                     songList.appendChild(item);
                 });
@@ -444,11 +791,60 @@
                         selected_ids: playlist.songs.map(s => s.id)
                     })
                 });
-                alert('Descarga iniciada');
+                showToast('Descarga iniciada en segundo plano');
+
+                // Start polling for progress
+                if (pollInterval) clearInterval(pollInterval);
+                pollInterval = setInterval(updateDownloadProgress, 1000);
+
             } catch (error) {
                 alert('Error: ' + error.message);
             }
         });
+
+        async function updateDownloadProgress() {
+            try {
+                const res = await fetch('http://localhost:5001/api/status');
+                const statusMap = await res.json();
+
+                let allFinished = true;
+
+                // We iterate over the songs in the playlist to check their status
+                if (playlist && playlist.songs) {
+                    playlist.songs.forEach(song => {
+                        const status = statusMap[song.id];
+                        const item = document.querySelector(`.song-item[data-id="${song.id}"]`);
+
+                        if (item && status) {
+                            const progressBar = item.querySelector('.song-progress-bar');
+                            const statusDiv = item.querySelector('.song-status');
+
+                            if (status.status === 'downloading') {
+                                allFinished = false;
+                                progressBar.style.width = `${status.percent}%`;
+                                statusDiv.textContent = `${Math.round(status.percent)}%`;
+                                item.classList.add('downloading');
+                            } else if (status.status === 'finished') {
+                                progressBar.style.width = '100%';
+                                statusDiv.textContent = '✓ Listo';
+                                item.classList.remove('downloading');
+                                item.classList.add('finished');
+                            }
+                        } else if (item) {
+                            // Not started yet or queued
+                            allFinished = false;
+                        }
+                    });
+                }
+
+                // Optional: Stop polling if everything is finished? 
+                // For now, we keep polling as user might download more or status might clear.
+                // But to be efficient we could stop if we knew for sure.
+
+            } catch (e) {
+                console.error("Polling error:", e);
+            }
+        }
 
         async function loadLibrary() {
             try {
@@ -523,12 +919,20 @@
                 item.style.position = 'relative';
                 item.innerHTML = `
                     <div class="preview-indicator">Preview</div>
+                    <button class="add-queue-btn" title="Agregar a la cola">+</button>
                     <img src="${song.thumbnail ? 'http://localhost:5001' + song.thumbnail : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%23e5e7eb\' width=\'48\' height=\'48\'/%3E%3C/svg%3E'}" class="song-thumb">
                     <div class="song-info">
                         <div class="song-title">${song.title}</div>
                         <div class="song-artist">${song.filename}</div>
                     </div>
                 `;
+
+                // Add to Queue Button
+                const addBtn = item.querySelector('.add-queue-btn');
+                addBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    addToQueue(song);
+                });
 
                 // Click to play
                 item.addEventListener('click', (e) => {
@@ -576,6 +980,12 @@
         function playSong(song, index) {
             currentSong = song;
             currentSongIndex = index;
+
+            // Only update lastFolderIndex if playing from the main list
+            if (index !== -1) {
+                lastFolderIndex = index;
+            }
+
             audioPlayer.src = `http://localhost:5001${song.path}`;
             audioPlayer.play().then(() => {
                 initAudioChain();
@@ -594,8 +1004,17 @@
             playIcon.classList.toggle('hidden', isPlaying);
             pauseIcon.classList.toggle('hidden', !isPlaying);
 
-            if (currentSong && currentSong.thumbnail) {
-                albumImage.src = `http://localhost:5001${currentSong.thumbnail}`;
+            if (currentSong) {
+                if (currentSong.thumbnail) {
+                    albumImage.src = `http://localhost:5001${currentSong.thumbnail}`;
+                } else {
+                    // Generate a deterministic random number (1-7) based on song title
+                    // This ensures the same song always gets the same "random" cover
+                    const hash = currentSong.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                    const coverNum = (hash % 7) + 1;
+                    albumImage.src = `styles/no_cover/${coverNum}.png`;
+                }
+
                 albumImage.classList.remove('hidden');
                 defaultArt.classList.add('hidden');
 
@@ -634,14 +1053,31 @@
                 playRandomSong();
             } else if (currentSongIndex > 0) {
                 playSong(folderSongs[currentSongIndex - 1], currentSongIndex - 1);
+            } else if (currentSongIndex === -1 && lastFolderIndex > 0) {
+                // If in queue/custom, go back to last known folder position
+                playSong(folderSongs[lastFolderIndex], lastFolderIndex);
             }
         });
 
         nextBtn.addEventListener('click', () => {
+            // Check queue first
+            if (songQueue.length > 0) {
+                const nextSong = songQueue.shift();
+                renderQueue();
+                playSong(nextSong, -1);
+                return;
+            }
+
             if (isShuffle) {
                 playRandomSong();
-            } else if (currentSongIndex < folderSongs.length - 1) {
+            } else if (currentSongIndex !== -1 && currentSongIndex < folderSongs.length - 1) {
                 playSong(folderSongs[currentSongIndex + 1], currentSongIndex + 1);
+            } else if (currentSongIndex === -1 && lastFolderIndex < folderSongs.length - 1) {
+                // Resume from last folder position
+                playSong(folderSongs[lastFolderIndex + 1], lastFolderIndex + 1);
+            } else if (folderSongs.length > 0) {
+                // Loop back to start
+                playSong(folderSongs[0], 0);
             }
         });
 
@@ -662,10 +1098,21 @@
         });
 
         audioPlayer.addEventListener('ended', () => {
-            if (isShuffle) {
+            // Check queue first
+            if (songQueue.length > 0) {
+                const nextSong = songQueue.shift();
+                renderQueue();
+                playSong(nextSong, -1);
+            } else if (isShuffle) {
                 playRandomSong();
-            } else if (currentSongIndex < folderSongs.length - 1) {
+            } else if (currentSongIndex !== -1 && currentSongIndex < folderSongs.length - 1) {
                 playSong(folderSongs[currentSongIndex + 1], currentSongIndex + 1);
+            } else if (currentSongIndex === -1 && lastFolderIndex < folderSongs.length - 1) {
+                // Resume from last folder position
+                playSong(folderSongs[lastFolderIndex + 1], lastFolderIndex + 1);
+            } else if (folderSongs.length > 0) {
+                // Loop back to start
+                playSong(folderSongs[0], 0);
             } else {
                 isPlaying = false;
                 updatePlayer();
@@ -680,30 +1127,109 @@
         }
 
         // Theme Switcher
-        const themeWiiUBtn = document.getElementById('themeWiiU');
-        const themeSNESBtn = document.getElementById('themeSNES');
-        const body = document.body;
-
-        // Load saved theme from localStorage
-        const savedTheme = localStorage.getItem('sonicstream-theme') || 'wiiu';
-        setTheme(savedTheme);
-
-        themeWiiUBtn.addEventListener('click', () => {
-            setTheme('wiiu');
-        });
-
-        themeSNESBtn.addEventListener('click', () => {
-            setTheme('snes');
-        });
+        const themeWiiU = document.getElementById('themeWiiU');
+        const themeSNES = document.getElementById('themeSNES');
+        const themeNature = document.getElementById('themeNature');
 
         function setTheme(theme) {
-            body.setAttribute('data-theme', theme);
-            localStorage.setItem('sonicstream-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+            themeWiiU.classList.toggle('active', theme === 'wiiu');
+            themeSNES.classList.toggle('active', theme === 'snes');
+            themeNature.classList.toggle('active', theme === 'nature');
+            localStorage.setItem('theme', theme);
 
-            // Update button states
-            themeWiiUBtn.classList.toggle('active', theme === 'wiiu');
-            themeSNESBtn.classList.toggle('active', theme === 'snes');
+            // Re-draw visualizer if needed to match theme colors
+            if (canvas && ctx) {
+                // You could add theme-specific visualizer colors here if desired
+            }
         }
+
+        themeWiiU.addEventListener('click', () => setTheme('wiiu'));
+        themeSNES.addEventListener('click', () => setTheme('snes'));
+        themeNature.addEventListener('click', () => setTheme('nature'));
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'wiiu';
+        setTheme(savedTheme);
+
+        // Quick Play Section - Load all songs as cartridges
+        async function loadQuickPlay() {
+            console.log('loadQuickPlay called');
+            console.log('cartridgeGrid element:', cartridgeGrid);
+
+            if (!cartridgeGrid) {
+                console.error('cartridgeGrid element not found!');
+                return;
+            }
+
+            try {
+                console.log('Fetching from http://localhost:5001/api/library/random');
+                const response = await fetch('http://localhost:5001/api/library/random');
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const songs = await response.json();
+                console.log('Songs received:', songs.length, songs);
+
+                cartridgeGrid.innerHTML = '';
+
+                if (songs.length === 0) {
+                    cartridgeGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No hay canciones en la biblioteca aún</div>';
+                    return;
+                }
+
+                songs.forEach(song => {
+                    const cart = document.createElement('div');
+                    cart.className = 'cartridge-item';
+
+                    // Deterministic random cover if missing
+                    let thumbSrc = song.thumbnail;
+                    if (!thumbSrc) {
+                        const hash = song.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                        const coverNum = (hash % 7) + 1;
+                        thumbSrc = `styles/no_cover/${coverNum}.png`;
+                    } else {
+                        thumbSrc = 'http://localhost:5001' + thumbSrc;
+                    }
+
+                    cart.innerHTML = `
+                        <div class="cartridge-label">
+                            <img src="${thumbSrc}" alt="${song.title}">
+                            <div class="cartridge-overlay">
+                                <div class="cartridge-play-btn">▶</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 10px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; font-weight: bold; opacity: 0.7;">
+                            ${song.title}
+                        </div>
+                    `;
+
+                    cart.addEventListener('click', () => {
+                        // Set the context to this random list so next/prev works
+                        folderSongs = songs;
+                        currentFolder = "Juego Rápido";
+                        const index = songs.indexOf(song);
+                        playSong(song, index);
+                    });
+
+                    cartridgeGrid.appendChild(cart);
+                });
+
+                console.log('Quick Play loaded successfully with', songs.length, 'songs');
+            } catch (e) {
+                console.error("Error loading quick play:", e);
+                console.error("Error stack:", e.stack);
+                if (cartridgeGrid) {
+                    cartridgeGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">Error al cargar canciones</div>';
+                }
+            }
+        }
+
+        // Load Quick Play on page load
+        loadQuickPlay();
     </script>
 </body>
 

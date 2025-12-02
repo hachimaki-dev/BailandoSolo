@@ -409,5 +409,193 @@ body[data-theme="snes"] ::-webkit-scrollbar-thumb:hover {
     background: #d4d4d4;
 }
 
+/* Extra Controls Bar */
+body[data-theme="snes"] .controls-extra {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding: 10px;
+    background: #c4c4c4;
+    border: 3px solid #000;
+    box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
+}
+
+body[data-theme="snes"] .control-icon-btn {
+    background: transparent;
+    border: none;
+    color: #5a5a5a;
+    cursor: pointer;
+    padding: 5px;
+    image-rendering: pixelated;
+}
+
+body[data-theme="snes"] .control-icon-btn:hover {
+    color: #000;
+    transform: scale(1.1);
+}
+
+body[data-theme="snes"] .control-icon-btn.active {
+    color: #5a5aff;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* Queue Panel */
+body[data-theme="snes"] .queue-panel {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 300px;
+    height: 100vh;
+    background: #e4e4e4;
+    border-left: 4px solid #000;
+    box-shadow: -4px 0 0 #000;
+    z-index: 100;
+    transition: right 0.3s steps(5);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+body[data-theme="snes"] .queue-panel.open {
+    right: 0;
+}
+
+body[data-theme="snes"] .queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 4px solid #000;
+}
+
+body[data-theme="snes"] .queue-header h3 {
+    font-size: 10px;
+    color: #000;
+}
+
+body[data-theme="snes"] .queue-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+body[data-theme="snes"] .queue-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border: 2px solid #000;
+    margin-bottom: 5px;
+    cursor: pointer;
+    background: #fff;
+    box-shadow: 2px 2px 0 #7c7c7c;
+}
+
+body[data-theme="snes"] .queue-item:hover {
+    background: #ffff00;
+}
+
+body[data-theme="snes"] .queue-item.playing {
+    background: #5a5aff;
+    color: #fff;
+}
+
+/* Equalizer Panel */
+body[data-theme="snes"] .eq-panel {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #e4e4e4;
+    padding: 20px;
+    border: 4px solid #000;
+    box-shadow: 6px 6px 0 #000;
+    display: flex;
+    gap: 15px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s steps(5);
+    z-index: 50;
+}
+
+body[data-theme="snes"] .eq-panel.open {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: all;
+}
+
+body[data-theme="snes"] .eq-band {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+body[data-theme="snes"] .eq-slider {
+    writing-mode: bt-lr;
+    -webkit-appearance: slider-vertical;
+    width: 10px;
+    height: 100px;
+    background: #000;
+    border: 2px solid #fff;
+}
+
+body[data-theme="snes"] .eq-label {
+    font-size: 6px;
+    color: #000;
+}
+
+/* Add to Queue Button */
+.add-queue-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #5a5aff;
+    border: 2px solid #000;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    color: #fff;
+    font-family: monospace;
+    box-shadow: 2px 2px 0 #000;
+    z-index: 20;
+}
+
+.song-item:hover .add-queue-btn {
+    opacity: 1;
+}
+
+.add-queue-btn:hover {
+    background: #6a6aff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Preview Tooltip */
+.preview-indicator {
+    position: absolute;
+    top: 5px;
+    right: 35px;
+    background: #ff5a5a;
+    color: #fff;
+    font-size: 8px;
+    padding: 2px 4px;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0 #000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.song-item:hover .preview-indicator {
+    opacity: 1;
+}
+
 /* Pixel Font Import */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');

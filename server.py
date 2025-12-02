@@ -214,6 +214,47 @@ def stream_file(filepath):
         
     return send_file(safe_path)
 
+@app.route('/api/library/random', methods=['GET'])
+def get_random_songs():
+    """Get a random selection of songs from all folders."""
+    import random
+    
+    base_dir = os.path.join(os.getcwd(), 'downloads')
+    if not os.path.exists(base_dir):
+        return jsonify([])
+    
+    all_songs = []
+    extensions = ['*.mp3', '*.webm', '*.m4a', '*.wav']
+    
+    # Walk through all folders
+    for root, dirs, files in os.walk(base_dir):
+        folder_name = os.path.basename(root)
+        if folder_name == 'downloads': continue
+        
+        for filename in files:
+            if any(filename.endswith(ext.replace('*', '')) for ext in extensions):
+                base_name = os.path.splitext(filename)[0]
+                
+                # Try to find thumbnail
+                thumbnail = None
+                for thumb_ext in ['.jpg', '.png', '.webp']:
+                    thumb_path = os.path.join(root, base_name + thumb_ext)
+                    if os.path.exists(thumb_path):
+                        thumbnail = f"/api/stream/{folder_name}/{base_name}{thumb_ext}"
+                        break
+                
+                all_songs.append({
+                    'filename': filename,
+                    'path': f"/api/stream/{folder_name}/{filename}",
+                    'thumbnail': thumbnail,
+                    'title': base_name,
+                    'folder': folder_name
+                })
+    
+    # Shuffle and pick up to 20
+    random.shuffle(all_songs)
+    return jsonify(all_songs[:20])
+
 if __name__ == '__main__':
     # Ensure ffmpeg is available or warn user? 
     # yt-dlp usually needs ffmpeg for audio conversion.
