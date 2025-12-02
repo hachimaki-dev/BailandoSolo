@@ -1,52 +1,84 @@
-/* Wii U Theme - Modern, Glossy, Glass Morphism */
+/* Wii U Theme - Modern, Clean, Sky Blue Aesthetic */
 
 body[data-theme="wiiu"] {
     font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
+    background: linear-gradient(180deg, #E8F4F8 0%, #B8E0F0 50%, #89CFF0 100%);
+    position: relative;
+    overflow-x: hidden;
 }
 
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-/* Floating particles background */
+/* Parallax Background Layers - Diagonal Dots Pattern */
 body[data-theme="wiiu"]::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
     background-image:
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-    animation: floatParticles 20s ease-in-out infinite;
+        radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 25% 35%, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 45% 20%, rgba(255, 255, 255, 0.5) 2.5px, transparent 2.5px),
+        radial-gradient(circle at 60% 45%, rgba(255, 255, 255, 0.35) 1.8px, transparent 1.8px),
+        radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 85% 55%, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 15% 65%, rgba(255, 255, 255, 0.45) 2.2px, transparent 2.2px),
+        radial-gradient(circle at 35% 75%, rgba(255, 255, 255, 0.35) 1.6px, transparent 1.6px),
+        radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.35) 1.8px, transparent 1.8px),
+        radial-gradient(circle at 20% 90%, rgba(255, 255, 255, 0.4) 2px, transparent 2px);
+    background-size: 180px 180px;
+    background-position: 0 0, 40px 60px, 80px 20px, 120px 80px, 30px 100px, 90px 40px,
+        50px 120px, 110px 70px, 70px 140px, 140px 90px, 100px 30px, 60px 110px;
+    animation: parallaxDots1 40s linear infinite;
     pointer-events: none;
     z-index: 0;
+    opacity: 0.6;
 }
 
-@keyframes floatParticles {
+body[data-theme="wiiu"]::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image:
+        radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 38% 48%, rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 58% 18%, rgba(255, 255, 255, 0.2) 1.3px, transparent 1.3px),
+        radial-gradient(circle at 78% 58%, rgba(255, 255, 255, 0.35) 1.8px, transparent 1.8px),
+        radial-gradient(circle at 28% 78%, rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 48% 38%, rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 68% 88%, rgba(255, 255, 255, 0.28) 1.6px, transparent 1.6px),
+        radial-gradient(circle at 88% 28%, rgba(255, 255, 255, 0.32) 1.7px, transparent 1.7px);
+    background-size: 200px 200px;
+    background-position: 20px 30px, 70px 80px, 130px 40px, 50px 90px,
+        100px 50px, 150px 100px, 80px 130px, 120px 60px;
+    animation: parallaxDots2 50s linear infinite reverse;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+}
 
-    0%,
-    100% {
-        transform: translateY(0) scale(1);
+@keyframes parallaxDots1 {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
     }
 
-    50% {
-        transform: translateY(-20px) scale(1.1);
+    100% {
+        transform: translate(-180px, -180px) rotate(-5deg);
+    }
+}
+
+@keyframes parallaxDots2 {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-200px, -200px) rotate(5deg);
     }
 }
 
@@ -57,9 +89,9 @@ body[data-theme="wiiu"] .container {
 
 /* Logo */
 body[data-theme="wiiu"] .logo-icon {
-    background: linear-gradient(135deg, #38bdf8, #3b82f6);
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
     color: white;
-    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 16px rgba(0, 168, 225, 0.4);
 }
 
 body[data-theme="wiiu"] .logo h1 {
@@ -83,7 +115,7 @@ body[data-theme="wiiu"] nav button {
 
 body[data-theme="wiiu"] nav button.active {
     background: rgba(255, 255, 255, 0.95);
-    color: #667eea;
+    color: #00A8E1;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -115,18 +147,18 @@ body[data-theme="wiiu"] input {
 }
 
 body[data-theme="wiiu"] input:focus {
-    border-color: #38bdf8;
+    border-color: #00A8E1;
     background: white;
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 0 4px rgba(0, 168, 225, 0.15);
 }
 
 body[data-theme="wiiu"] button.primary {
-    background: linear-gradient(135deg, #38bdf8, #3b82f6);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
+    box-shadow: 0 4px 12px rgba(0, 168, 225, 0.3);
 }
 
 body[data-theme="wiiu"] button.primary:hover {
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 20px rgba(0, 168, 225, 0.4);
 }
 
 /* Song Items */
@@ -136,9 +168,9 @@ body[data-theme="wiiu"] .song-item {
 }
 
 body[data-theme="wiiu"] .song-item:hover {
-    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-    border-color: #38bdf8;
-    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+    background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%);
+    border-color: #00A8E1;
+    box-shadow: 0 4px 12px rgba(0, 168, 225, 0.25);
 }
 
 body[data-theme="wiiu"] .song-thumb {
@@ -168,8 +200,8 @@ body[data-theme="wiiu"] .progress-bar {
 }
 
 body[data-theme="wiiu"] .progress-fill {
-    background: linear-gradient(90deg, #38bdf8, #3b82f6);
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    background: linear-gradient(90deg, #00A8E1, #4FC3F7);
+    box-shadow: 0 0 10px rgba(0, 168, 225, 0.6);
 }
 
 body[data-theme="wiiu"] .player-title {
@@ -192,13 +224,13 @@ body[data-theme="wiiu"] .control-btn:hover {
 }
 
 body[data-theme="wiiu"] .control-btn.play {
-    background: linear-gradient(135deg, #38bdf8, #3b82f6);
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
     color: white;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 16px rgba(0, 168, 225, 0.4);
 }
 
 body[data-theme="wiiu"] .control-btn.play:hover {
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 168, 225, 0.5);
 }
 
 body[data-theme="wiiu"] .time-info {
@@ -207,24 +239,24 @@ body[data-theme="wiiu"] .time-info {
 
 /* Folders */
 body[data-theme="wiiu"] .folder-item {
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-    border: 2px solid rgba(147, 197, 253, 0.5);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
+    border: 2px solid rgba(0, 168, 225, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 168, 225, 0.2);
 }
 
 body[data-theme="wiiu"] .folder-item:hover {
-    background: linear-gradient(135deg, #bfdbfe, #93c5fd);
-    border-color: #38bdf8;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #B3E5FC, #81D4FA);
+    border-color: #00A8E1;
+    box-shadow: 0 8px 20px rgba(0, 168, 225, 0.35);
 }
 
 body[data-theme="wiiu"] .folder-icon {
-    color: #3b82f6;
-    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+    color: #00A8E1;
+    filter: drop-shadow(0 2px 4px rgba(0, 168, 225, 0.3));
 }
 
 body[data-theme="wiiu"] .folder-name {
-    color: #1e40af;
+    color: #0277BD;
 }
 
 body[data-theme="wiiu"] .back-btn {

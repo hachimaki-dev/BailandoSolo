@@ -7,397 +7,9 @@
     <title>SonicStream</title>
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Press+Start+2P&display=swap"
         rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Varela Round', -apple-system, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-            transition: all 0.5s ease;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            -webkit-app-region: drag;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #38bdf8, #3b82f6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            transition: transform 0.3s;
-        }
-
-        .logo-icon:hover {
-            transform: rotate(360deg) scale(1.1);
-        }
-
-        .logo h1 {
-            color: white;
-            font-size: 28px;
-            font-weight: 700;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        nav {
-            display: flex;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 4px;
-            border-radius: 25px;
-            -webkit-app-region: no-drag;
-        }
-
-        nav button {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 20px;
-            background: transparent;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        nav button.active {
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
-        }
-
-        .panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-
-        .panel:hover {
-            transform: translateY(-2px);
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
-        }
-
-        button.primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #38bdf8, #3b82f6);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        button.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        button.primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .song-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .song-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: #f9fafb;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .song-item:hover {
-            background: #e0f2fe;
-            transform: translateX(5px);
-        }
-
-        .song-thumb {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .song-item:hover .song-thumb {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .song-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .song-title {
-            font-weight: 600;
-            font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .song-artist {
-            font-size: 12px;
-            color: #666;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .player {
-            position: sticky;
-            top: 20px;
-        }
-
-        .album-art {
-            width: 100%;
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #1f2937, #111827);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-            transition: transform 0.3s;
-        }
-
-        .album-art:hover {
-            transform: scale(1.02);
-        }
-
-        .album-art img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .album-art svg {
-            width: 64px;
-            height: 64px;
-            color: #4b5563;
-        }
-
-        .progress-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #38bdf8, #3b82f6);
-            transition: width 0.1s;
-        }
-
-        .player-info {
-            margin-bottom: 16px;
-        }
-
-        .player-title {
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .player-artist {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .control-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 50%;
-            background: #f3f4f6;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .control-btn:hover {
-            transform: scale(1.1);
-            background: #e5e7eb;
-        }
-
-        .control-btn:active {
-            transform: scale(0.9);
-        }
-
-        .control-btn.play {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #38bdf8, #3b82f6);
-            color: white;
-        }
-
-        .time-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            color: #666;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .folder-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
-        }
-
-        .folder-item {
-            aspect-ratio: 1;
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            padding: 16px;
-        }
-
-        .folder-item:hover {
-            transform: translateY(-8px) rotate(2deg);
-        }
-
-        .folder-icon {
-            width: 48px;
-            height: 48px;
-            color: #3b82f6;
-            margin-bottom: 8px;
-            transition: transform 0.3s;
-        }
-
-        .folder-item:hover .folder-icon {
-            transform: scale(1.2) rotate(10deg);
-        }
-
-        .folder-name {
-            font-weight: 600;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .back-btn {
-            padding: 8px 16px;
-            background: #f3f4f6;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-bottom: 16px;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            transform: translateX(-5px);
-            background: #e5e7eb;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/theme-wiiu.css">
+    <link rel="stylesheet" href="styles/theme-snes.css">
 </head>
 
 <body data-theme="wiiu">
@@ -500,6 +112,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+        <button class="theme-btn active" id="themeWiiU" title="Tema Wii U">🎮</button>
+        <button class="theme-btn" id="themeSNES" title="Tema SNES">🕹️</button>
     </div>
 
     <audio id="audioPlayer"></audio>
@@ -741,6 +359,32 @@
             const m = Math.floor(seconds / 60);
             const s = Math.floor(seconds % 60);
             return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // Theme Switcher
+        const themeWiiUBtn = document.getElementById('themeWiiU');
+        const themeSNESBtn = document.getElementById('themeSNES');
+        const body = document.body;
+
+        // Load saved theme from localStorage
+        const savedTheme = localStorage.getItem('sonicstream-theme') || 'wiiu';
+        setTheme(savedTheme);
+
+        themeWiiUBtn.addEventListener('click', () => {
+            setTheme('wiiu');
+        });
+
+        themeSNESBtn.addEventListener('click', () => {
+            setTheme('snes');
+        });
+
+        function setTheme(theme) {
+            body.setAttribute('data-theme', theme);
+            localStorage.setItem('sonicstream-theme', theme);
+
+            // Update button states
+            themeWiiUBtn.classList.toggle('active', theme === 'wiiu');
+            themeSNESBtn.classList.toggle('active', theme === 'snes');
         }
     </script>
 </body>
