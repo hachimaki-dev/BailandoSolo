@@ -189,113 +189,276 @@ body[data-theme="wiiu"] .song-artist {
 body[data-theme="wiiu"] .album-art {
     background: linear-gradient(135deg, #1f2937, #111827);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    width: 250px;
+    height: 250px;
+    margin: 0 auto 20px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    /* Allow visualizer to go outside */
 }
 
-body[data-theme="wiiu"] .album-art svg {
-    color: #4b5563;
+body[data-theme="wiiu"] .album-art::after {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    z-index: 10;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-body[data-theme="wiiu"] .progress-bar {
-    background: rgba(0, 0, 0, 0.3);
+body[data-theme="wiiu"] .album-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 1s linear;
 }
 
-body[data-theme="wiiu"] .progress-fill {
-    background: linear-gradient(90deg, #00A8E1, #4FC3F7);
-    box-shadow: 0 0 10px rgba(0, 168, 225, 0.6);
+body[data-theme="wiiu"] .album-art img.spinning {
+    animation: spin 10s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#visualizer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    height: 400px;
+    z-index: -1;
+    pointer-events: none;
 }
 
 body[data-theme="wiiu"] .player-title {
     color: #1f2937;
+    margin-top: 10px;
 }
 
 body[data-theme="wiiu"] .player-artist {
     color: #6b7280;
 }
 
+/* Improved Controls */
+body[data-theme="wiiu"] .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin: 20px 0;
+}
+
 body[data-theme="wiiu"] .control-btn {
-    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-    color: #4b5563;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 body[data-theme="wiiu"] .control-btn:hover {
-    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 12px #d1d1d1, -6px -6px 12px #ffffff;
+    color: #00A8E1;
+}
+
+body[data-theme="wiiu"] .control-btn:active {
+    transform: translateY(0);
+    box-shadow: inset 3px 3px 6px #d1d1d1, inset -3px -3px 6px #ffffff;
 }
 
 body[data-theme="wiiu"] .control-btn.play {
+    width: 64px;
+    height: 64px;
     background: linear-gradient(135deg, #00A8E1, #4FC3F7);
     color: white;
-    box-shadow: 0 4px 16px rgba(0, 168, 225, 0.4);
+    box-shadow: 0 8px 20px rgba(0, 168, 225, 0.4);
 }
 
 body[data-theme="wiiu"] .control-btn.play:hover {
-    box-shadow: 0 6px 20px rgba(0, 168, 225, 0.5);
+    transform: scale(1.05);
+    box-shadow: 0 12px 25px rgba(0, 168, 225, 0.5);
+    color: white;
 }
 
-body[data-theme="wiiu"] .time-info {
-    color: #6b7280;
+body[data-theme="wiiu"] .control-btn.play:active {
+    transform: scale(0.95);
 }
 
-/* Folders */
-body[data-theme="wiiu"] .folder-item {
-    background: linear-gradient(135deg, #E1F5FE, #B3E5FC);
-    border: 2px solid rgba(0, 168, 225, 0.3);
-    box-shadow: 0 4px 12px rgba(0, 168, 225, 0.2);
-}
-
-body[data-theme="wiiu"] .folder-item:hover {
-    background: linear-gradient(135deg, #B3E5FC, #81D4FA);
-    border-color: #00A8E1;
-    box-shadow: 0 8px 20px rgba(0, 168, 225, 0.35);
-}
-
-body[data-theme="wiiu"] .folder-icon {
-    color: #00A8E1;
-    filter: drop-shadow(0 2px 4px rgba(0, 168, 225, 0.3));
-}
-
-body[data-theme="wiiu"] .folder-name {
-    color: #0277BD;
-}
-
-body[data-theme="wiiu"] .back-btn {
-    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-    color: #4b5563;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-body[data-theme="wiiu"] .back-btn:hover {
-    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-}
-
-/* Theme Selector */
-body[data-theme="wiiu"] .theme-selector {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-body[data-theme="wiiu"] .theme-btn {
-    background: rgba(255, 255, 255, 0.2);
+/* Extra Controls Bar */
+body[data-theme="wiiu"] .controls-extra {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 30px;
     backdrop-filter: blur(5px);
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.8), 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-body[data-theme="wiiu"] .theme-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+body[data-theme="wiiu"] .control-icon-btn {
+    background: transparent;
+    border: none;
+    color: #777;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-body[data-theme="wiiu"] .theme-btn.active {
+body[data-theme="wiiu"] .control-icon-btn:hover {
+    background: rgba(0, 168, 225, 0.1);
+    color: #00A8E1;
+    transform: scale(1.1);
+}
+
+body[data-theme="wiiu"] .control-icon-btn.active {
+    color: #00A8E1;
+    background: rgba(0, 168, 225, 0.15);
+    box-shadow: 0 0 0 2px rgba(0, 168, 225, 0.2);
+}
+
+/* Volume Slider */
+body[data-theme="wiiu"] input[type=range] {
+    -webkit-appearance: none;
+    width: 100px;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+    border: none;
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
     background: white;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border: 2px solid #00A8E1;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Scrollbar */
-body[data-theme="wiiu"] ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #cbd5e1, #94a3b8);
-    border-radius: 10px;
+body[data-theme="wiiu"] input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 3px 6px rgba(0, 168, 225, 0.3);
 }
 
-body[data-theme="wiiu"] ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #94a3b8, #64748b);
+/* Progress Bar */
+body[data-theme="wiiu"] .progress-container {
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 5px 0;
+    /* Increase hit area */
+}
+
+body[data-theme="wiiu"] .progress-bar {
+    background: rgba(0, 0, 0, 0.05) !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] .progress-fill {
+    background: linear-gradient(90deg, #00A8E1, #4FC3F7) !important;
+    box-shadow: 0 0 10px rgba(0, 168, 225, 0.4) !important;
+    position: relative;
+}
+
+body[data-theme="wiiu"] .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+body[data-theme="wiiu"] .progress-container:hover .progress-fill::after {
+    opacity: 1;
+}
+
+/* Search Input */
+body[data-theme="wiiu"] .search-container {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+body[data-theme="wiiu"] .search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.9);
+    font-family: inherit;
+    font-size: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body[data-theme="wiiu"] .search-input:focus {
+    outline: none;
+    border-color: #00A8E1;
+    box-shadow: 0 8px 25px rgba(0, 168, 225, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Preview Tooltip */
+.preview-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 12px;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0, 168, 225, 0.3);
+    z-index: 10;
+}
+
+.song-item:hover .preview-indicator {
+    opacity: 1;
+    transform: translateY(0);
 }

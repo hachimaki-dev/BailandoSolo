@@ -64,18 +64,32 @@
             <div class="panel player">
                 <h3 style="margin-bottom: 16px;">Reproductor</h3>
                 <div class="album-art" id="albumArt">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                    </svg>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
+                    <canvas id="visualizer"></canvas>
+                    <img id="albumImage"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23e5e7eb' width='48' height='48'/%3E%3C/svg%3E"
+                        class="hidden">
+                    <div id="defaultArt">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            width="48" height="48">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
                     </div>
                 </div>
                 <div class="player-info">
                     <div class="player-title" id="playerTitle">Sin música</div>
                     <div class="player-artist" id="playerArtist">Selecciona una canción</div>
                 </div>
+
+                <div class="progress-container" id="progressContainer" style="width: 100%; margin: 16px 0 8px;">
+                    <div class="progress-bar"
+                        style="width: 100%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden;">
+                        <div class="progress-fill" id="progressFill"
+                            style="height: 100%; width: 0%; background: #00A8E1; border-radius: 3px; transition: width 0.1s linear;">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="controls">
                     <button class="control-btn" id="prevBtn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"
@@ -106,6 +120,37 @@
                         </svg>
                     </button>
                 </div>
+
+                <div class="controls-extra">
+                    <button class="control-icon-btn" id="shuffleBtn" title="Aleatorio">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 3 21 3 21 8"></polyline>
+                            <line x1="4" y1="20" x2="21" y2="3"></line>
+                            <polyline points="21 16 21 21 16 21"></polyline>
+                            <line x1="15" y1="15" x2="21" y2="21"></line>
+                            <line x1="4" y1="4" x2="9" y2="9"></line>
+                        </svg>
+                    </button>
+                    <button class="control-icon-btn" id="bassBtn" title="Bass Boost">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        </svg>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1">
+                    </div>
+                </div>
+
                 <div class="time-info">
                     <span id="currentTime">0:00</span>
                     <span id="duration">0:00</span>
@@ -120,16 +165,31 @@
         <button class="theme-btn" id="themeSNES" title="Tema SNES">🕹️</button>
     </div>
 
-    <audio id="audioPlayer"></audio>
+    <audio id="audioPlayer" crossorigin="anonymous"></audio>
 
     <script>
         let currentView = 'downloader';
         let playlist = null;
         let currentFolder = '';
         let folderSongs = [];
+        let displayedSongs = [];
         let currentSong = null;
         let currentSongIndex = -1;
         let isPlaying = false;
+        let isShuffle = false;
+        let isBassBoost = false;
+
+        // Audio Context
+        let audioContext;
+        let analyser;
+        let source;
+        let gainNode;
+        let bassFilter;
+        let canvas, ctx;
+
+        // Preview Audio
+        let previewAudio = new Audio();
+        let previewTimeout;
 
         const navDownloader = document.getElementById('navDownloader');
         const navLibrary = document.getElementById('navLibrary');
@@ -154,11 +214,161 @@
         const playIcon = document.getElementById('playIcon');
         const pauseIcon = document.getElementById('pauseIcon');
         const albumArt = document.getElementById('albumArt');
+        const albumImage = document.getElementById('albumImage');
+        const defaultArt = document.getElementById('defaultArt');
         const playerTitle = document.getElementById('playerTitle');
         const playerArtist = document.getElementById('playerArtist');
         const progressFill = document.getElementById('progressFill');
+        const progressContainer = document.getElementById('progressContainer');
         const currentTime = document.getElementById('currentTime');
         const duration = document.getElementById('duration');
+
+        // New Controls
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const bassBtn = document.getElementById('bassBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        // Initialize Audio Chain
+        function initAudioChain() {
+            if (audioContext) return;
+
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 128;
+
+                bassFilter = audioContext.createBiquadFilter();
+                bassFilter.type = 'lowshelf';
+                bassFilter.frequency.value = 200;
+                bassFilter.gain.value = 0; // Start flat
+
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = volumeSlider.value;
+
+                source = audioContext.createMediaElementSource(audioPlayer);
+
+                // Chain: Source -> Bass -> Gain -> Analyser -> Destination
+                source.connect(bassFilter);
+                bassFilter.connect(gainNode);
+                gainNode.connect(analyser);
+                analyser.connect(audioContext.destination);
+
+                canvas = document.getElementById('visualizer');
+                ctx = canvas.getContext('2d');
+                canvas.width = 400;
+                canvas.height = 400;
+
+                drawVisualizer();
+            } catch (e) {
+                console.error("Web Audio API error:", e);
+            }
+        }
+
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+            if (!analyser) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 130;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] / 255) * 60;
+                const angle = (i / bufferLength) * 2 * Math.PI - Math.PI / 2;
+
+                const x1 = centerX + Math.cos(angle) * radius;
+                const y1 = centerY + Math.sin(angle) * radius;
+                const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+                const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = `rgba(0, 168, 225, ${dataArray[i] / 255})`;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            }
+        }
+
+        // Bass Boost Logic
+        bassBtn.addEventListener('click', () => {
+            if (!audioContext) initAudioChain();
+            isBassBoost = !isBassBoost;
+            bassBtn.classList.toggle('active', isBassBoost);
+
+            if (bassFilter) {
+                // Smooth transition
+                const currentTime = audioContext.currentTime;
+                bassFilter.gain.cancelScheduledValues(currentTime);
+                bassFilter.gain.linearRampToValueAtTime(isBassBoost ? 15 : 0, currentTime + 0.2);
+            }
+        });
+
+        // Volume Logic
+        volumeSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (gainNode) {
+                gainNode.gain.value = val;
+            } else {
+                audioPlayer.volume = val;
+            }
+        });
+
+        // Shuffle Logic
+        shuffleBtn.addEventListener('click', () => {
+            isShuffle = !isShuffle;
+            shuffleBtn.classList.toggle('active', isShuffle);
+        });
+
+        // Seek Logic
+        progressContainer.addEventListener('click', (e) => {
+            if (!audioPlayer.duration) return;
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audioPlayer.currentTime = pos * audioPlayer.duration;
+        });
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return; // Ignore if typing
+
+            switch (e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    playBtn.click();
+                    break;
+                case 'ArrowRight':
+                    if (e.shiftKey) {
+                        nextBtn.click();
+                    } else {
+                        audioPlayer.currentTime = Math.min(audioPlayer.duration, audioPlayer.currentTime + 5);
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (e.shiftKey) {
+                        prevBtn.click();
+                    } else {
+                        audioPlayer.currentTime = Math.max(0, audioPlayer.currentTime - 5);
+                    }
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    volumeSlider.value = Math.min(1, parseFloat(volumeSlider.value) + 0.1);
+                    volumeSlider.dispatchEvent(new Event('input'));
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    volumeSlider.value = Math.max(0, parseFloat(volumeSlider.value) - 0.1);
+                    volumeSlider.dispatchEvent(new Event('input'));
+                    break;
+            }
+        });
 
         navDownloader.addEventListener('click', () => {
             currentView = 'downloader';
@@ -270,30 +480,110 @@
             try {
                 const response = await fetch(`http://localhost:5001/api/library/${folder}`);
                 folderSongs = await response.json();
-                folderSongList.innerHTML = '';
-                folderSongs.forEach((song, index) => {
-                    const item = document.createElement('div');
-                    item.className = 'song-item';
-                    item.innerHTML = `
-                        <img src="${song.thumbnail ? 'http://localhost:5001' + song.thumbnail : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%23e5e7eb\' width=\'48\' height=\'48\'/%3E%3C/svg%3E'}" class="song-thumb">
-                        <div class="song-info">
-                            <div class="song-title">${song.title}</div>
-                            <div class="song-artist">${song.filename}</div>
-                        </div>
-                    `;
-                    item.addEventListener('click', () => playSong(song, index));
-                    folderSongList.appendChild(item);
-                });
+                displayedSongs = [...folderSongs];
+                renderSongList();
             } catch (error) {
                 console.error(error);
             }
+        }
+
+        function renderSongList() {
+            folderSongList.innerHTML = '';
+
+            // Add Search Input
+            const searchContainer = document.createElement('div');
+            searchContainer.className = 'search-container';
+            searchContainer.innerHTML = `
+                <input type="text" class="search-input" placeholder="Buscar canción..." id="searchInput">
+            `;
+            folderSongList.appendChild(searchContainer);
+
+            // Re-attach listener
+            const searchInput = searchContainer.querySelector('input');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                displayedSongs = folderSongs.filter(s => s.title.toLowerCase().includes(term));
+                renderSongsOnly();
+            });
+
+            const listContainer = document.createElement('div');
+            listContainer.id = 'actualSongList';
+            folderSongList.appendChild(listContainer);
+
+            renderSongsOnly();
+        }
+
+        function renderSongsOnly() {
+            const container = document.getElementById('actualSongList');
+            container.innerHTML = '';
+
+            displayedSongs.forEach((song, index) => {
+                const item = document.createElement('div');
+                item.className = 'song-item';
+                item.style.position = 'relative';
+                item.innerHTML = `
+                    <div class="preview-indicator">Preview</div>
+                    <img src="${song.thumbnail ? 'http://localhost:5001' + song.thumbnail : 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect fill=\'%23e5e7eb\' width=\'48\' height=\'48\'/%3E%3C/svg%3E'}" class="song-thumb">
+                    <div class="song-info">
+                        <div class="song-title">${song.title}</div>
+                        <div class="song-artist">${song.filename}</div>
+                    </div>
+                `;
+
+                // Click to play
+                item.addEventListener('click', (e) => {
+                    // Find original index in full list for correct navigation
+                    const originalIndex = folderSongs.indexOf(song);
+                    playSong(song, originalIndex);
+                });
+
+                // Preview Logic
+                item.addEventListener('mouseenter', () => {
+                    if (isPlaying) return; // Don't preview if main music is playing
+
+                    previewTimeout = setTimeout(() => {
+                        previewAudio.src = `http://localhost:5001${song.path}`;
+                        previewAudio.volume = 0;
+                        previewAudio.play().then(() => {
+                            // Try to seek to 25%
+                            if (previewAudio.duration) {
+                                previewAudio.currentTime = previewAudio.duration * 0.25;
+                            }
+                            // Fade in
+                            let vol = 0;
+                            const fade = setInterval(() => {
+                                vol += 0.1;
+                                if (vol >= 0.5) {
+                                    vol = 0.5;
+                                    clearInterval(fade);
+                                }
+                                previewAudio.volume = vol;
+                            }, 50);
+                        }).catch(e => console.log("Preview error", e));
+                    }, 400); // 400ms delay
+                });
+
+                item.addEventListener('mouseleave', () => {
+                    clearTimeout(previewTimeout);
+                    previewAudio.pause();
+                    previewAudio.currentTime = 0;
+                });
+
+                container.appendChild(item);
+            });
         }
 
         function playSong(song, index) {
             currentSong = song;
             currentSongIndex = index;
             audioPlayer.src = `http://localhost:5001${song.path}`;
-            audioPlayer.play();
+            audioPlayer.play().then(() => {
+                initAudioChain();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }).catch(e => console.error("Play error:", e));
+
             isPlaying = true;
             updatePlayer();
         }
@@ -303,18 +593,32 @@
             playerArtist.textContent = currentSong ? currentFolder : 'Selecciona una canción';
             playIcon.classList.toggle('hidden', isPlaying);
             pauseIcon.classList.toggle('hidden', !isPlaying);
+
             if (currentSong && currentSong.thumbnail) {
-                albumArt.innerHTML = `
-                    <img src="http://localhost:5001${currentSong.thumbnail}">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill"></div>
-                    </div>
-                `;
+                albumImage.src = `http://localhost:5001${currentSong.thumbnail}`;
+                albumImage.classList.remove('hidden');
+                defaultArt.classList.add('hidden');
+
+                // Add spinning class if playing
+                if (isPlaying) {
+                    albumImage.classList.add('spinning');
+                } else {
+                    albumImage.classList.remove('spinning');
+                }
+            } else {
+                albumImage.classList.add('hidden');
+                defaultArt.classList.remove('hidden');
+                albumImage.classList.remove('spinning');
             }
         }
 
         playBtn.addEventListener('click', () => {
             if (!audioPlayer.src) return;
+
+            // Ensure audio context is ready
+            if (!audioContext) initAudioChain();
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume();
+
             if (audioPlayer.paused) {
                 audioPlayer.play();
                 isPlaying = true;
@@ -326,21 +630,30 @@
         });
 
         prevBtn.addEventListener('click', () => {
-            if (currentSongIndex > 0) {
+            if (isShuffle) {
+                playRandomSong();
+            } else if (currentSongIndex > 0) {
                 playSong(folderSongs[currentSongIndex - 1], currentSongIndex - 1);
             }
         });
 
         nextBtn.addEventListener('click', () => {
-            if (currentSongIndex < folderSongs.length - 1) {
+            if (isShuffle) {
+                playRandomSong();
+            } else if (currentSongIndex < folderSongs.length - 1) {
                 playSong(folderSongs[currentSongIndex + 1], currentSongIndex + 1);
             }
         });
 
+        function playRandomSong() {
+            if (folderSongs.length === 0) return;
+            const randomIndex = Math.floor(Math.random() * folderSongs.length);
+            playSong(folderSongs[randomIndex], randomIndex);
+        }
+
         audioPlayer.addEventListener('timeupdate', () => {
             const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            const fill = document.getElementById('progressFill');
-            if (fill) fill.style.width = progress + '%';
+            if (progressFill) progressFill.style.width = progress + '%';
             currentTime.textContent = formatTime(audioPlayer.currentTime);
         });
 
@@ -349,8 +662,13 @@
         });
 
         audioPlayer.addEventListener('ended', () => {
-            if (currentSongIndex < folderSongs.length - 1) {
+            if (isShuffle) {
+                playRandomSong();
+            } else if (currentSongIndex < folderSongs.length - 1) {
                 playSong(folderSongs[currentSongIndex + 1], currentSongIndex + 1);
+            } else {
+                isPlaying = false;
+                updatePlayer();
             }
         });
 
