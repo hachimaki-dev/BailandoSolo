@@ -64,9 +64,7 @@
                 <!-- ... (rest of HTML) ... -->
 
                 <style>
-                    /* ... (existing styles) ... */
-
-                    /* 3DS Cartridge Styles */
+                    /* 3DS Cartridge Styles (Restored) */
                     .cartridge-grid {
                         display: grid;
                         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -108,13 +106,11 @@
                         border-radius: 8px;
                         background: #e0e0e0;
                         padding: 8px 8px 20px 8px;
-                        /* Bottom padding for "contacts" area look */
                         display: flex;
                         flex-direction: column;
                     }
 
                     .cartridge-item::after {
-                        /* Contacts area visual */
                         content: '';
                         position: absolute;
                         bottom: 0;
@@ -125,7 +121,6 @@
                         opacity: 0.5;
                     }
 
-                    /* The "Sticker" */
                     .cartridge-label {
                         flex: 1;
                         background: #333;
@@ -173,20 +168,6 @@
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                    }
-
-                    /* Theme specific overrides */
-                    body[data-theme="snes"] .cartridge-item {
-                        background: #bbb;
-                        border: 2px solid #000;
-                        border-radius: 0;
-                        box-shadow: 4px 4px 0 #000;
-                    }
-
-                    body[data-theme="nature"] .cartridge-item {
-                        background: rgba(255, 255, 255, 0.1);
-                        border: 1px solid rgba(255, 255, 255, 0.2);
-                        backdrop-filter: blur(10px);
                     }
                 </style>
 
@@ -354,63 +335,7 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast">Añadido a la cola</div>
 
-    <style>
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(31, 41, 55, 0.9);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(5px);
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Download Progress Styles */
-        .song-progress-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background: #2ecc71;
-            width: 0%;
-            transition: width 0.3s linear;
-            z-index: 5;
-            box-shadow: 0 -1px 4px rgba(46, 204, 113, 0.4);
-        }
-
-        .song-status {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #2ecc71;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 2px 6px;
-            border-radius: 4px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .song-item.downloading .song-status,
-        .song-item.finished .song-status {
-            opacity: 1;
-        }
-
-        .song-item.finished .song-progress-bar {
-            background: #3498db;
-        }
-    </style>
+    <!-- Toast and progress styles moved to base.css -->
 
     <script>
         let currentView = 'downloader';

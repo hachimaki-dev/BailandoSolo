@@ -214,6 +214,11 @@ def stream_file(filepath):
         
     return send_file(safe_path)
 
+@app.route('/')
+def index():
+    """Serve the main HTML file."""
+    return send_file('index.html')
+
 @app.route('/api/library/random', methods=['GET'])
 def get_random_songs():
     """Get a random selection of songs from all folders."""

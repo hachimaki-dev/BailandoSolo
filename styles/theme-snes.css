@@ -1,8 +1,41 @@
 /* SNES Theme - Retro, Pixelated, 16-bit Era */
 
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 body[data-theme="snes"] {
-    font-family: 'Press Start 2P', 'Courier New', monospace;
-    background: #7c7c7c;
+    /* Colors */
+    --color-bg: #7c7c7c;
+    --color-bg-alt: #e4e4e4;
+    --color-text: #000000;
+    --color-text-muted: #5a5a5a;
+    --color-primary: #ff5a5a;
+    --color-primary-hover: #ff6a6a;
+    --color-secondary: #5a5aff;
+    --color-border: #000000;
+    --color-shadow: rgba(0, 0, 0, 0.5);
+    /* Harder shadow */
+    --color-input-bg: #ffffff;
+    --color-panel-bg: #e4e4e4;
+
+    /* Typography */
+    --font-main: 'Press Start 2P', 'Courier New', monospace;
+    --font-size-base: 12px;
+    /* Smaller base size for pixel font */
+    --font-size-sm: 10px;
+    --font-size-xs: 8px;
+
+    /* Layout & Shape */
+    --radius: 0;
+    --radius-lg: 0;
+    --radius-full: 0;
+    --border-width: 4px;
+    --border-style: solid;
+
+    /* Components */
+    --control-size: 48px;
+    --control-size-lg: 64px;
+
+    /* Background Pattern */
     background-image:
         repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px),
         repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px);
@@ -59,199 +92,101 @@ body[data-theme="snes"]::before {
 
     0%,
     100% {
-        box-shadow:
-            -4px -4px 0 #fff,
-            4px -4px 0 #fff,
-            -4px 4px 0 #000,
-            4px 4px 0 #000;
+        box-shadow: -4px -4px 0 #fff, 4px -4px 0 #fff, -4px 4px 0 #000, 4px 4px 0 #000;
     }
 
     50% {
-        box-shadow:
-            -4px -4px 0 #000,
-            4px -4px 0 #000,
-            -4px 4px 0 #fff,
-            4px 4px 0 #fff;
+        box-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #fff, 4px 4px 0 #fff;
     }
 }
+
+/* Specific Overrides */
 
 /* Logo */
 body[data-theme="snes"] .logo-icon {
     background: #5a5aff;
     color: #ffff00;
-    border: 4px solid #000;
-    box-shadow:
-        inset -2px -2px 0 #000,
-        inset 2px 2px 0 #8a8aff,
-        4px 4px 0 #000;
+    box-shadow: inset -2px -2px 0 #000, inset 2px 2px 0 #8a8aff, 4px 4px 0 #000;
     animation: pixelBorder 2s ease-in-out infinite;
+    border: 4px solid #000;
 }
 
 body[data-theme="snes"] .logo h1 {
-    color: #fff;
-    font-size: 18px;
-    text-shadow:
-        3px 3px 0 #000,
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px 1px 0 #000,
-        1px 1px 0 #000;
+    text-shadow: 3px 3px 0 #000;
     letter-spacing: 2px;
 }
 
-/* Navigation */
+/* Nav */
 body[data-theme="snes"] nav {
     background: #c4c4c4;
-    border: 4px solid #000;
-    box-shadow:
-        inset -2px -2px 0 #7c7c7c,
-        inset 2px 2px 0 #fff,
-        4px 4px 0 #000;
+    box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 4px 4px 0 #000;
 }
 
 body[data-theme="snes"] nav button {
     background: #b4b4b4;
-    color: #000;
     border: 3px solid #000;
-    box-shadow:
-        inset -1px -1px 0 #7c7c7c,
-        inset 1px 1px 0 #fff;
-    font-size: 10px;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 body[data-theme="snes"] nav button.active {
     background: #5a5aff;
     color: #fff;
-    box-shadow:
-        inset 1px 1px 0 #000,
-        inset -1px -1px 0 #8a8aff;
+    box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 #8a8aff;
     transform: translateY(2px);
-}
-
-body[data-theme="snes"] nav button:hover {
-    background: #d4d4d4;
-}
-
-body[data-theme="snes"] nav button.active:hover {
-    background: #6a6aff;
 }
 
 /* Panels */
 body[data-theme="snes"] .panel {
-    background: #e4e4e4;
-    border: 4px solid #000;
-    box-shadow:
-        inset -3px -3px 0 #7c7c7c,
-        inset 3px 3px 0 #fff,
-        6px 6px 0 #000;
-    border-radius: 0;
+    box-shadow: inset -3px -3px 0 #7c7c7c, inset 3px 3px 0 #fff, 6px 6px 0 #000;
 }
 
-body[data-theme="snes"] .panel:hover {
-    box-shadow:
-        inset -3px -3px 0 #7c7c7c,
-        inset 3px 3px 0 #fff,
-        8px 8px 0 #000;
-}
-
-/* Form Elements */
-body[data-theme="snes"] label {
-    color: #000;
-    font-size: 8px;
-}
-
+/* Inputs */
 body[data-theme="snes"] input {
-    background: #fff;
-    border: 3px solid #000;
     box-shadow: inset 2px 2px 0 #7c7c7c;
-    color: #000;
-    border-radius: 0;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
 }
 
 body[data-theme="snes"] input:focus {
-    box-shadow:
-        inset 2px 2px 0 #7c7c7c,
-        0 0 0 3px #ffff00;
+    box-shadow: inset 2px 2px 0 #7c7c7c, 0 0 0 3px #ffff00;
 }
 
+/* Primary Button */
 body[data-theme="snes"] button.primary {
-    background: #ff5a5a;
-    border: 4px solid #000;
-    box-shadow:
-        inset -2px -2px 0 #c42a2a,
-        inset 2px 2px 0 #ff8a8a,
-        4px 4px 0 #000;
-    color: #fff;
+    box-shadow: inset -2px -2px 0 #c42a2a, inset 2px 2px 0 #ff8a8a, 4px 4px 0 #000;
     text-shadow: 2px 2px 0 #000;
-    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 body[data-theme="snes"] button.primary:hover {
-    background: #ff6a6a;
-    box-shadow:
-        inset -2px -2px 0 #c42a2a,
-        inset 2px 2px 0 #ff9a9a,
-        6px 6px 0 #000;
+    box-shadow: inset -2px -2px 0 #c42a2a, inset 2px 2px 0 #ff9a9a, 6px 6px 0 #000;
 }
 
 body[data-theme="snes"] button.primary:active {
-    box-shadow:
-        inset 2px 2px 0 #c42a2a,
-        2px 2px 0 #000;
+    box-shadow: inset 2px 2px 0 #c42a2a, 2px 2px 0 #000;
 }
 
 /* Song Items */
 body[data-theme="snes"] .song-item {
-    background: #fff;
-    border: 3px solid #000;
     box-shadow: 3px 3px 0 #7c7c7c;
-    border-radius: 0;
+    border: 3px solid #000;
 }
 
 body[data-theme="snes"] .song-item:hover {
     background: #ffff00;
     box-shadow: 4px 4px 0 #000;
+    color: black;
 }
 
 body[data-theme="snes"] .song-thumb {
     border: 3px solid #000;
-    border-radius: 0;
     image-rendering: pixelated;
-}
-
-body[data-theme="snes"] .song-title {
-    color: #000;
-    font-size: 8px;
-}
-
-body[data-theme="snes"] .song-artist {
-    color: #5a5a5a;
-    font-size: 7px;
 }
 
 /* Player */
 body[data-theme="snes"] .album-art {
     background: #000;
-    border: 4px solid #000;
-    box-shadow:
-        inset -3px -3px 0 #3a3a3a,
-        inset 3px 3px 0 #1a1a1a,
-        6px 6px 0 #000;
-    border-radius: 0;
-}
-
-body[data-theme="snes"] .album-art img {
-    image-rendering: pixelated;
-}
-
-body[data-theme="snes"] .album-art svg {
-    color: #5a5a5a;
+    box-shadow: inset -3px -3px 0 #3a3a3a, inset 3px 3px 0 #1a1a1a, 6px 6px 0 #000;
 }
 
 body[data-theme="snes"] .progress-bar {
@@ -264,127 +199,45 @@ body[data-theme="snes"] .progress-fill {
     box-shadow: 0 0 8px #00ff00;
 }
 
-body[data-theme="snes"] .player-title {
-    color: #000;
-    font-size: 9px;
-}
-
-body[data-theme="snes"] .player-artist {
-    color: #5a5a5a;
-    font-size: 7px;
-}
-
+/* Controls */
 body[data-theme="snes"] .control-btn {
     background: #c4c4c4;
     border: 3px solid #000;
-    box-shadow:
-        inset -1px -1px 0 #7c7c7c,
-        inset 1px 1px 0 #fff,
-        3px 3px 0 #000;
-    color: #000;
-}
-
-body[data-theme="snes"] .control-btn:hover {
-    background: #d4d4d4;
-}
-
-body[data-theme="snes"] .control-btn:active {
-    box-shadow:
-        inset 1px 1px 0 #7c7c7c,
-        1px 1px 0 #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff, 3px 3px 0 #000;
 }
 
 body[data-theme="snes"] .control-btn.play {
     background: #5a5aff;
-    color: #fff;
-    border: 4px solid #000;
-    box-shadow:
-        inset -2px -2px 0 #2a2aaf,
-        inset 2px 2px 0 #8a8aff,
-        4px 4px 0 #000;
+    box-shadow: inset -2px -2px 0 #2a2aaf, inset 2px 2px 0 #8a8aff, 4px 4px 0 #000;
 }
 
-body[data-theme="snes"] .control-btn.play:hover {
-    background: #6a6aff;
-}
-
-body[data-theme="snes"] .time-info {
-    color: #000;
-    font-size: 8px;
-}
-
-/* Folders */
+/* Folder Items */
 body[data-theme="snes"] .folder-item {
     background: #ffaa00;
     border: 4px solid #000;
-    box-shadow:
-        inset -2px -2px 0 #c47a00,
-        inset 2px 2px 0 #ffda5a,
-        5px 5px 0 #000;
-    border-radius: 0;
+    box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffda5a, 5px 5px 0 #000;
 }
 
 body[data-theme="snes"] .folder-item:hover {
     background: #ffba20;
-    box-shadow:
-        inset -2px -2px 0 #c47a00,
-        inset 2px 2px 0 #ffea7a,
-        7px 7px 0 #000;
-}
-
-body[data-theme="snes"] .folder-icon {
-    color: #5a3a00;
-    filter: drop-shadow(2px 2px 0 #000);
-}
-
-body[data-theme="snes"] .folder-name {
-    color: #000;
-    font-size: 8px;
-    text-shadow: 1px 1px 0 #ffda5a;
-}
-
-body[data-theme="snes"] .back-btn {
-    background: #c4c4c4;
-    border: 3px solid #000;
-    box-shadow:
-        inset -1px -1px 0 #7c7c7c,
-        inset 1px 1px 0 #fff,
-        3px 3px 0 #000;
-    color: #000;
-    font-size: 8px;
-}
-
-body[data-theme="snes"] .back-btn:hover {
-    background: #d4d4d4;
+    box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffea7a, 7px 7px 0 #000;
 }
 
 /* Theme Selector */
 body[data-theme="snes"] .theme-selector {
     background: #c4c4c4;
-    border: 4px solid #000;
-    box-shadow:
-        inset -2px -2px 0 #7c7c7c,
-        inset 2px 2px 0 #fff,
-        4px 4px 0 #000;
+    box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 4px 4px 0 #000;
 }
 
 body[data-theme="snes"] .theme-btn {
     background: #b4b4b4;
     border: 3px solid #000;
-    box-shadow:
-        inset -1px -1px 0 #7c7c7c,
-        inset 1px 1px 0 #fff;
-}
-
-body[data-theme="snes"] .theme-btn:hover {
-    background: #d4d4d4;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
 }
 
 body[data-theme="snes"] .theme-btn.active {
     background: #5a5aff;
-    box-shadow:
-        inset 1px 1px 0 #2a2aaf,
-        inset -1px -1px 0 #8a8aff;
+    box-shadow: inset 1px 1px 0 #2a2aaf, inset -1px -1px 0 #8a8aff;
 }
 
 /* Scrollbar */
@@ -400,202 +253,6 @@ body[data-theme="snes"] ::-webkit-scrollbar-track {
 body[data-theme="snes"] ::-webkit-scrollbar-thumb {
     background: #c4c4c4;
     border: 2px solid #000;
-    box-shadow:
-        inset -1px -1px 0 #7c7c7c,
-        inset 1px 1px 0 #fff;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
+    border-radius: 0;
 }
-
-body[data-theme="snes"] ::-webkit-scrollbar-thumb:hover {
-    background: #d4d4d4;
-}
-
-/* Extra Controls Bar */
-body[data-theme="snes"] .controls-extra {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 15px;
-    padding: 10px;
-    background: #c4c4c4;
-    border: 3px solid #000;
-    box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
-}
-
-body[data-theme="snes"] .control-icon-btn {
-    background: transparent;
-    border: none;
-    color: #5a5a5a;
-    cursor: pointer;
-    padding: 5px;
-    image-rendering: pixelated;
-}
-
-body[data-theme="snes"] .control-icon-btn:hover {
-    color: #000;
-    transform: scale(1.1);
-}
-
-body[data-theme="snes"] .control-icon-btn.active {
-    color: #5a5aff;
-    text-shadow: 1px 1px 0 #000;
-}
-
-/* Queue Panel */
-body[data-theme="snes"] .queue-panel {
-    position: fixed;
-    top: 0;
-    right: -320px;
-    width: 300px;
-    height: 100vh;
-    background: #e4e4e4;
-    border-left: 4px solid #000;
-    box-shadow: -4px 0 0 #000;
-    z-index: 100;
-    transition: right 0.3s steps(5);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-body[data-theme="snes"] .queue-panel.open {
-    right: 0;
-}
-
-body[data-theme="snes"] .queue-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 4px solid #000;
-}
-
-body[data-theme="snes"] .queue-header h3 {
-    font-size: 10px;
-    color: #000;
-}
-
-body[data-theme="snes"] .queue-list {
-    flex: 1;
-    overflow-y: auto;
-}
-
-body[data-theme="snes"] .queue-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    border: 2px solid #000;
-    margin-bottom: 5px;
-    cursor: pointer;
-    background: #fff;
-    box-shadow: 2px 2px 0 #7c7c7c;
-}
-
-body[data-theme="snes"] .queue-item:hover {
-    background: #ffff00;
-}
-
-body[data-theme="snes"] .queue-item.playing {
-    background: #5a5aff;
-    color: #fff;
-}
-
-/* Equalizer Panel */
-body[data-theme="snes"] .eq-panel {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #e4e4e4;
-    padding: 20px;
-    border: 4px solid #000;
-    box-shadow: 6px 6px 0 #000;
-    display: flex;
-    gap: 15px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s steps(5);
-    z-index: 50;
-}
-
-body[data-theme="snes"] .eq-panel.open {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    pointer-events: all;
-}
-
-body[data-theme="snes"] .eq-band {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-body[data-theme="snes"] .eq-slider {
-    writing-mode: bt-lr;
-    -webkit-appearance: slider-vertical;
-    width: 10px;
-    height: 100px;
-    background: #000;
-    border: 2px solid #fff;
-}
-
-body[data-theme="snes"] .eq-label {
-    font-size: 6px;
-    color: #000;
-}
-
-/* Add to Queue Button */
-.add-queue-btn {
-    position: absolute;
-    right: 5px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #5a5aff;
-    border: 2px solid #000;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    color: #fff;
-    font-family: monospace;
-    box-shadow: 2px 2px 0 #000;
-    z-index: 20;
-}
-
-.song-item:hover .add-queue-btn {
-    opacity: 1;
-}
-
-.add-queue-btn:hover {
-    background: #6a6aff;
-    transform: translateY(-50%) scale(1.1);
-}
-
-/* Preview Tooltip */
-.preview-indicator {
-    position: absolute;
-    top: 5px;
-    right: 35px;
-    background: #ff5a5a;
-    color: #fff;
-    font-size: 8px;
-    padding: 2px 4px;
-    border: 2px solid #000;
-    box-shadow: 2px 2px 0 #000;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.song-item:hover .preview-indicator {
-    opacity: 1;
-}
-
-/* Pixel Font Import */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
