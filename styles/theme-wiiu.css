@@ -1,0 +1,269 @@
+/* Wii U Theme - Modern, Glossy, Glass Morphism */
+
+body[data-theme="wiiu"] {
+    font-family: 'Varela Round', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Floating particles background */
+body[data-theme="wiiu"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    animation: floatParticles 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes floatParticles {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-20px) scale(1.1);
+    }
+}
+
+body[data-theme="wiiu"] .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Logo */
+body[data-theme="wiiu"] .logo-icon {
+    background: linear-gradient(135deg, #38bdf8, #3b82f6);
+    color: white;
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
+}
+
+body[data-theme="wiiu"] .logo h1 {
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Navigation */
+body[data-theme="wiiu"] nav {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] nav button {
+    background: transparent;
+    color: white;
+}
+
+body[data-theme="wiiu"] nav button.active {
+    background: rgba(255, 255, 255, 0.95);
+    color: #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Panels */
+body[data-theme="wiiu"] .panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+body[data-theme="wiiu"] .panel:hover {
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Form Elements */
+body[data-theme="wiiu"] label {
+    color: #666;
+}
+
+body[data-theme="wiiu"] input {
+    background: rgba(249, 250, 251, 0.8);
+    border: 2px solid #e5e7eb;
+    color: #333;
+}
+
+body[data-theme="wiiu"] input:focus {
+    border-color: #38bdf8;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+}
+
+body[data-theme="wiiu"] button.primary {
+    background: linear-gradient(135deg, #38bdf8, #3b82f6);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+body[data-theme="wiiu"] button.primary:hover {
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Song Items */
+body[data-theme="wiiu"] .song-item {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+body[data-theme="wiiu"] .song-item:hover {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border-color: #38bdf8;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+}
+
+body[data-theme="wiiu"] .song-thumb {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] .song-title {
+    color: #1f2937;
+}
+
+body[data-theme="wiiu"] .song-artist {
+    color: #6b7280;
+}
+
+/* Player */
+body[data-theme="wiiu"] .album-art {
+    background: linear-gradient(135deg, #1f2937, #111827);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="wiiu"] .album-art svg {
+    color: #4b5563;
+}
+
+body[data-theme="wiiu"] .progress-bar {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+body[data-theme="wiiu"] .progress-fill {
+    background: linear-gradient(90deg, #38bdf8, #3b82f6);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+body[data-theme="wiiu"] .player-title {
+    color: #1f2937;
+}
+
+body[data-theme="wiiu"] .player-artist {
+    color: #6b7280;
+}
+
+body[data-theme="wiiu"] .control-btn {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #4b5563;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] .control-btn:hover {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body[data-theme="wiiu"] .control-btn.play {
+    background: linear-gradient(135deg, #38bdf8, #3b82f6);
+    color: white;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+body[data-theme="wiiu"] .control-btn.play:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+body[data-theme="wiiu"] .time-info {
+    color: #6b7280;
+}
+
+/* Folders */
+body[data-theme="wiiu"] .folder-item {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    border: 2px solid rgba(147, 197, 253, 0.5);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+body[data-theme="wiiu"] .folder-item:hover {
+    background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+    border-color: #38bdf8;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+body[data-theme="wiiu"] .folder-icon {
+    color: #3b82f6;
+    filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.3));
+}
+
+body[data-theme="wiiu"] .folder-name {
+    color: #1e40af;
+}
+
+body[data-theme="wiiu"] .back-btn {
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    color: #4b5563;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] .back-btn:hover {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+}
+
+/* Theme Selector */
+body[data-theme="wiiu"] .theme-selector {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="wiiu"] .theme-btn {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+body[data-theme="wiiu"] .theme-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+body[data-theme="wiiu"] .theme-btn.active {
+    background: white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Scrollbar */
+body[data-theme="wiiu"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+    border-radius: 10px;
+}
+
+body[data-theme="wiiu"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+}

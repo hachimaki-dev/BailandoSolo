@@ -1,0 +1,15 @@
+{
+  "name": "sonicstream",
+  "version": "1.0.0",
+  "description": "Descargador de Playlists de Alta Fidelidad",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^33.2.0"
+  }
+}
