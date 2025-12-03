@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="styles/theme-wiiu.css">
     <link rel="stylesheet" href="styles/theme-snes.css">
     <link rel="stylesheet" href="styles/theme-nature.css">
+    <link rel="stylesheet" href="styles/theme-ps2.css">
 </head>
 
 <body data-theme="wiiu">
@@ -328,6 +329,7 @@
         <button class="theme-btn active" id="themeWiiU" title="Tema Wii U">🎮</button>
         <button class="theme-btn" id="themeSNES" title="Tema SNES">🕹️</button>
         <button class="theme-btn" id="themeNature" title="Tema Puerto Montt">🌧️</button>
+        <button class="theme-btn" id="themePS2" title="Tema PS2">🌌</button>
     </div>
 
     <audio id="audioPlayer" crossorigin="anonymous"></audio>
@@ -1055,12 +1057,14 @@
         const themeWiiU = document.getElementById('themeWiiU');
         const themeSNES = document.getElementById('themeSNES');
         const themeNature = document.getElementById('themeNature');
+        const themePS2 = document.getElementById('themePS2');
 
         function setTheme(theme) {
             document.body.setAttribute('data-theme', theme);
             themeWiiU.classList.toggle('active', theme === 'wiiu');
             themeSNES.classList.toggle('active', theme === 'snes');
             themeNature.classList.toggle('active', theme === 'nature');
+            themePS2.classList.toggle('active', theme === 'ps2');
             localStorage.setItem('theme', theme);
 
             // Re-draw visualizer if needed to match theme colors
@@ -1072,6 +1076,7 @@
         themeWiiU.addEventListener('click', () => setTheme('wiiu'));
         themeSNES.addEventListener('click', () => setTheme('snes'));
         themeNature.addEventListener('click', () => setTheme('nature'));
+        themePS2.addEventListener('click', () => setTheme('ps2'));
 
         // Load saved theme
         const savedTheme = localStorage.getItem('theme') || 'wiiu';
@@ -1156,6 +1161,7 @@
         // Load Quick Play on page load
         loadQuickPlay();
     </script>
+    <script src="ps2-theme.js"></script>
 </body>
 
 </html>
