@@ -1,0 +1,226 @@
+/* PS2 Theme - The Third Place */
+
+body[data-theme="ps2"] {
+    /* --- COLORS --- */
+    --bg-main: #000000;
+    --bg-alt: rgba(10, 20, 40, 0.85);
+    --bg-panel: rgba(5, 15, 35, 0.7);
+    --bg-input: rgba(0, 0, 0, 0.6);
+
+    --text-main: #e0e6ff;
+    --text-muted: #6b7a99;
+    --text-inverse: #000000;
+
+    --primary: #0050ff;
+    --primary-hover: #2277ff;
+    --accent: #ff0055;
+
+    --border-color: rgba(60, 100, 200, 0.4);
+    --shadow-color: rgba(0, 10, 30, 0.9);
+
+    /* --- SHAPES --- */
+    --radius-md: 2px;
+    --radius-lg: 4px;
+    --border-width: 1px;
+    --border-style: solid;
+
+    /* --- TYPOGRAPHY --- */
+    --font-main: 'Arial', 'Helvetica', sans-serif;
+
+    /* --- BACKGROUND --- */
+    background-color: #000;
+    overflow-x: hidden;
+    /* Prevent scroll from parallax elements */
+}
+
+/* --- PARALLAX BACKGROUND --- */
+
+/* Layer 1: Deep Nebula Rotation */
+body[data-theme="ps2"]::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(0, 30, 100, 0.2), transparent 60%),
+        radial-gradient(circle at 20% 80%, rgba(0, 60, 120, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(50, 0, 100, 0.1), transparent 40%);
+    z-index: -3;
+    animation: ps2-rotate 60s linear infinite;
+    pointer-events: none;
+}
+
+/* Layer 2: Floating Cubes / Mist */
+body[data-theme="ps2"]::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(1px 1px at 10% 10%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.2) 50%, transparent 100%),
+        radial-gradient(1px 1px at 30% 70%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+        radial-gradient(2px 2px at 70% 40%, rgba(255, 255, 255, 0.2) 50%, transparent 100%),
+        radial-gradient(1px 1px at 90% 90%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    background-size: 100% 100%;
+    z-index: -2;
+    animation: ps2-float 20s ease-in-out infinite alternate;
+    pointer-events: none;
+    filter: blur(0.5px);
+}
+
+/* --- ANIMATIONS --- */
+
+@keyframes ps2-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes ps2-float {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.1) translateY(-10px);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 0.5;
+    }
+}
+
+@keyframes ps2-glow {
+    0% {
+        box-shadow: 0 0 5px rgba(0, 80, 255, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(0, 120, 255, 0.6);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(0, 80, 255, 0.3);
+    }
+}
+
+@keyframes ps2-boot-fade {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* --- COMPONENT OVERRIDES --- */
+
+/* Global Transitions */
+body[data-theme="ps2"] * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+/* Glass Panels */
+body[data-theme="ps2"] .panel,
+body[data-theme="ps2"] .card,
+body[data-theme="ps2"] .folder-item,
+body[data-theme="ps2"] .song-item {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(100, 150, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+/* Hover Effects */
+body[data-theme="ps2"] .song-item:hover,
+body[data-theme="ps2"] .folder-item:hover {
+    background: rgba(0, 60, 150, 0.3);
+    border-color: rgba(100, 200, 255, 0.5);
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(0, 100, 255, 0.3);
+}
+
+/* Buttons */
+body[data-theme="ps2"] button {
+    background: linear-gradient(180deg, rgba(40, 80, 160, 0.3) 0%, rgba(10, 40, 100, 0.5) 100%);
+    border: 1px solid rgba(80, 150, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+body[data-theme="ps2"] button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+body[data-theme="ps2"] button:hover::before {
+    left: 100%;
+}
+
+body[data-theme="ps2"] button:hover {
+    background: linear-gradient(180deg, rgba(60, 100, 200, 0.5) 0%, rgba(20, 60, 140, 0.7) 100%);
+    border-color: rgba(120, 200, 255, 0.6);
+    text-shadow: 0 0 8px rgba(150, 200, 255, 0.8);
+}
+
+/* Active State */
+body[data-theme="ps2"] .active,
+body[data-theme="ps2"] button.active {
+    color: #fff;
+    border-color: #00aaff;
+    box-shadow: 0 0 10px rgba(0, 100, 255, 0.5);
+    animation: ps2-glow 3s infinite;
+}
+
+/* Inputs */
+body[data-theme="ps2"] input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(80, 120, 200, 0.3);
+    color: #fff;
+}
+
+body[data-theme="ps2"] input:focus {
+    border-color: #0088ff;
+    box-shadow: 0 0 10px rgba(0, 100, 255, 0.4);
+}
+
+/* Scrollbar */
+body[data-theme="ps2"] ::-webkit-scrollbar {
+    width: 12px;
+}
+
+body[data-theme="ps2"] ::-webkit-scrollbar-track {
+    background: #050510;
+}
+
+body[data-theme="ps2"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #003366, #0055aa);
+    border: 1px solid #001133;
+    border-radius: 6px;
+}
+
+body[data-theme="ps2"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #004488, #0066cc);
+}
