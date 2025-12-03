@@ -20,7 +20,7 @@ function createWindow() {
     show: false // Don't show until ready
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(path.join(__dirname, 'ui', 'dist', 'index.html'));
 
   // Open DevTools for debugging
   mainWindow.webContents.openDevTools();
