@@ -233,8 +233,10 @@ def get_random_songs():
     
     # Walk through all folders
     for root, dirs, files in os.walk(base_dir):
-        folder_name = os.path.basename(root)
-        if folder_name == 'downloads': continue
+        # Get relative path from base_dir
+        rel_path = os.path.relpath(root, base_dir)
+        if rel_path == '.':
+            continue
         
         for filename in files:
             if any(filename.endswith(ext.replace('*', '')) for ext in extensions):
@@ -245,15 +247,15 @@ def get_random_songs():
                 for thumb_ext in ['.jpg', '.png', '.webp']:
                     thumb_path = os.path.join(root, base_name + thumb_ext)
                     if os.path.exists(thumb_path):
-                        thumbnail = f"/api/stream/{folder_name}/{base_name}{thumb_ext}"
+                        thumbnail = f"/api/stream/{rel_path}/{base_name}{thumb_ext}"
                         break
                 
                 all_songs.append({
                     'filename': filename,
-                    'path': f"/api/stream/{folder_name}/{filename}",
+                    'path': f"/api/stream/{rel_path}/{filename}",
                     'thumbnail': thumbnail,
                     'title': base_name,
-                    'folder': folder_name
+                    'folder': rel_path
                 })
     
     # Shuffle and pick up to 20

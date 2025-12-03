@@ -83,7 +83,7 @@ const getThumbnail = (song) => {
     if (song.thumbnail) return 'http://localhost:5001' + song.thumbnail
     // Deterministic random cover
     const hash = song.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const coverNum = (hash % 7) + 1;
+    const coverNum = (hash % 9) + 1;
     return new URL(`../assets/styles/no_cover/${coverNum}.png`, import.meta.url).href
 }
 

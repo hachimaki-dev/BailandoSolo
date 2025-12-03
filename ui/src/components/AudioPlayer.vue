@@ -3,7 +3,7 @@
     <h3 style="margin-bottom: 16px;">Reproductor</h3>
     <div class="album-art" id="albumArt">
         <canvas ref="canvas" id="visualizer"></canvas>
-        <img v-if="currentSong && currentSong.thumbnail" :src="currentSong.thumbnail" id="albumImage">
+        <img v-if="currentSong && getThumbnail(currentSong)" :src="getThumbnail(currentSong)" id="albumImage">
         <div v-else id="defaultArt">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -131,13 +131,41 @@ const formatTime = (seconds) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`
 }
 
+const getThumbnail = (song) => {
+    if (!song) return null
+    
+    // If thumbnail exists and starts with http, use it directly
+    if (song.thumbnail && song.thumbnail.startsWith('http')) {
+        return song.thumbnail
+    }
+    
+    // If thumbnail exists and starts with /, prepend server URL
+    if (song.thumbnail && song.thumbnail.startsWith('/')) {
+        return 'http://localhost:5001' + song.thumbnail
+    }
+    
+    // If thumbnail exists but is a relative path
+    if (song.thumbnail) {
+        return 'http://localhost:5001' + song.thumbnail
+    }
+    
+    // Fallback to random cover based on title hash
+    const hash = song.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const coverNum = (hash % 9) + 1
+    return new URL(`../assets/styles/no_cover/${coverNum}.png`, import.meta.url).href
+}
+
 watch(() => props.currentSong, (newSong) => {
     if (newSong && audio.value) {
         if (newSong.url) {
              audio.value.src = newSong.url
              if (props.isPlaying) audio.value.play()
+        } else if (newSong.path) {
+             // Path already includes /api/stream/folder/filename
+             audio.value.src = 'http://localhost:5001' + newSong.path
+             if (props.isPlaying) audio.value.play()
         } else if (newSong.filename) {
-             audio.value.src = `http://localhost:5001/stream?path=${encodeURIComponent(newSong.path || newSong.filename)}`
+             audio.value.src = `http://localhost:5001/api/stream/${encodeURIComponent(newSong.filename)}`
              if (props.isPlaying) audio.value.play()
         }
     }
