@@ -4,9 +4,9 @@
 
     <div class="main-grid">
       <div>
-        <DownloaderView v-show="currentView === 'downloader'" @play-cartridge="playSong" />
+        <DownloaderView v-show="currentView === 'downloader'" @play-cartridge="playSong" @add-to-queue="addToQueue" />
         <LibraryView v-if="currentView === 'library'" @open-folder="openFolder" />
-        <FolderView v-if="currentView === 'folder'" :folderName="currentFolder" @back="currentView = 'library'" @play-song="playSong" />
+        <FolderView v-if="currentView === 'folder'" :folderName="currentFolder" @back="currentView = 'library'" @play-song="playSong" @add-to-queue="addToQueue" />
       </div>
 
       <AudioPlayer 
@@ -202,6 +202,13 @@ const playQueueItem = (index) => {
     queue.value.splice(index, 1)
     currentSong.value = song
     isPlaying.value = true
+}
+
+const addToQueue = (song) => {
+    queue.value.push(song)
+    isQueueOpen.value = true
+    // Optional: Show a notification
+    console.log('Added to queue:', song.title)
 }
 
 </script>

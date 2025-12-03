@@ -20,7 +20,13 @@ function createWindow() {
     show: false // Don't show until ready
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'ui', 'dist', 'index.html'));
+  const isDev = process.argv.includes('--dev');
+
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173');
+  } else {
+    mainWindow.loadFile(path.join(__dirname, 'ui', 'dist', 'index.html'));
+  }
 
   // Open DevTools for debugging
   mainWindow.webContents.openDevTools();
