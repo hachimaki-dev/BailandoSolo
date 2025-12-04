@@ -37,11 +37,19 @@
   />
   <QueuePanel :queue="queue" :isOpen="isQueueOpen" @close="isQueueOpen = false" @remove-item="removeFromQueue" @play-item="playQueueItem" />
   <EqualizerPanel :isOpen="isEqOpen" @change-band="updateEq" />
-  <ThemeSelector />
+  <ThemeSelector @theme-change="currentTheme = $event" />
+  <LyricsKaraoke 
+    v-if="currentTheme === 'karaoke' && currentSong"
+    :isPlaying="isPlaying"
+    :currentSong="currentSong"
+    :currentTime="currentSongTime"
+    :duration="songDuration"
+    :analyser="analyserNode"
+  />
 </template>
 
 <script setup>
-import { ref, provide } from 'vue'
+import { ref, provide, computed, onMounted } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import DownloaderView from './components/DownloaderView.vue'
 import LibraryView from './components/LibraryView.vue'
@@ -51,6 +59,7 @@ import QueuePanel from './components/QueuePanel.vue'
 import EqualizerPanel from './components/EqualizerPanel.vue'
 import ThemeSelector from './components/ThemeSelector.vue'
 import ParallaxManager from './components/ParallaxManager.vue'
+import LyricsKaraoke from './components/LyricsKaraoke.vue'
 
 const currentView = ref('downloader')
 const currentFolder = ref('')
@@ -65,6 +74,9 @@ const currentIndex = ref(-1)
 
 const currentSongTime = ref(0)
 const songDuration = ref(0)
+const audioElement = ref(null)
+const analyserNode = ref(null)
+const currentTheme = ref('wiiu')
 
 const updateSongTime = ({ currentTime, duration }) => {
     currentSongTime.value = currentTime
@@ -82,11 +94,13 @@ let canvasEl
 
 const initAudio = ({ audio, canvas }) => {
     if (audioContext) return
+    audioElement.value = audio // Store audio element reference
     try {
         const AudioContext = window.AudioContext || window.webkitAudioContext
         audioContext = new AudioContext()
         analyser = audioContext.createAnalyser()
         analyser.fftSize = 128
+        analyserNode.value = analyser // Store analyser for LyricsKaraoke
 
         gainNode = audioContext.createGain()
         
