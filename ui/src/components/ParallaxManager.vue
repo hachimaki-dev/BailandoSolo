@@ -38,6 +38,15 @@
             <span>BioClock (Tiempo/Latido)</span>
           </div>
         </div>
+
+        <div class="experimental-section">
+            <label class="experimental-toggle">
+                <input type="checkbox" v-model="experimentalMode" @change="toggleExperimental">
+                <span class="slider"></span>
+                <span class="label-text">Modo Experimental (Todos los temas)</span>
+            </label>
+        </div>
+
         <button class="close-btn" @click="showSettings = false">Cerrar</button>
       </div>
     </div>
@@ -54,8 +63,11 @@ const props = defineProps({
   songDuration: Number
 })
 
+const emit = defineEmits(['toggle-experimental'])
+
 const showSettings = ref(false)
 const currentMode = ref('default')
+const experimentalMode = ref(false)
 
 const activeComponent = computed(() => {
   switch (currentMode.value) {
@@ -72,10 +84,21 @@ const setMode = (mode) => {
   localStorage.setItem('parallax-mode', mode)
 }
 
+const toggleExperimental = () => {
+  localStorage.setItem('experimental-mode', experimentalMode.value)
+  emit('toggle-experimental', experimentalMode.value)
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('parallax-mode')
   if (saved) {
     currentMode.value = saved
+  }
+  
+  const savedExperimental = localStorage.getItem('experimental-mode')
+  if (savedExperimental) {
+    experimentalMode.value = savedExperimental === 'true'
+    emit('toggle-experimental', experimentalMode.value)
   }
 })
 </script>
@@ -209,5 +232,60 @@ onMounted(() => {
 
 .close-btn:hover {
   background: #555;
+}
+
+.experimental-section {
+    margin-bottom: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #444;
+}
+
+.experimental-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.experimental-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: #444;
+    border-radius: 20px;
+    margin-right: 12px;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #007bff;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.label-text {
+    font-size: 0.9rem;
+    color: #ccc;
 }
 </style>

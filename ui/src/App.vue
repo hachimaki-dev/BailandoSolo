@@ -34,10 +34,11 @@
     :isPlaying="isPlaying"
     :currentSongTime="currentSongTime"
     :songDuration="songDuration"
+    @toggle-experimental="showExperimental = $event"
   />
   <QueuePanel :queue="queue" :isOpen="isQueueOpen" @close="isQueueOpen = false" @remove-item="removeFromQueue" @play-item="playQueueItem" />
   <EqualizerPanel :isOpen="isEqOpen" @change-band="updateEq" />
-  <ThemeSelector @theme-change="currentTheme = $event" />
+  <ThemeSelector :showExperimental="showExperimental" @theme-change="currentTheme = $event" />
   <LyricsKaraoke 
     v-if="currentTheme === 'karaoke' && currentSong"
     :isPlaying="isPlaying"
@@ -76,7 +77,8 @@ const currentSongTime = ref(0)
 const songDuration = ref(0)
 const audioElement = ref(null)
 const analyserNode = ref(null)
-const currentTheme = ref('wiiu')
+const currentTheme = ref('snes')
+const showExperimental = ref(false)
 
 const updateSongTime = ({ currentTime, duration }) => {
     currentSongTime.value = currentTime
