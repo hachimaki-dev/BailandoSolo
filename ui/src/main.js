@@ -7,5 +7,10 @@ import './assets/styles/theme-wiiu.css'
 import './assets/styles/theme-snes.css'
 import './assets/styles/theme-nature.css'
 import './assets/styles/theme-ps2.css'
+import './assets/styles/theme-cassette.css'
+
+import { initCassetteThemeObserver } from './assets/js/cassette-theme.js'
+
+initCassetteThemeObserver()
 
 createApp(App).mount('#app')
