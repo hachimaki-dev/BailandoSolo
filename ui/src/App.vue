@@ -25,10 +25,16 @@
         @volume-change="setVolume"
         @ended="nextSong"
         @init-audio="initAudio"
+        @time-update="updateSongTime"
       />
     </div>
   </div>
 
+  <ParallaxManager 
+    :isPlaying="isPlaying"
+    :currentSongTime="currentSongTime"
+    :songDuration="songDuration"
+  />
   <QueuePanel :queue="queue" :isOpen="isQueueOpen" @close="isQueueOpen = false" @remove-item="removeFromQueue" @play-item="playQueueItem" />
   <EqualizerPanel :isOpen="isEqOpen" @change-band="updateEq" />
   <ThemeSelector />
@@ -44,6 +50,7 @@ import AudioPlayer from './components/AudioPlayer.vue'
 import QueuePanel from './components/QueuePanel.vue'
 import EqualizerPanel from './components/EqualizerPanel.vue'
 import ThemeSelector from './components/ThemeSelector.vue'
+import ParallaxManager from './components/ParallaxManager.vue'
 
 const currentView = ref('downloader')
 const currentFolder = ref('')
@@ -55,6 +62,14 @@ const isEqOpen = ref(false)
 const queue = ref([])
 const currentPlaylist = ref([]) // List of songs currently playing from (folder or queue)
 const currentIndex = ref(-1)
+
+const currentSongTime = ref(0)
+const songDuration = ref(0)
+
+const updateSongTime = ({ currentTime, duration }) => {
+    currentSongTime.value = currentTime
+    songDuration.value = duration
+}
 
 // Audio Context
 let audioContext

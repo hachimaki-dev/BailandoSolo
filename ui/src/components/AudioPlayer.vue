@@ -91,7 +91,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps(['currentSong', 'isPlaying', 'isShuffle', 'isQueueOpen', 'isEqOpen'])
-const emit = defineEmits(['play', 'pause', 'next', 'prev', 'seek', 'volume-change', 'toggle-queue', 'toggle-eq', 'toggle-shuffle', 'ended', 'init-audio'])
+const emit = defineEmits(['play', 'pause', 'next', 'prev', 'seek', 'volume-change', 'toggle-queue', 'toggle-eq', 'toggle-shuffle', 'ended', 'init-audio', 'time-update'])
 
 const audio = ref(null)
 const canvas = ref(null)
@@ -115,6 +115,7 @@ const updateTime = () => {
     currentTime.value = audio.value.currentTime
     duration.value = audio.value.duration || 0
     progress.value = (currentTime.value / duration.value) * 100 || 0
+    emit('time-update', { currentTime: currentTime.value, duration: duration.value })
 }
 
 const seek = (e) => {
