@@ -6,6 +6,8 @@
     <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'ps2' }" @click="setTheme('ps2')" title="Tema PS2">🌌</button>
     <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'cassette' }" @click="setTheme('cassette')" title="Tema Cassette">📼</button>
     <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'karaoke' }" @click="setTheme('karaoke')" title="Tema Karaoke">🎤</button>
+    <div class="separator"></div>
+    <button class="theme-btn" @click="$emit('open-stats')" title="Estadísticas">📊</button>
   </div>
 </template>
 
@@ -19,7 +21,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['theme-change'])
+const emit = defineEmits(['theme-change', 'open-stats'])
 
 const currentTheme = ref('snes')
 
@@ -40,4 +42,13 @@ onMounted(() => {
   setTheme('snes')
 })
 </script>
+
+<style scoped>
+.separator {
+  width: 1px;
+  background: var(--border-color);
+  margin: 0 4px;
+  opacity: 0.5;
+}
+</style>
 

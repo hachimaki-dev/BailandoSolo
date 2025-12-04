@@ -262,6 +262,122 @@ def get_random_songs():
     random.shuffle(all_songs)
     return jsonify(all_songs[:20])
 
+# --- Statistics Logic ---
+STATS_FILE = 'stats.json'
+
+def load_stats():
+    if os.path.exists(STATS_FILE):
+        try:
+            with open(STATS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_stats(stats):
+    try:
+        with open(STATS_FILE, 'w') as f:
+            json.dump(stats, f, indent=4)
+    except Exception as e:
+        print(f"Error saving stats: {e}")
+
+@app.route('/api/stats/track', methods=['POST'])
+def track_stat():
+    data = request.json
+    event_type = data.get('type') # 'play', 'time_update'
+    song_id = data.get('song_id') # Use filename or title as ID
+    duration = data.get('duration', 0) # For 'time_update'
+    
+    if not song_id:
+        return jsonify({'error': 'Song ID required'}), 400
+        
+    stats = load_stats()
+    
+    if song_id not in stats:
+        stats[song_id] = {
+            'play_count': 0,
+            'total_time': 0,
+            'last_played': None,
+            'title': data.get('title', song_id)
+        }
+        
+    if event_type == 'play':
+        stats[song_id]['play_count'] += 1
+        import time
+        stats[song_id]['last_played'] = time.time()
+    elif event_type == 'time_update':
+        # Add duration in seconds
+        stats[song_id]['total_time'] += duration
+        
+    save_stats(stats)
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    stats = load_stats()
+    
+    # Calculate derived stats
+    if not stats:
+        return jsonify({
+            'most_played': None,
+            'most_time': None,
+            'least_played': None,
+            'never_played': [],
+            'total_plays': 0,
+            'total_time_global': 0
+        })
+        
+    # Convert dict to list for sorting
+    songs_list = []
+    for sid, data in stats.items():
+        data['id'] = sid
+        songs_list.append(data)
+        
+    # Most played
+    songs_list.sort(key=lambda x: x['play_count'], reverse=True)
+    most_played = songs_list[0] if songs_list else None
+    
+    # Most time
+    songs_list.sort(key=lambda x: x['total_time'], reverse=True)
+    most_time = songs_list[0] if songs_list else None
+    
+    # Least played (of those that have been played)
+    songs_list.sort(key=lambda x: x['play_count'])
+    least_played = songs_list[0] if songs_list else None
+    
+    # Never played logic
+    # We need to scan the library and find songs not in stats or with 0 plays
+    base_dir = os.path.join(os.getcwd(), 'downloads')
+    all_files = []
+    extensions = ['*.mp3', '*.webm', '*.m4a', '*.wav']
+    if os.path.exists(base_dir):
+        for root, dirs, files in os.walk(base_dir):
+            for filename in files:
+                if any(filename.endswith(ext.replace('*', '')) for ext in extensions):
+                    # We use filename as ID in track_stat usually, or title. 
+                    # Ideally we should use a consistent ID. 
+                    # For now let's assume the frontend sends the filename as ID.
+                    all_files.append(filename)
+    
+    never_played = []
+    for fname in all_files:
+        if fname not in stats:
+            never_played.append(fname)
+            
+    # Global totals
+    total_plays = sum(s['play_count'] for s in songs_list)
+    total_time_global = sum(s['total_time'] for s in songs_list)
+    
+    return jsonify({
+        'most_played': most_played,
+        'most_time': most_time,
+        'least_played': least_played,
+        'never_played': never_played[:50], # Limit to 50
+        'total_plays': total_plays,
+        'total_time_global': total_time_global
+    })
+
+
 if __name__ == '__main__':
     # Ensure ffmpeg is available or warn user? 
     # yt-dlp usually needs ffmpeg for audio conversion.

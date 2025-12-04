@@ -38,7 +38,8 @@
   />
   <QueuePanel :queue="queue" :isOpen="isQueueOpen" @close="isQueueOpen = false" @remove-item="removeFromQueue" @play-item="playQueueItem" />
   <EqualizerPanel :isOpen="isEqOpen" @change-band="updateEq" />
-  <ThemeSelector :showExperimental="showExperimental" @theme-change="currentTheme = $event" />
+  <ThemeSelector :showExperimental="showExperimental" @theme-change="currentTheme = $event" @open-stats="showStats = true" />
+  <StatisticsDashboard v-if="showStats" @close="showStats = false" />
   <LyricsKaraoke 
     v-if="currentTheme === 'karaoke' && currentSong"
     :isPlaying="isPlaying"
@@ -50,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, provide, computed, onMounted } from 'vue'
+import { ref, provide, computed, onMounted, watch } from 'vue'
 import AppHeader from './components/AppHeader.vue'
 import DownloaderView from './components/DownloaderView.vue'
 import LibraryView from './components/LibraryView.vue'
@@ -61,6 +62,8 @@ import EqualizerPanel from './components/EqualizerPanel.vue'
 import ThemeSelector from './components/ThemeSelector.vue'
 import ParallaxManager from './components/ParallaxManager.vue'
 import LyricsKaraoke from './components/LyricsKaraoke.vue'
+import StatisticsDashboard from './components/StatisticsDashboard.vue'
+import { StatsService } from './services/StatsService'
 
 const currentView = ref('downloader')
 const currentFolder = ref('')
@@ -79,6 +82,29 @@ const audioElement = ref(null)
 const analyserNode = ref(null)
 const currentTheme = ref('snes')
 const showExperimental = ref(false)
+const showStats = ref(false)
+
+// Stats Tracking
+let lastTrackedTime = 0
+const TRACK_INTERVAL = 5 // Track time every 5 seconds of playback
+
+watch(currentSong, (newSong) => {
+    if (newSong) {
+        StatsService.trackPlay(newSong)
+        lastTrackedTime = 0
+    }
+})
+
+watch(currentSongTime, (newTime) => {
+    if (!currentSong.value || !isPlaying.value) return
+    
+    // Calculate delta since last check (approximate)
+    // Actually, we can just check if we crossed a 5s threshold
+    if (newTime - lastTrackedTime >= TRACK_INTERVAL) {
+        StatsService.trackTime(currentSong.value, newTime - lastTrackedTime)
+        lastTrackedTime = newTime
+    }
+})
 
 const updateSongTime = ({ currentTime, duration }) => {
     currentSongTime.value = currentTime
