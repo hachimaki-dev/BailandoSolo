@@ -259,7 +259,6 @@ const formatDate = (timestamp) => {
   box-shadow: -5px 0 20px var(--shadow-color);
   z-index: 2000;
   transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 20px;
   display: flex;
   flex-direction: column;
   border-left: var(--border-width) var(--border-style) var(--border-color);
@@ -274,16 +273,19 @@ const formatDate = (timestamp) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
+  padding: 20px;
   border-bottom: var(--border-width) var(--border-style) var(--border-color);
+  flex-shrink: 0;
 }
 
 .stats-header h2 {
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .close-btn {
@@ -296,6 +298,8 @@ const formatDate = (timestamp) => {
   transition: opacity 0.2s;
   padding: 0;
   line-height: 1;
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 .close-btn:hover {
@@ -315,7 +319,8 @@ const formatDate = (timestamp) => {
 .stats-content {
   flex: 1;
   overflow-y: auto;
-  padding-right: 5px;
+  overflow-x: hidden;
+  padding: 20px;
 }
 
 .global-stats {
@@ -327,39 +332,42 @@ const formatDate = (timestamp) => {
 
 .stat-badge {
   background: var(--bg-alt);
-  padding: 15px;
+  padding: 12px 8px;
   border-radius: var(--radius-md);
   text-align: center;
   border: var(--border-width) var(--border-style) var(--border-color);
   box-shadow: var(--shadow-sm);
+  min-width: 0;
 }
 
 .badge-icon {
-  font-size: 2rem;
+  font-size: 1.5rem;
   margin-bottom: 5px;
 }
 
 .badge-label {
-  font-size: var(--text-xs);
+  font-size: 9px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   opacity: 0.7;
   margin-bottom: 5px;
   font-weight: bold;
+  line-height: 1.2;
 }
 
 .badge-value {
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   font-weight: bold;
   font-family: var(--font-mono);
+  word-break: break-all;
 }
 
 .stats-section {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .stats-section h3 {
-  font-size: var(--text-sm);
+  font-size: 11px;
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -373,7 +381,7 @@ const formatDate = (timestamp) => {
 }
 
 .stats-cartridge {
-  width: 140px;
+  width: 130px;
   background: var(--bg-alt);
   border: var(--border-width) var(--border-style) var(--border-color);
   border-radius: var(--radius-md);
@@ -404,7 +412,7 @@ const formatDate = (timestamp) => {
 
 .cartridge-art {
   width: 100%;
-  height: 120px;
+  height: 110px;
   background: #333;
   position: relative;
   overflow: hidden;
@@ -418,14 +426,14 @@ const formatDate = (timestamp) => {
 
 .cartridge-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   background: rgba(0, 0, 0, 0.85);
   color: #FFD700;
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
   font-weight: bold;
-  font-size: var(--text-xs);
+  font-size: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -445,8 +453,8 @@ const formatDate = (timestamp) => {
 }
 
 .cartridge-title {
-  padding: 8px;
-  font-size: var(--text-xs);
+  padding: 8px 6px;
+  font-size: 10px;
   font-weight: bold;
   text-align: center;
   white-space: nowrap;
@@ -456,8 +464,8 @@ const formatDate = (timestamp) => {
 }
 
 .cartridge-meta {
-  padding: 0 8px 8px;
-  font-size: 10px;
+  padding: 0 6px 8px;
+  font-size: 9px;
   text-align: center;
   opacity: 0.7;
 }
@@ -466,18 +474,19 @@ const formatDate = (timestamp) => {
   background: var(--bg-alt);
   border: var(--border-width) var(--border-style) var(--border-color);
   border-radius: var(--radius-md);
-  padding: 10px;
-  max-height: 250px;
+  padding: 8px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
 .vault-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px;
+  gap: 8px;
+  padding: 6px;
   border-bottom: 1px solid var(--border-color);
   font-size: var(--text-sm);
+  min-width: 0;
 }
 
 .vault-item:last-child {
@@ -485,8 +494,9 @@ const formatDate = (timestamp) => {
 }
 
 .vault-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
   opacity: 0.5;
+  flex-shrink: 0;
 }
 
 .vault-name {
@@ -494,13 +504,14 @@ const formatDate = (timestamp) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: var(--text-xs);
+  font-size: 10px;
+  min-width: 0;
 }
 
 .vault-more {
-  padding: 10px;
+  padding: 8px;
   text-align: center;
-  font-size: var(--text-xs);
+  font-size: 10px;
   opacity: 0.6;
   font-style: italic;
 }
@@ -512,7 +523,7 @@ const formatDate = (timestamp) => {
 }
 
 .empty-icon {
-  font-size: 4rem;
+  font-size: 3rem;
   margin-bottom: 15px;
   opacity: 0.3;
 }
@@ -525,6 +536,206 @@ const formatDate = (timestamp) => {
 .empty-state small {
   font-size: var(--text-sm);
   opacity: 0.7;
+}
+
+/* Exploration Bar */
+.exploration-bar {
+  position: relative;
+  background: var(--bg-alt);
+  border: var(--border-width) var(--border-style) var(--border-color);
+  border-radius: var(--radius-md);
+  height: 35px;
+  overflow: hidden;
+}
+
+.exploration-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8BC34A);
+  transition: width 0.5s ease;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.exploration-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 10px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exploration-percent {
+  margin-left: 5px;
+  opacity: 0.8;
+}
+
+/* Achievements */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.achievement-badge {
+  background: var(--bg-alt);
+  border: var(--border-width) var(--border-style) var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 6px;
+  text-align: center;
+  transition: transform 0.2s;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.achievement-badge:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.achievement-icon {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.achievement-title {
+  font-size: 9px;
+  font-weight: bold;
+  margin-bottom: 2px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.achievement-desc {
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+/* Folder List */
+.folder-list {
+  background: var(--bg-alt);
+  border: var(--border-width) var(--border-style) var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s;
+  min-width: 0;
+}
+
+.folder-item:last-child {
+  border-bottom: none;
+}
+
+.folder-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.folder-rank {
+  width: 24px;
+  height: 24px;
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.folder-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.folder-name {
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-meta {
+  font-size: 9px;
+  opacity: 0.7;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3px 6px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Timeline */
+.timeline-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.timeline-item {
+  background: var(--bg-alt);
+  border: var(--border-width) var(--border-style) var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 8px;
+  text-align: center;
+  min-width: 0;
+}
+
+.timeline-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.timeline-song {
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-date {
+  font-size: 9px;
+  opacity: 0.7;
+  font-family: var(--font-mono);
 }
 
 /* Exploration Bar */
