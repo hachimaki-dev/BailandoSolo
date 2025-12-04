@@ -39,7 +39,7 @@
   <QueuePanel :queue="queue" :isOpen="isQueueOpen" @close="isQueueOpen = false" @remove-item="removeFromQueue" @play-item="playQueueItem" />
   <EqualizerPanel :isOpen="isEqOpen" @change-band="updateEq" />
   <ThemeSelector :showExperimental="showExperimental" @theme-change="currentTheme = $event" @open-stats="showStats = true" />
-  <StatisticsDashboard v-if="showStats" @close="showStats = false" />
+  <StatisticsDashboard :isOpen="showStats" @close="showStats = false" />
   <LyricsKaraoke 
     v-if="currentTheme === 'karaoke' && currentSong"
     :isPlaying="isPlaying"
