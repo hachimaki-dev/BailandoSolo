@@ -1002,10 +1002,115 @@ input[type=range]::-webkit-slider-runnable-track {
 /* Nature Rain */
 @keyframes rain {
     0% {
-        background-position: 0 0;
+        background-position: 10px 20px;
+    }
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 900px) {
+    :root {
+        --header-height: auto;
+        --album-art-size: 200px;
+        --control-size: 40px;
+        --control-size-lg: 56px;
     }
 
-    100% {
-        background-position: 10px 20px;
+    .container {
+        padding: 0 10px;
+    }
+
+    /* Stack the main grid */
+    .main-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Header adjustments */
+    header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+        height: auto;
+    }
+
+    .logo {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    nav {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    nav button {
+        padding: 8px 16px;
+        font-size: var(--text-sm);
+        flex: 1;
+        text-align: center;
+        min-width: 80px;
+    }
+
+    /* Player adjustments */
+    .player {
+        position: relative;
+        top: 0;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        order: -1;
+        /* Optional: Move player to top if desired, but user didn't specify. Keeping default order (bottom) for now. */
+    }
+
+    /* If the user wants the player at the top on mobile, uncomment below:
+    .main-grid {
+        display: flex;
+        flex-direction: column-reverse; 
+    }
+    But grid-template-columns: 1fr works to stack them. The player is the second child, so it will be at the bottom.
+    */
+
+    /* Queue Panel */
+    .queue-panel {
+        width: 85%;
+        right: -90%;
+    }
+
+    .queue-panel.open {
+        right: 0;
+    }
+
+    /* Controls */
+    .controls-extra {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Theme Selector */
+    .theme-selector {
+        bottom: 10px;
+        right: 10px;
+        padding: 4px;
+    }
+
+    .theme-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --album-art-size: 160px;
+    }
+
+    .cartridge-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .folder-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
 }
