@@ -163,25 +163,28 @@ watch(isOpen, (newVal) => {
 }
 
 .qr-trigger-btn {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
+  background: #b4b4b4;
+  border: 3px solid #000;
+  color: #000;
   font-size: 1.5rem;
   width: 50px;
   height: 50px;
-  border-radius: 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
 }
 
 .qr-trigger-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.05);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: #c4c4c4;
+  transform: translateY(-2px);
+}
+
+.qr-trigger-btn:active {
+  box-shadow: inset 2px 2px 0 #000;
+  transform: translate(2px, 2px);
 }
 
 .modal-overlay {
@@ -190,8 +193,8 @@ watch(isOpen, (newVal) => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,16 +208,16 @@ watch(isOpen, (newVal) => {
 }
 
 .modal-content {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 25px;
-  padding: 40px;
+  background: #e4e4e4;
+  border: 4px solid #000;
+  padding: 30px;
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 10px 10px 0 #000;
   position: relative;
   animation: slideUp 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  image-rendering: pixelated;
+  font-family: 'Press Start 2P', cursive;
 }
 
 @keyframes slideUp {
@@ -232,52 +235,58 @@ watch(isOpen, (newVal) => {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  background: #ff5a5a;
+  border: 3px solid #000;
   color: #fff;
-  font-size: 1.5rem;
+  font-size: 1rem;
   width: 35px;
   height: 35px;
-  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset -2px -2px 0 #aa0000, inset 2px 2px 0 #ffaaaa;
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
+  background: #ff6a6a;
+}
+
+.close-btn:active {
+  box-shadow: inset 2px 2px 0 #000;
+  transform: translate(2px, 2px);
 }
 
 h2 {
-  color: #fff;
-  margin-bottom: 10px;
-  font-size: 1.8rem;
+  color: #000;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
   text-align: center;
+  text-shadow: 2px 2px 0 #ccc;
+  line-height: 1.5;
 }
 
 .instructions {
-  color: rgba(255, 255, 255, 0.9);
+  color: #555;
   text-align: center;
   margin-bottom: 30px;
-  font-size: 0.95rem;
+  font-size: 0.7rem;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
 }
 
 .loading, .error {
   text-align: center;
   padding: 40px;
-  color: #fff;
+  color: #000;
 }
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #fff;
-  border-radius: 50%;
+  border: 4px solid #ccc;
+  border-top: 4px solid #5a5aff;
   width: 50px;
   height: 50px;
-  animation: spin 1s linear infinite;
+  animation: spin 1s steps(8) infinite;
   margin: 0 auto 20px;
 }
 
@@ -292,11 +301,11 @@ h2 {
 
 .qr-code {
   background: #fff;
-  padding: 20px;
-  border-radius: 20px;
+  padding: 15px;
+  border: 4px solid #000;
   display: inline-block;
   margin-bottom: 25px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 6px 6px 0 #000;
 }
 
 .url-section {
@@ -304,9 +313,9 @@ h2 {
 }
 
 .url-label {
-  color: rgba(255, 255, 255, 0.9);
+  color: #000;
   margin-bottom: 10px;
-  font-size: 0.9rem;
+  font-size: 0.7rem;
 }
 
 .url-display {
@@ -318,83 +327,89 @@ h2 {
 .url-input {
   flex: 1;
   padding: 12px 15px;
-  border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 0.85rem;
-  font-family: monospace;
+  border: 3px solid #000;
+  background: #fff;
+  color: #000;
+  font-size: 0.7rem;
+  font-family: 'Courier New', monospace;
+  box-shadow: inset 2px 2px 0 #ccc;
 }
 
 .url-input:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.2);
+  background: #ffffcc;
 }
 
 .copy-btn {
-  background: rgba(255, 255, 255, 0.25);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: #5a5aff;
+  border: 3px solid #000;
   color: #fff;
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: 12px 15px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
   white-space: nowrap;
 }
 
 .copy-btn:hover {
-  background: rgba(255, 255, 255, 0.35);
-  transform: translateY(-2px);
+  background: #6a6aff;
+}
+
+.copy-btn:active {
+  box-shadow: inset 2px 2px 0 #000;
+  transform: translate(2px, 2px);
 }
 
 .retry-btn {
-  background: rgba(255, 255, 255, 0.25);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: #5a5aff;
+  border: 3px solid #000;
   color: #fff;
-  padding: 12px 30px;
-  border-radius: 12px;
+  padding: 12px 20px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.7rem;
+  box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
   margin-top: 15px;
 }
 
-.retry-btn:hover {
-  background: rgba(255, 255, 255, 0.35);
-  transform: translateY(-2px);
+.retry-btn:active {
+  box-shadow: inset 2px 2px 0 #000;
+  transform: translate(2px, 2px);
 }
 
 .info-box {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 15px;
+  background: #ffff00;
   padding: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 4px solid #000;
+  box-shadow: 4px 4px 0 #000;
 }
 
 .info-box p {
-  color: rgba(255, 255, 255, 0.95);
+  color: #000;
   margin: 5px 0;
-  font-size: 0.85rem;
+  font-size: 0.6rem;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
 }
 
 .network-info {
-  font-family: monospace;
-  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  font-weight: 800;
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {
   .modal-content {
-    padding: 25px;
+    padding: 20px;
   }
   
   h2 {
-    font-size: 1.5rem;
+    font-size: 1rem;
   }
   
   .qr-code {
-    padding: 15px;
+    padding: 10px;
   }
   
   .url-display {
