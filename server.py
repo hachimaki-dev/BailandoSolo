@@ -2,6 +2,7 @@ import os
 import json
 import threading
 import socket
+import shutil
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 import yt_dlp
@@ -13,6 +14,66 @@ CORS(app)
 
 # Global dictionary to store progress
 download_status = {}
+
+# Profile Management
+PROFILES_CONFIG_FILE = 'profiles.json'
+
+def load_profiles():
+    """Load profiles configuration from JSON file."""
+    if os.path.exists(PROFILES_CONFIG_FILE):
+        try:
+            with open(PROFILES_CONFIG_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {'active': 'Default', 'profiles': ['Default']}
+    return {'active': 'Default', 'profiles': ['Default']}
+
+def save_profiles(config):
+    """Save profiles configuration to JSON file."""
+    try:
+        with open(PROFILES_CONFIG_FILE, 'w') as f:
+            json.dump(config, f, indent=4)
+    except Exception as e:
+        print(f"Error saving profiles: {e}")
+
+def ensure_default_profile():
+    """Ensure Default profile exists and migrate existing music if needed."""
+    config = load_profiles()
+    base_dir = os.path.join(os.getcwd(), 'downloads')
+    default_dir = os.path.join(base_dir, 'Default')
+    
+    # Create downloads directory if it doesn't exist
+    os.makedirs(base_dir, exist_ok=True)
+    
+    # Create Default profile directory
+    os.makedirs(default_dir, exist_ok=True)
+    
+    # Migrate existing music to Default profile
+    if os.path.exists(base_dir):
+        for item in os.listdir(base_dir):
+            item_path = os.path.join(base_dir, item)
+            # Skip if it's already a profile directory or the Default folder itself
+            if os.path.isdir(item_path) and item in config['profiles']:
+                continue
+            # Move files and non-profile folders to Default
+            if item != 'Default':
+                dest_path = os.path.join(default_dir, item)
+                try:
+                    if os.path.isfile(item_path):
+                        shutil.move(item_path, dest_path)
+                    elif os.path.isdir(item_path):
+                        # Move folder contents
+                        if not os.path.exists(dest_path):
+                            shutil.move(item_path, dest_path)
+                except Exception as e:
+                    print(f"Error migrating {item}: {e}")
+    
+    # Ensure Default is in profiles list
+    if 'Default' not in config['profiles']:
+        config['profiles'].append('Default')
+    
+    save_profiles(config)
+    return config
 
 def progress_hook(d):
     """
@@ -44,6 +105,120 @@ def progress_hook(d):
             'percent': 100,
             'filename': d.get('filename', 'unknown')
         }
+
+# Profile Management Endpoints
+@app.route('/api/profiles', methods=['GET'])
+def get_profiles():
+    """Get all profiles and the active one."""
+    config = load_profiles()
+    return jsonify(config)
+
+@app.route('/api/profiles', methods=['POST'])
+def create_profile():
+    """Create a new profile."""
+    data = request.json
+    profile_name = data.get('name', '').strip()
+    
+    if not profile_name:
+        return jsonify({'error': 'Profile name is required'}), 400
+    
+    config = load_profiles()
+    
+    if profile_name in config['profiles']:
+        return jsonify({'error': 'Profile already exists'}), 400
+    
+    # Create profile directory
+    profile_dir = os.path.join(os.getcwd(), 'downloads', profile_name)
+    try:
+        os.makedirs(profile_dir, exist_ok=True)
+        config['profiles'].append(profile_name)
+        save_profiles(config)
+        return jsonify({'status': 'success', 'profile': profile_name})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/profiles/<profile_name>', methods=['DELETE'])
+def delete_profile(profile_name):
+    """Delete a profile (cannot delete Default or active profile)."""
+    config = load_profiles()
+    
+    if profile_name == 'Default':
+        return jsonify({'error': 'Cannot delete Default profile'}), 400
+    
+    if profile_name == config['active']:
+        return jsonify({'error': 'Cannot delete active profile'}), 400
+    
+    if profile_name not in config['profiles']:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    # Delete profile directory
+    profile_dir = os.path.join(os.getcwd(), 'downloads', profile_name)
+    try:
+        if os.path.exists(profile_dir):
+            shutil.rmtree(profile_dir)
+        config['profiles'].remove(profile_name)
+        save_profiles(config)
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/profiles/<profile_name>/rename', methods=['POST'])
+def rename_profile(profile_name):
+    """Rename a profile (cannot rename Default)."""
+    data = request.json
+    new_name = data.get('new_name', '').strip()
+    
+    if not new_name:
+        return jsonify({'error': 'New name is required'}), 400
+    
+    if profile_name == 'Default':
+        return jsonify({'error': 'Cannot rename Default profile'}), 400
+    
+    config = load_profiles()
+    
+    if profile_name not in config['profiles']:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if new_name in config['profiles']:
+        return jsonify({'error': 'Profile with new name already exists'}), 400
+    
+    # Rename profile directory
+    old_dir = os.path.join(os.getcwd(), 'downloads', profile_name)
+    new_dir = os.path.join(os.getcwd(), 'downloads', new_name)
+    
+    try:
+        if os.path.exists(old_dir):
+            os.rename(old_dir, new_dir)
+        
+        # Update config
+        index = config['profiles'].index(profile_name)
+        config['profiles'][index] = new_name
+        
+        if config['active'] == profile_name:
+            config['active'] = new_name
+        
+        save_profiles(config)
+        return jsonify({'status': 'success', 'new_name': new_name})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/profiles/active', methods=['POST'])
+def set_active_profile():
+    """Set the active profile."""
+    data = request.json
+    profile_name = data.get('profile')
+    
+    if not profile_name:
+        return jsonify({'error': 'Profile name is required'}), 400
+    
+    config = load_profiles()
+    
+    if profile_name not in config['profiles']:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    config['active'] = profile_name
+    save_profiles(config)
+    return jsonify({'status': 'success', 'active': profile_name})
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_playlist():
@@ -94,8 +269,12 @@ def download_thread(url, folder_name, selected_ids):
     """
     Background thread to handle the download process.
     """
+    # Get active profile
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
     # Create directory if it doesn't exist
-    base_dir = os.path.join(os.getcwd(), 'downloads', folder_name)
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile, folder_name)
     os.makedirs(base_dir, exist_ok=True)
 
     ydl_opts = {
@@ -162,8 +341,11 @@ def get_status():
 
 @app.route('/api/library', methods=['GET'])
 def get_library():
-    """List all folders in the downloads directory."""
-    base_dir = os.path.join(os.getcwd(), 'downloads')
+    """List all folders in the active profile's directory."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
+    
     if not os.path.exists(base_dir):
         return jsonify([])
     
@@ -172,8 +354,11 @@ def get_library():
 
 @app.route('/api/library/<folder>', methods=['GET'])
 def get_folder_content(folder):
-    """List all audio files in a specific folder."""
-    folder_path = os.path.join(os.getcwd(), 'downloads', folder)
+    """List all audio files in a specific folder within the active profile."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    folder_path = os.path.join(os.getcwd(), 'downloads', active_profile, folder)
+    
     if not os.path.exists(folder_path):
         return jsonify({'error': 'Folder not found'}), 404
         
@@ -204,10 +389,13 @@ def get_folder_content(folder):
 
 @app.route('/api/stream/<path:filepath>', methods=['GET'])
 def stream_file(filepath):
-    """Serve a file from the downloads directory."""
+    """Serve a file from the active profile's directory."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
     # Security check: ensure we don't traverse up
-    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', filepath))
-    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads')):
+    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', active_profile, filepath))
+    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads', active_profile)):
         return jsonify({'error': 'Access denied'}), 403
         
     if not os.path.exists(safe_path):
@@ -270,10 +458,13 @@ def qr_page():
 
 @app.route('/api/mobile/download/<path:filepath>', methods=['GET'])
 def download_file(filepath):
-    """Force download a file from the downloads directory."""
+    """Force download a file from the active profile's directory."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
     # Security check: ensure we don't traverse up
-    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', filepath))
-    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads')):
+    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', active_profile, filepath))
+    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads', active_profile)):
         return jsonify({'error': 'Access denied'}), 403
         
     if not os.path.exists(safe_path):
@@ -291,10 +482,13 @@ def download_file(filepath):
 
 @app.route('/api/library/random', methods=['GET'])
 def get_random_songs():
-    """Get a random selection of songs from all folders."""
+    """Get a random selection of songs from all folders in the active profile."""
     import random
     
-    base_dir = os.path.join(os.getcwd(), 'downloads')
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
+    
     if not os.path.exists(base_dir):
         return jsonify([])
     
@@ -432,7 +626,9 @@ def get_stats():
         last_played = None
     
     # Never played logic + folder stats
-    base_dir = os.path.join(os.getcwd(), 'downloads')
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
     all_files = []
     folder_stats = {}
     extensions = ['*.mp3', '*.webm', '*.m4a', '*.wav']
@@ -522,8 +718,16 @@ def get_stats():
 
 
 
+
+
 if __name__ == '__main__':
+    # Initialize profiles system
+    print("Initializing profiles system...")
+    ensure_default_profile()
+    print("Profiles initialized successfully!")
+    
     # Ensure ffmpeg is available or warn user? 
     # yt-dlp usually needs ffmpeg for audio conversion.
     print("Starting server on http://0.0.0.0:5001")
     app.run(debug=True, host='0.0.0.0', port=5001)
+

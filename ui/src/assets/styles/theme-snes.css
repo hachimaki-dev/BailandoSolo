@@ -257,6 +257,169 @@ body[data-theme="snes"] ::-webkit-scrollbar-thumb {
     border-radius: 0;
 }
 
+/* Profile Manager SNES Overrides */
+body[data-theme="snes"] .profile-fab {
+    border-radius: 0;
+    background: #5a5aff;
+    /* Blue button */
+    border: 3px solid #000;
+    box-shadow: inset -2px -2px 0 #2a2aaf, inset 2px 2px 0 #8a8aff, 4px 4px 0 #000;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+}
+
+body[data-theme="snes"] .profile-fab:hover {
+    transform: none;
+    background: #6a6aff;
+    box-shadow: inset -2px -2px 0 #2a2aaf, inset 2px 2px 0 #9a9aff, 4px 4px 0 #000;
+}
+
+body[data-theme="snes"] .profile-fab.active {
+    background: #ff5a5a;
+    /* Red when open */
+    box-shadow: inset 2px 2px 0 #c42a2a, inset -2px -2px 0 #ff8a8a;
+    transform: translateY(2px);
+}
+
+body[data-theme="snes"] .profile-menu {
+    border-radius: 0;
+    background: #e4e4e4;
+    border: 4px solid #000;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+    backdrop-filter: none;
+}
+
+body[data-theme="snes"] .profile-menu-header {
+    background: #c4c4c4;
+    border-bottom: 4px solid #000;
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 15px;
+}
+
+body[data-theme="snes"] .profile-menu-header h3 {
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 #fff;
+}
+
+body[data-theme="snes"] .profile-item {
+    border-bottom: 2px solid #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+}
+
+body[data-theme="snes"] .profile-item:hover {
+    background: #ffff00;
+    color: #000;
+}
+
+body[data-theme="snes"] .profile-name {
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+}
+
+body[data-theme="snes"] .profile-item:hover .profile-name {
+    color: #000;
+}
+
+body[data-theme="snes"] .profile-icon {
+    color: #5a5aff;
+}
+
+body[data-theme="snes"] .btn-action {
+    border-radius: 0;
+    opacity: 1;
+    border: 2px solid #000;
+    background: #fff;
+    margin-left: 4px;
+}
+
+body[data-theme="snes"] .btn-action:hover {
+    background: #5a5aff;
+    color: #fff;
+}
+
+body[data-theme="snes"] .btn-delete:hover {
+    background: #ff5a5a;
+    color: #fff;
+}
+
+body[data-theme="snes"] .profile-create {
+    border-top: 4px solid #000;
+    background: #c4c4c4;
+}
+
+body[data-theme="snes"] .btn-create {
+    border-radius: 0;
+    background: #b4b4b4;
+    border: 3px solid #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+body[data-theme="snes"] .btn-create:hover {
+    background: #5a5aff;
+    color: #fff;
+    transform: none;
+    box-shadow: inset -1px -1px 0 #2a2aaf, inset 1px 1px 0 #8a8aff;
+}
+
+body[data-theme="snes"] .profile-input {
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: inset 2px 2px 0 #7c7c7c;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    background: #fff;
+    color: #000;
+}
+
+body[data-theme="snes"] .profile-input:focus {
+    outline: none;
+    background: #ffff00;
+}
+
+body[data-theme="snes"] .btn-confirm,
+body[data-theme="snes"] .btn-cancel {
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0 #000;
+}
+
+body[data-theme="snes"] .btn-confirm {
+    background: #00ff00;
+    color: #000;
+}
+
+body[data-theme="snes"] .btn-cancel {
+    background: #ff5a5a;
+    color: #000;
+}
+
+body[data-theme="snes"] .error-message {
+    background: #ff5a5a;
+    color: #fff;
+    border-top: 2px solid #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 10px;
+}
+
+/* Disable transitions for retro feel */
+body[data-theme="snes"] .profile-fab,
+body[data-theme="snes"] .profile-menu,
+body[data-theme="snes"] .profile-item,
+body[data-theme="snes"] .btn-action,
+body[data-theme="snes"] .btn-create {
+    transition: none;
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
     body[data-theme="snes"] .main-grid {

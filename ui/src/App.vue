@@ -41,6 +41,7 @@
   <ThemeSelector :showExperimental="showExperimental" @theme-change="currentTheme = $event" @open-stats="showStats = true" />
   <StatisticsDashboard :isOpen="showStats" @close="showStats = false" />
   <MobileDownloadQR />
+  <ProfileManager @profile-changed="handleProfileChange" />
   <LyricsKaraoke 
     v-if="currentTheme === 'karaoke' && currentSong"
     :isPlaying="isPlaying"
@@ -65,6 +66,7 @@ import ParallaxManager from './components/ParallaxManager.vue'
 import LyricsKaraoke from './components/LyricsKaraoke.vue'
 import StatisticsDashboard from './components/StatisticsDashboard.vue'
 import MobileDownloadQR from './components/MobileDownloadQR.vue'
+import ProfileManager from './components/ProfileManager.vue'
 import { StatsService } from './services/StatsService'
 
 const currentView = ref('downloader')
@@ -268,6 +270,11 @@ const addToQueue = (song) => {
     isQueueOpen.value = true
     // Optional: Show a notification
     console.log('Added to queue:', song.title)
+}
+
+const handleProfileChange = (profileName) => {
+    console.log('Profile changed to:', profileName)
+    // The ProfileManager component will reload the page
 }
 
 </script>
