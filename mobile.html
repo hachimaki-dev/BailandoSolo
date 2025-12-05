@@ -1,10 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SonicStream Mobile</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --color-bg: #7c7c7c;
+            --color-panel-bg: #e4e4e4;
+            --color-text: #000000;
+            --color-primary: #5a5aff;
+            --color-secondary: #ff5a5a;
+            --font-main: 'Press Start 2P', cursive;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,158 +24,348 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px);
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 20px;
-            color: #fff;
+            padding-bottom: 160px;
+            color: var(--color-text);
+            image-rendering: pixelated;
+        }
+
+        /* CRT Scanline Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px);
+            pointer-events: none;
+            z-index: 9999;
         }
 
         .container {
             max-width: 600px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .header {
             text-align: center;
             margin-bottom: 30px;
+            background: #5a5aff;
+            padding: 20px;
+            border: 4px solid #000;
+            box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.5), inset 4px 4px 0 rgba(255, 255, 255, 0.5), 6px 6px 0 #000;
+            color: #fff;
+            text-shadow: 3px 3px 0 #000;
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.2rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.5;
         }
 
         .header p {
+            font-size: 0.6rem;
             opacity: 0.9;
-            font-size: 0.9rem;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
+            background: var(--color-panel-bg);
+            border: 4px solid #000;
+            padding: 15px;
             margin-bottom: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 6px 6px 0 #000;
+            border-radius: 0;
         }
 
         .breadcrumb {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-size: 0.7rem;
         }
 
         .breadcrumb button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 10px;
+            background: #c4c4c4;
+            border: 4px solid #000;
+            color: #000;
+            padding: 10px 15px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
+            font-family: var(--font-main);
+            font-size: 0.7rem;
+            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
         }
 
-        .breadcrumb button:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+        .breadcrumb button:active {
+            box-shadow: inset 2px 2px 0 #000;
+            transform: translateY(2px);
         }
 
-        .folder-item, .song-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 10px;
+        .folder-item {
+            background: #ffaa00;
+            box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffda5a, 6px 6px 0 #000;
             display: flex;
             align-items: center;
             gap: 15px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform 0.1s;
         }
 
-        .folder-item:hover, .song-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(5px);
+        .folder-item:active {
+            transform: translate(4px, 4px);
+            box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffda5a, 2px 2px 0 #000;
         }
 
-        .folder-item .icon, .song-item .icon {
-            font-size: 2rem;
-            min-width: 50px;
+        .song-item {
+            background: #e4e4e4;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .song-item:hover {
+            background: #ffff00;
+        }
+
+        .folder-item .icon,
+        .song-item .icon {
+            font-size: 1.5rem;
+            min-width: 40px;
             text-align: center;
         }
 
-        .folder-item .name, .song-item .name {
+        .folder-item .name,
+        .song-item .name {
             flex: 1;
-            font-weight: 600;
+            font-size: 0.7rem;
+            line-height: 1.4;
             word-break: break-word;
         }
 
         .download-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border: none;
+            background: #5a5aff;
+            border: 4px solid #000;
             color: #fff;
-            padding: 10px 20px;
-            border-radius: 12px;
+            padding: 8px 12px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+            font-family: var(--font-main);
+            font-size: 0.6rem;
+            box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
+            border-radius: 0;
+            text-transform: uppercase;
         }
 
         .download-btn:active {
-            transform: translateY(0);
+            box-shadow: inset 2px 2px 0 #000;
+            transform: translateY(2px);
+        }
+
+        .folder-download {
+            background: #ff5a5a;
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 15px;
+            font-size: 0.7rem;
+            box-shadow: inset -4px -4px 0 #aa0000, inset 4px 4px 0 #ffaaaa, 6px 6px 0 #000;
+        }
+
+        .folder-download:active {
+            box-shadow: inset 4px 4px 0 #000;
+            transform: translate(4px, 4px);
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px;
+            border: 4px solid #000;
+            background: #fff;
+            color: #000;
+            margin-bottom: 15px;
+            font-family: var(--font-main);
+            font-size: 0.7rem;
+            border-radius: 0;
+            box-shadow: inset 4px 4px 0 #ccc;
+        }
+
+        .search-bar::placeholder {
+            color: #999;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            background: #ffffcc;
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            font-size: 1.2rem;
+            font-size: 0.8rem;
+            text-shadow: 2px 2px 0 #000;
         }
 
         .error {
-            background: rgba(255, 87, 87, 0.3);
+            background: #ff5a5a;
+            color: white;
             padding: 15px;
-            border-radius: 15px;
+            border: 4px solid #000;
             text-align: center;
             margin: 20px 0;
+            box-shadow: 6px 6px 0 #000;
         }
 
         .empty {
             text-align: center;
             padding: 40px;
             opacity: 0.8;
+            font-size: 0.7rem;
         }
 
         .song-thumbnail {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #000;
+            object-fit: cover;
+        }
+
+        /* Player Styles */
+        .player-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #c4c4c4;
+            border-top: 4px solid #000;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .player-bar.visible {
+            transform: translateY(0);
+        }
+
+        .player-main {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mini-thumbnail {
             width: 50px;
             height: 50px;
-            border-radius: 10px;
+            border: 4px solid #000;
             object-fit: cover;
-            background: rgba(255, 255, 255, 0.1);
+            background: #000;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .track-info {
+            flex: 1;
+            overflow: hidden;
         }
 
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
+        .track-title {
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.7rem;
+            margin-bottom: 8px;
+            color: #000;
+        }
+
+        .track-artist {
+            font-size: 0.6rem;
+            color: #555;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: #b4b4b4;
+            border: 4px solid #000;
+            color: #000;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
+        }
+
+        .control-btn:active {
+            box-shadow: inset 2px 2px 0 #000;
+            transform: translate(2px, 2px);
+        }
+
+        .play-btn {
+            background: #5a5aff;
+            color: #fff;
+            box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
+        }
+
+        .progress-area {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.6rem;
+            color: #000;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 12px;
+            background: #000;
+            border: 2px solid #fff;
+            position: relative;
+            cursor: pointer;
+            box-shadow: inset 2px 2px 0 #000;
+        }
+
+        .progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: #00ff00;
+            width: 0%;
+            box-shadow: inset -1px -1px 0 #004400, inset 1px 1px 0 #ccffcc;
+        }
+
+        .progress-handle {
+            display: none;
+            /* Retro style doesn't usually have handles */
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -181,23 +383,59 @@
         </div>
     </div>
 
+    <!-- Player Bar -->
+    <div class="player-bar" id="playerBar">
+        <div class="player-main">
+            <img src="" alt="" class="mini-thumbnail" id="playerThumb">
+            <div class="track-info">
+                <div class="track-title" id="playerTitle">Selecciona una canción</div>
+                <div class="track-artist" id="playerStatus">Reproductor listo</div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" onclick="prevSong()">⏮️</button>
+                <button class="control-btn play-btn" onclick="togglePlay()" id="playBtn">▶️</button>
+                <button class="control-btn" onclick="nextSong()">⏭️</button>
+            </div>
+        </div>
+        <div class="progress-area">
+            <span id="currentTime">0:00</span>
+            <div class="progress-bar" onclick="seek(event)">
+                <div class="progress-fill" id="progressFill">
+                    <div class="progress-handle"></div>
+                </div>
+            </div>
+            <span id="duration">0:00</span>
+        </div>
+    </div>
+
     <script>
         let currentFolder = null;
+        let currentSongs = [];
+        let audio = new Audio();
+        let isPlaying = false;
+        let currentIndex = -1;
+
+        // Player Event Listeners
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', nextSong);
+        audio.addEventListener('loadedmetadata', () => {
+            document.getElementById('duration').textContent = formatTime(audio.duration);
+        });
 
         async function loadFolders() {
             try {
                 const response = await fetch('/api/library');
                 const folders = await response.json();
-                
+
                 const content = document.getElementById('content');
                 const breadcrumb = document.getElementById('breadcrumb');
                 breadcrumb.style.display = 'none';
-                
+
                 if (folders.length === 0) {
                     content.innerHTML = '<div class="card empty">No hay carpetas en la biblioteca</div>';
                     return;
                 }
-                
+
                 content.innerHTML = folders.map(folder => `
                     <div class="card folder-item" onclick="openFolder('${folder}')">
                         <div class="icon">📁</div>
@@ -205,37 +443,47 @@
                     </div>
                 `).join('');
             } catch (error) {
-                document.getElementById('content').innerHTML = 
+                document.getElementById('content').innerHTML =
                     '<div class="error">Error al cargar carpetas: ' + error.message + '</div>';
             }
         }
 
         async function openFolder(folderName) {
             currentFolder = folderName;
-            
+
             try {
                 const response = await fetch(`/api/library/${encodeURIComponent(folderName)}`);
                 const songs = await response.json();
-                
+                currentSongs = songs; // Store for playlist
+
                 const content = document.getElementById('content');
                 const breadcrumb = document.getElementById('breadcrumb');
                 const currentPath = document.getElementById('currentPath');
-                
+
                 breadcrumb.style.display = 'flex';
                 currentPath.textContent = folderName;
-                
+
                 if (songs.length === 0) {
                     content.innerHTML = '<div class="card empty">No hay canciones en esta carpeta</div>';
                     return;
                 }
-                
-                content.innerHTML = songs.map(song => {
-                    const thumbnail = song.thumbnail 
+
+                const headerHtml = `
+                    <div class="folder-actions">
+                        <input type="text" class="search-bar" placeholder="🔍 Buscar canción..." onkeyup="filterSongs(this.value)">
+                        <button class="download-btn folder-download" onclick="downloadFolder('${folderName}')">
+                            📦 Descargar Carpeta Completa (.zip)
+                        </button>
+                    </div>
+                `;
+
+                content.innerHTML = headerHtml + '<div id="song-list">' + songs.map((song, index) => {
+                    const thumbnail = song.thumbnail
                         ? `<img src="${song.thumbnail}" class="song-thumbnail" alt="${song.title}">`
                         : '<div class="icon">🎵</div>';
-                    
+
                     return `
-                        <div class="card song-item">
+                        <div class="card song-item" onclick="playSong(${index})">
                             ${thumbnail}
                             <div class="name">${song.title}</div>
                             <button class="download-btn" onclick="downloadSong('${folderName}', '${song.filename}', event)">
@@ -243,11 +491,103 @@
                             </button>
                         </div>
                     `;
-                }).join('');
+                }).join('') + '</div>';
             } catch (error) {
-                document.getElementById('content').innerHTML = 
+                document.getElementById('content').innerHTML =
                     '<div class="error">Error al cargar canciones: ' + error.message + '</div>';
             }
+        }
+
+        // Player Functions
+        function playSong(index) {
+            if (index < 0 || index >= currentSongs.length) return;
+
+            currentIndex = index;
+            const song = currentSongs[index];
+            const streamUrl = `/api/stream/${encodeURIComponent(currentFolder)}/${encodeURIComponent(song.filename)}`;
+
+            audio.src = streamUrl;
+            audio.play().then(() => {
+                isPlaying = true;
+                updatePlayerUI();
+            }).catch(e => console.error("Playback error:", e));
+
+            // Show player
+            document.getElementById('playerBar').classList.add('visible');
+            updatePlayerUI();
+        }
+
+        function togglePlay() {
+            if (!audio.src) return;
+
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+            updatePlayerUI();
+        }
+
+        function nextSong() {
+            if (currentIndex < currentSongs.length - 1) {
+                playSong(currentIndex + 1);
+            } else {
+                // Loop to start? Or stop? Let's loop
+                playSong(0);
+            }
+        }
+
+        function prevSong() {
+            if (audio.currentTime > 3) {
+                audio.currentTime = 0;
+                return;
+            }
+            if (currentIndex > 0) {
+                playSong(currentIndex - 1);
+            } else {
+                playSong(currentSongs.length - 1);
+            }
+        }
+
+        function seek(event) {
+            const progressBar = event.currentTarget;
+            const clickPosition = (event.pageX - progressBar.offsetLeft) / progressBar.offsetWidth;
+            audio.currentTime = clickPosition * audio.duration;
+        }
+
+        function updateProgress() {
+            const { duration, currentTime } = audio;
+            const progressPercent = (currentTime / duration) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('currentTime').textContent = formatTime(currentTime);
+        }
+
+        function updatePlayerUI() {
+            const song = currentSongs[currentIndex];
+            const playBtn = document.getElementById('playBtn');
+            const titleEl = document.getElementById('playerTitle');
+            const thumbEl = document.getElementById('playerThumb');
+            const statusEl = document.getElementById('playerStatus');
+
+            titleEl.textContent = song.title;
+            statusEl.textContent = isPlaying ? 'Reproduciendo...' : 'Pausado';
+            playBtn.textContent = isPlaying ? '⏸️' : '▶️';
+
+            if (song.thumbnail) {
+                thumbEl.src = song.thumbnail;
+                thumbEl.style.display = 'block';
+            } else {
+                thumbEl.style.display = 'none';
+            }
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
         function goBack() {
@@ -259,7 +599,7 @@
             event.stopPropagation();
             const downloadPath = `${folder}/${filename}`;
             const downloadUrl = `/api/mobile/download/${encodeURIComponent(downloadPath)}`;
-            
+
             // Create a temporary link and trigger download
             const a = document.createElement('a');
             a.href = downloadUrl;
@@ -267,21 +607,57 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            
+
             // Show feedback
             const btn = event.target;
             const originalText = btn.innerHTML;
             btn.innerHTML = '✓ Descargando...';
             btn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-            
+
             setTimeout(() => {
                 btn.innerHTML = originalText;
                 btn.style.background = '';
             }, 2000);
         }
 
+        function downloadFolder(folderName) {
+            const btn = document.querySelector('.folder-download');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Preparando ZIP...';
+            btn.disabled = true;
+
+            const downloadUrl = `/api/mobile/download-folder/${encodeURIComponent(folderName)}`;
+
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `${folderName}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 3000);
+        }
+
+        function filterSongs(query) {
+            const term = query.toLowerCase();
+            const items = document.querySelectorAll('.song-item');
+
+            items.forEach(item => {
+                const name = item.querySelector('.name').textContent.toLowerCase();
+                if (name.includes(term)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
         // Load folders on page load
         loadFolders();
     </script>
 </body>
+
 </html>

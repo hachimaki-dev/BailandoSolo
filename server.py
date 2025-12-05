@@ -3,7 +3,7 @@ import json
 import threading
 import socket
 import shutil
-from flask import Flask, request, jsonify, Response, stream_with_context
+from flask import Flask, request, jsonify, Response, stream_with_context, after_this_request
 from flask_cors import CORS
 import yt_dlp
 import glob
@@ -719,7 +719,52 @@ def get_stats():
 
 
 
-
+@app.route('/api/mobile/download-folder/<folder>', methods=['GET'])
+def download_folder(folder):
+    """Download an entire folder as a ZIP file."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
+    # Security check
+    folder_path = os.path.join(os.getcwd(), 'downloads', active_profile, folder)
+    safe_path = os.path.normpath(folder_path)
+    base_downloads = os.path.join(os.getcwd(), 'downloads', active_profile)
+    
+    if not safe_path.startswith(base_downloads):
+        return jsonify({'error': 'Access denied'}), 403
+        
+    if not os.path.exists(safe_path):
+        return jsonify({'error': 'Folder not found'}), 404
+        
+    try:
+        # Create a temporary directory
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_base_name = os.path.join(temp_dir, folder)
+        
+        # Create zip with folder structure
+        parent_dir = os.path.dirname(folder_path)
+        base_name = os.path.basename(folder_path)
+        shutil.make_archive(zip_base_name, 'zip', root_dir=parent_dir, base_dir=base_name)
+        zip_path = zip_base_name + '.zip'
+        
+        # Define cleanup
+        @after_this_request
+        def remove_temp(response):
+            try:
+                shutil.rmtree(temp_dir)
+            except Exception as e:
+                print(f"Error removing temp dir: {e}")
+            return response
+            
+        return send_file(
+            zip_path,
+            as_attachment=True,
+            download_name=f"{folder}.zip"
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 if __name__ == '__main__':
     # Initialize profiles system
     print("Initializing profiles system...")
