@@ -1,6 +1,7 @@
 import os
 import json
 import threading
+import socket
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 import yt_dlp
@@ -218,6 +219,53 @@ def stream_file(filepath):
 def index():
     """Serve the main HTML file."""
     return send_file('index.html')
+
+@app.route('/api/mobile/info', methods=['GET'])
+def get_mobile_info():
+    """Get network information for mobile access."""
+    try:
+        # Get local IP address
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        
+        port = 5001
+        mobile_url = f"http://{local_ip}:{port}/mobile"
+        
+        return jsonify({
+            'ip': local_ip,
+            'port': port,
+            'url': mobile_url
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/mobile')
+def mobile_interface():
+    """Serve the mobile HTML interface."""
+    return send_file('mobile.html')
+
+@app.route('/api/mobile/download/<path:filepath>', methods=['GET'])
+def download_file(filepath):
+    """Force download a file from the downloads directory."""
+    # Security check: ensure we don't traverse up
+    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', filepath))
+    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads')):
+        return jsonify({'error': 'Access denied'}), 403
+        
+    if not os.path.exists(safe_path):
+        return jsonify({'error': 'File not found'}), 404
+    
+    # Get just the filename for Content-Disposition
+    filename = os.path.basename(safe_path)
+    
+    # Force download with attachment header
+    return send_file(
+        safe_path,
+        as_attachment=True,
+        download_name=filename
+    )
 
 @app.route('/api/library/random', methods=['GET'])
 def get_random_songs():

@@ -40,6 +40,7 @@
   <EqualizerPanel :isOpen="isEqOpen" @change-band="updateEq" />
   <ThemeSelector :showExperimental="showExperimental" @theme-change="currentTheme = $event" @open-stats="showStats = true" />
   <StatisticsDashboard :isOpen="showStats" @close="showStats = false" />
+  <MobileDownloadQR />
   <LyricsKaraoke 
     v-if="currentTheme === 'karaoke' && currentSong"
     :isPlaying="isPlaying"
@@ -63,6 +64,7 @@ import ThemeSelector from './components/ThemeSelector.vue'
 import ParallaxManager from './components/ParallaxManager.vue'
 import LyricsKaraoke from './components/LyricsKaraoke.vue'
 import StatisticsDashboard from './components/StatisticsDashboard.vue'
+import MobileDownloadQR from './components/MobileDownloadQR.vue'
 import { StatsService } from './services/StatsService'
 
 const currentView = ref('downloader')
