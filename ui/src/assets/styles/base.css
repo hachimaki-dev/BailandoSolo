@@ -322,6 +322,10 @@ nav button.active {
     animation: fadeIn 0.6s ease-out;
 }
 
+.main-grid>* {
+    min-width: 0;
+}
+
 .panel {
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
@@ -417,6 +421,7 @@ button.back-btn:hover {
     max-height: 400px;
     overflow-y: auto;
     padding-right: var(--spacing-sm);
+    overflow-x: hidden;
 }
 
 .song-item {
@@ -1059,8 +1064,8 @@ input[type=range]::-webkit-slider-runnable-track {
         width: 100%;
         max-width: 400px;
         margin: 0 auto;
-        order: -1;
-        /* Optional: Move player to top if desired, but user didn't specify. Keeping default order (bottom) for now. */
+        margin: 0 auto;
+        /* order: -1; Removed to keep player at bottom */
     }
 
     /* If the user wants the player at the top on mobile, uncomment below:

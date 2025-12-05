@@ -976,4 +976,15 @@ body[data-theme="snes"] .folder-rank {
 body[data-theme="snes"] .timeline-item {
   box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 3px 3px 0 #000;
 }
+
+@media (max-width: 480px) {
+  .stats-panel {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .stats-panel.open {
+    right: 0;
+  }
+}
 </style>
