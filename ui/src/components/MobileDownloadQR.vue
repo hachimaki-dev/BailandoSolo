@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 
 const isOpen = ref(false)
 const loading = ref(false)
@@ -89,12 +89,18 @@ const loadQR = async () => {
     mobileUrl.value = data.url
     networkIp.value = data.ip
     
+    // Stop loading to render the container
+    loading.value = false
+    
+    // Wait for DOM update
+    await nextTick()
+    
     // Generate QR code
     await generateQRCode(data.url)
     
   } catch (err) {
+    console.error(err)
     error.value = err.message || 'Error al generar código QR'
-  } finally {
     loading.value = false
   }
 }

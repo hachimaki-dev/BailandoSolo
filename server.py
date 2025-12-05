@@ -224,11 +224,23 @@ def index():
 def get_mobile_info():
     """Get network information for mobile access."""
     try:
-        # Get local IP address
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        local_ip = s.getsockname()[0]
-        s.close()
+        # Try to find the best local IP address
+        local_ip = '127.0.0.1'
+        
+        # Method 1: Connect to a public DNS (most reliable if internet available)
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+        except:
+            # Method 2: Iterate interfaces (fallback)
+            try:
+                # This is a simple heuristic fallback
+                hostname = socket.gethostname()
+                local_ip = socket.gethostbyname(hostname)
+            except:
+                pass
         
         port = 5001
         mobile_url = f"http://{local_ip}:{port}/mobile"
@@ -245,6 +257,16 @@ def get_mobile_info():
 def mobile_interface():
     """Serve the mobile HTML interface."""
     return send_file('mobile.html')
+
+@app.route('/test-mobile')
+def test_mobile():
+    """Serve the mobile connectivity test page."""
+    return send_file('test-mobile.html')
+
+@app.route('/qr')
+def qr_page():
+    """Serve the QR code generator page."""
+    return send_file('qr.html')
 
 @app.route('/api/mobile/download/<path:filepath>', methods=['GET'])
 def download_file(filepath):
@@ -503,5 +525,5 @@ def get_stats():
 if __name__ == '__main__':
     # Ensure ffmpeg is available or warn user? 
     # yt-dlp usually needs ffmpeg for audio conversion.
-    print("Starting server on http://localhost:5001")
-    app.run(debug=True, port=5001)
+    print("Starting server on http://0.0.0.0:5001")
+    app.run(debug=True, host='0.0.0.0', port=5001)

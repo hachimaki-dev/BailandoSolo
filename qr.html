@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - SonicStream Mobile</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .url-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .instructions {
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+            transition: all 0.3s;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(100, 200, 255, 0.2);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>📱 Acceso Móvil</h1>
+            <p class="subtitle">Escanea el código QR con tu móvil</p>
+
+            <div id="qrcode"></div>
+
+            <div class="url-box" id="url">Cargando...</div>
+
+            <a href="#" class="btn" id="testBtn">🧪 Probar Conexión</a>
+            <a href="/mobile" class="btn" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">🎵 Ir a
+                Móvil</a>
+
+            <div class="instructions">
+                <h3>📋 Instrucciones:</h3>
+                <ol>
+                    <li>Asegúrate de que tu móvil esté en la <strong>misma red WiFi</strong></li>
+                    <li>Abre la cámara de tu móvil</li>
+                    <li>Apunta al código QR</li>
+                    <li>Toca la notificación que aparece</li>
+                </ol>
+            </div>
+
+            <div class="info">
+                💡 <strong>Tip:</strong> Si el QR no funciona, copia manualmente la URL mostrada arriba en el navegador
+                de tu móvil.
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Generator Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <script>
+        async function init() {
+            try {
+                // Get mobile info from server
+                const response = await fetch('/api/mobile/info');
+                const data = await response.json();
+
+                // Display URL
+                document.getElementById('url').textContent = data.url;
+                document.getElementById('testBtn').href = data.url.replace('/mobile', '/test-mobile');
+
+                // Generate QR Code
+                new QRCode(document.getElementById('qrcode'), {
+                    text: data.url,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                document.getElementById('url').textContent = 'Error: ' + error.message;
+                document.getElementById('qrcode').innerHTML = '<p style="color: #ff3b30; padding: 40px;">No se pudo generar el código QR</p>';
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
