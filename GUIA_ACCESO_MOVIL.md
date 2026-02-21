@@ -1,4 +1,4 @@
-# 📱 Guía de Solución: Acceso Móvil a SonicStream
+# 📱 Guía de Solución: Acceso Móvil a Bailando Solo
 
 ## 🔍 Diagnóstico Realizado
 

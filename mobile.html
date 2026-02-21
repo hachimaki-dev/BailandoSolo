@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonicStream Mobile</title>
+    <title>Bailando Solo Mobile</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
@@ -363,13 +363,246 @@
             display: none;
             /* Retro style doesn't usually have handles */
         }
+
+        /* Cassette Folder Styles */
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px 0;
+        }
+
+        .cassette-folder {
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            aspect-ratio: 1.6;
+            position: relative;
+        }
+
+        .cassette-folder:active {
+            transform: scale(0.98);
+            border-radius: 8px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            box-shadow:
+                inset 0 0 10px rgba(0, 0, 0, 0.8),
+                2px 4px 6px rgba(0, 0, 0, 0.3);
+            border: 1px solid #555;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cassette-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cassette-body::before,
+        .cassette-body::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #111;
+            border-radius: 50%;
+            top: 6px;
+            box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+            z-index: 2;
+        }
+
+        .cassette-body::before {
+            left: 6px;
+        }
+
+        .cassette-body::after {
+            right: 6px;
+        }
+
+        .cassette-label {
+            flex: 1;
+            /* background: #f4f4f4; Removed paper background */
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            z-index: 2;
+        }
+
+        .cassette-art {
+            width: 85%;
+            height: 75%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            transform: rotate(-1deg);
+            z-index: 1;
+        }
+
+        .cassette-art-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .cassette-title-strip {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: rotate(-2deg);
+            border: 1px solid #ccc;
+            z-index: 2;
+        }
+
+        .cassette-title {
+            display: block;
+            font-family: var(--font-main);
+            font-weight: bold;
+            font-size: 0.6rem;
+            color: #000;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .cassette-bottom {
+            height: 25%;
+            position: relative;
+            margin-top: 4px;
+            z-index: 2;
+        }
+
+        .cassette-holes {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 3;
+        }
+
+        .hole {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: inset 0 0 0 2px #000;
+            position: relative;
+        }
+
+        .hole::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: transparent;
+            border-left: 2px solid #000;
+            border-right: 2px solid #000;
+        }
+
+        .cassette-trapezoid {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 100%;
+            background: #2a2a2a;
+            clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
+            z-index: 1;
+            border-top: 1px solid #444;
+        }
+
+        /* SNES Pixel Art Style for Cassettes */
+        .cassette-body {
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            image-rendering: pixelated;
+        }
+
+        .cassette-overlay {
+            background: rgba(0, 0, 0, 0.1);
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.2) 2px, rgba(0, 0, 0, 0.2) 4px);
+            box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cassette-title-strip {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            border: 2px solid #000;
+            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+            background: #fff;
+            transform: rotate(0deg);
+            top: 15px;
+            padding: 6px 4px;
+        }
+
+        .cassette-trapezoid {
+            border-top: 2px solid #000;
+            background: rgba(0, 0, 0, 0.6);
+            clip-path: polygon(15% 0, 85% 0, 100% 100%, 0% 100%);
+        }
+
+        .hole {
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.5);
+            background: #fff;
+        }
+
+        .hole::after {
+            border-left: 4px solid #000;
+            border-right: 4px solid #000;
+            height: 8px;
+            width: 8px;
+        }
+
+        .cassette-body::before,
+        .cassette-body::after {
+            box-shadow: none;
+            background: #000;
+            width: 8px;
+            height: 8px;
+            border: 1px solid #555;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎵 SonicStream Mobile</h1>
+            <h1>🎵 Bailando Solo Mobile</h1>
             <p>Descarga tu música favorita</p>
         </div>
 
@@ -436,12 +669,30 @@
                     return;
                 }
 
-                content.innerHTML = folders.map(folder => `
-                    <div class="card folder-item" onclick="openFolder('${folder}')">
-                        <div class="icon">📁</div>
-                        <div class="name">${folder}</div>
+                content.innerHTML = '<div class="folder-grid">' + folders.map(folder => {
+                    const name = folder.name || folder; // Handle both object and string for backward compat
+                    const thumb = folder.thumbnail ? (folder.thumbnail.startsWith('http') ? folder.thumbnail : folder.thumbnail) : null;
+
+                    return `
+                    <div class="cassette-folder" onclick="openFolder('${name}')">
+                        <div class="cassette-body" style="${thumb ? `background-image: url('${thumb}')` : ''}">
+                            <div class="cassette-overlay"></div>
+                            <div class="cassette-label">
+                                ${!thumb ? `<div class="cassette-art-placeholder"><span>${name.substring(0, 2).toUpperCase()}</span></div>` : ''}
+                                <div class="cassette-title-strip">
+                                    <span class="cassette-title">${name}</span>
+                                </div>
+                            </div>
+                            <div class="cassette-bottom">
+                                <div class="cassette-holes">
+                                    <div class="hole left"></div>
+                                    <div class="hole right"></div>
+                                </div>
+                                <div class="cassette-trapezoid"></div>
+                            </div>
+                        </div>
                     </div>
-                `).join('');
+                `}).join('') + '</div>';
             } catch (error) {
                 document.getElementById('content').innerHTML =
                     '<div class="error">Error al cargar carpetas: ' + error.message + '</div>';

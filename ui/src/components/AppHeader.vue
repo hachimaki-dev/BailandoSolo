@@ -2,7 +2,7 @@
   <header>
     <div class="logo">
       <div class="logo-icon">♪</div>
-      <h1>SonicStream</h1>
+      <h1>Bailando Solo</h1>
     </div>
     <nav>
       <button :class="{ active: currentView === 'downloader' }" @click="$emit('navigate', 'downloader')">Descargar</button>

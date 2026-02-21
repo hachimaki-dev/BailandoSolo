@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test de Conectividad - SonicStream</title>
+    <title>Test de Conectividad - Bailando Solo</title>
     <style>
         * {
             margin: 0;
@@ -32,7 +33,7 @@
         .header h1 {
             font-size: 2rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .card {
@@ -41,7 +42,7 @@
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -96,8 +97,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
         }
 
         .btn {
@@ -150,6 +158,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -211,7 +220,8 @@
             <div class="info-box" style="background: rgba(76, 217, 100, 0.2); margin-top: 15px;">
                 <h3>✅ Si todo funciona:</h3>
                 <ul>
-                    <li><a href="/mobile" style="color: #fff; text-decoration: underline;">Ir a la interfaz móvil →</a></li>
+                    <li><a href="/mobile" style="color: #fff; text-decoration: underline;">Ir a la interfaz móvil →</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -225,10 +235,10 @@
 
             // Server Connection Test
             await testServer();
-            
+
             // Library API Test
             await testLibrary();
-            
+
             // Random Songs API Test
             await testRandom();
         }
@@ -236,13 +246,13 @@
         async function testServer() {
             const status = document.getElementById('serverStatus');
             const info = document.getElementById('serverInfo');
-            
+
             try {
                 const start = Date.now();
                 const response = await fetch('/api/mobile/info');
                 const data = await response.json();
                 const latency = Date.now() - start;
-                
+
                 if (response.ok) {
                     status.className = 'status success';
                     status.textContent = '✓ Conectado';
@@ -260,13 +270,13 @@
         async function testLibrary() {
             const status = document.getElementById('libraryStatus');
             const info = document.getElementById('libraryInfo');
-            
+
             try {
                 const start = Date.now();
                 const response = await fetch('/api/library');
                 const data = await response.json();
                 const latency = Date.now() - start;
-                
+
                 if (response.ok) {
                     status.className = 'status success';
                     status.textContent = '✓ OK';
@@ -284,13 +294,13 @@
         async function testRandom() {
             const status = document.getElementById('randomStatus');
             const info = document.getElementById('randomInfo');
-            
+
             try {
                 const start = Date.now();
                 const response = await fetch('/api/library/random');
                 const data = await response.json();
                 const latency = Date.now() - start;
-                
+
                 if (response.ok) {
                     status.className = 'status success';
                     status.textContent = '✓ OK';
@@ -309,4 +319,5 @@
         runTests();
     </script>
 </body>
+
 </html>

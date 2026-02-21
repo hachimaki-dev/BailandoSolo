@@ -1,4 +1,4 @@
-# Guía de Creación de Temas para SonicStream
+# Guía de Creación de Temas para Bailando Solo
 
 Esta guía define el estándar estricto para la creación de nuevos temas. El objetivo es garantizar que cualquier nuevo tema generado por IA o humanos se integre perfectamente sin romper la estructura ni la funcionalidad.
 
@@ -66,7 +66,7 @@ Consulta `styles/base.css` para la lista completa. Las más críticas son:
 
 ## Proceso de Generación (Prompt para IA)
 
-> "Crea un nuevo archivo CSS para un tema llamado '[NOMBRE]' para SonicStream.
+> "Crea un nuevo archivo CSS para un tema llamado '[NOMBRE]' para Bailando Solo.
 > El tema debe evocar [ESTILO/SENSACIÓN].
 > REGLAS ESTRICTAS:
 > 1. Usa el selector `body[data-theme='[NOMBRE]']`.

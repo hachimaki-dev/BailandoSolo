@@ -341,7 +341,8 @@ def get_status():
 
 @app.route('/api/library', methods=['GET'])
 def get_library():
-    """List all folders in the active profile's directory."""
+    """List all folders in the active profile's directory with a random thumbnail."""
+    import random
     config = load_profiles()
     active_profile = config.get('active', 'Default')
     base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
@@ -349,8 +350,34 @@ def get_library():
     if not os.path.exists(base_dir):
         return jsonify([])
     
+    folders_data = []
     folders = [f for f in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, f))]
-    return jsonify(folders)
+    
+    for folder in folders:
+        folder_path = os.path.join(base_dir, folder)
+        thumbnail = None
+        
+        # Look for images in the folder (case-insensitive)
+        images = []
+        # Common image extensions
+        exts = ['*.jpg', '*.jpeg', '*.png', '*.webp', '*.JPG', '*.JPEG', '*.PNG', '*.WEBP']
+        for ext in exts:
+            images.extend(glob.glob(os.path.join(folder_path, ext)))
+            
+        if images:
+            # Pick a random image
+            selected_image = random.choice(images)
+            filename = os.path.basename(selected_image)
+            # Ensure we encode the filename for URL safety
+            from urllib.parse import quote
+            thumbnail = f"/api/stream/{quote(folder)}/{quote(filename)}"
+            
+        folders_data.append({
+            'name': folder,
+            'thumbnail': thumbnail
+        })
+        
+    return jsonify(folders_data)
 
 @app.route('/api/library/<folder>', methods=['GET'])
 def get_folder_content(folder):

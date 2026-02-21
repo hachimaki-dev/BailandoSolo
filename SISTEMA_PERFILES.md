@@ -1,4 +1,4 @@
-# Sistema de Perfiles - SonicStream
+# Sistema de Perfiles - Bailando Solo
 
 ## Descripción General
 
