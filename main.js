@@ -20,7 +20,13 @@ function createWindow() {
     show: false // Don't show until ready
   });
 
-  mainWindow.loadFile('index.html');
+  const isDev = process.argv.includes('--dev');
+
+  if (isDev) {
+    mainWindow.loadURL('http://localhost:5173');
+  } else {
+    mainWindow.loadFile(path.join(__dirname, 'ui', 'dist', 'index.html'));
+  }
 
   // Open DevTools for debugging
   mainWindow.webContents.openDevTools();
@@ -36,7 +42,11 @@ function createWindow() {
 
 function startPythonServer() {
   // Asumimos que el venv ya está creado en la carpeta del proyecto
-  const pythonPath = path.join(__dirname, 'venv', 'bin', 'python3');
+  // Determine python path based on platform
+  const isWin = process.platform === 'win32';
+  const pythonExecutable = isWin ? 'python.exe' : 'python3';
+  const venvPath = isWin ? path.join('venv', 'Scripts') : path.join('venv', 'bin');
+  const pythonPath = path.join(__dirname, venvPath, pythonExecutable);
   const scriptPath = path.join(__dirname, 'server.py');
 
   console.log(`Iniciando servidor Python: ${pythonPath} ${scriptPath}`);

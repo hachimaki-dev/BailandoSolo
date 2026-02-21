@@ -1,15 +1,18 @@
 {
-  "name": "sonicstream",
+  "name": "Bailando Solo",
   "version": "1.0.0",
   "description": "Descargador de Playlists de Alta Fidelidad",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "npm run build --prefix ui && electron .",
+    "dev": "concurrently \"npm run dev --prefix ui\" \"wait-on tcp:5173 && electron . --dev\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^33.2.0"
+    "concurrently": "^9.2.1",
+    "electron": "^33.2.0",
+    "wait-on": "^9.0.3"
   }
 }

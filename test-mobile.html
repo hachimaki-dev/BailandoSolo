@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Conectividad - Bailando Solo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .test-item .icon {
+            font-size: 1.5rem;
+            min-width: 30px;
+        }
+
+        .test-item .content {
+            flex: 1;
+        }
+
+        .test-item .title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .test-item .detail {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            font-family: monospace;
+        }
+
+        .status {
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: rgba(76, 217, 100, 0.3);
+        }
+
+        .status.error {
+            background: rgba(255, 59, 48, 0.3);
+        }
+
+        .status.pending {
+            background: rgba(255, 204, 0, 0.3);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+
+        .info-box {
+            background: rgba(100, 200, 255, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-box li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Test de Conectividad</h1>
+            <p>Diagnóstico de conexión móvil</p>
+        </div>
+
+        <div class="card">
+            <div id="tests">
+                <div class="test-item">
+                    <div class="icon">📱</div>
+                    <div class="content">
+                        <div class="title">Información del Dispositivo</div>
+                        <div class="detail" id="deviceInfo">Cargando...</div>
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <div class="icon">🌐</div>
+                    <div class="content">
+                        <div class="title">Conexión al Servidor</div>
+                        <div class="detail" id="serverInfo">Cargando...</div>
+                    </div>
+                    <div class="status pending" id="serverStatus">Probando...</div>
+                </div>
+
+                <div class="test-item">
+                    <div class="icon">📚</div>
+                    <div class="content">
+                        <div class="title">API de Biblioteca</div>
+                        <div class="detail" id="libraryInfo">Cargando...</div>
+                    </div>
+                    <div class="status pending" id="libraryStatus">Probando...</div>
+                </div>
+
+                <div class="test-item">
+                    <div class="icon">🎵</div>
+                    <div class="content">
+                        <div class="title">API de Canciones Aleatorias</div>
+                        <div class="detail" id="randomInfo">Cargando...</div>
+                    </div>
+                    <div class="status pending" id="randomStatus">Probando...</div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="runTests()">🔄 Volver a Probar</button>
+
+            <div class="info-box">
+                <h3>📋 Checklist de Solución</h3>
+                <ul>
+                    <li>Verifica que ambos dispositivos estén en la misma red WiFi</li>
+                    <li>Asegúrate de que el servidor esté corriendo (npm run dev)</li>
+                    <li>Verifica que el firewall permita conexiones a Python</li>
+                    <li>Intenta desactivar temporalmente VPN o proxies</li>
+                    <li>Reinicia el router si es necesario</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="background: rgba(76, 217, 100, 0.2); margin-top: 15px;">
+                <h3>✅ Si todo funciona:</h3>
+                <ul>
+                    <li><a href="/mobile" style="color: #fff; text-decoration: underline;">Ir a la interfaz móvil →</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function runTests() {
+            // Device Info
+            const deviceInfo = document.getElementById('deviceInfo');
+            deviceInfo.textContent = `${navigator.userAgent.includes('Mobile') ? 'Móvil' : 'Desktop'} - ${navigator.platform}`;
+
+            // Server Connection Test
+            await testServer();
+
+            // Library API Test
+            await testLibrary();
+
+            // Random Songs API Test
+            await testRandom();
+        }
+
+        async function testServer() {
+            const status = document.getElementById('serverStatus');
+            const info = document.getElementById('serverInfo');
+
+            try {
+                const start = Date.now();
+                const response = await fetch('/api/mobile/info');
+                const data = await response.json();
+                const latency = Date.now() - start;
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.textContent = '✓ Conectado';
+                    info.textContent = `${data.url} (${latency}ms)`;
+                } else {
+                    throw new Error('Error en respuesta');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '✗ Error';
+                info.textContent = error.message;
+            }
+        }
+
+        async function testLibrary() {
+            const status = document.getElementById('libraryStatus');
+            const info = document.getElementById('libraryInfo');
+
+            try {
+                const start = Date.now();
+                const response = await fetch('/api/library');
+                const data = await response.json();
+                const latency = Date.now() - start;
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.textContent = '✓ OK';
+                    info.textContent = `${data.length} carpetas encontradas (${latency}ms)`;
+                } else {
+                    throw new Error('Error en respuesta');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '✗ Error';
+                info.textContent = error.message;
+            }
+        }
+
+        async function testRandom() {
+            const status = document.getElementById('randomStatus');
+            const info = document.getElementById('randomInfo');
+
+            try {
+                const start = Date.now();
+                const response = await fetch('/api/library/random');
+                const data = await response.json();
+                const latency = Date.now() - start;
+
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.textContent = '✓ OK';
+                    info.textContent = `${data.length} canciones aleatorias (${latency}ms)`;
+                } else {
+                    throw new Error('Error en respuesta');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '✗ Error';
+                info.textContent = error.message;
+            }
+        }
+
+        // Run tests on page load
+        runTests();
+    </script>
+</body>
+
+</html>

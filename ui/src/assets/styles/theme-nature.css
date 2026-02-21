@@ -1,0 +1,168 @@
+/* Puerto Montt Nature Theme - Sea, Mountains, Rain */
+
+body[data-theme="nature"] {
+    /* Colors */
+    --color-bg: #2c3e50;
+    --color-bg-alt: rgba(255, 255, 255, 0.05);
+    --color-text: #ecf0f1;
+    --color-text-muted: #bdc3c7;
+    --color-primary: #2ecc71;
+    --color-primary-hover: #27ae60;
+    --color-secondary: #3498db;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-shadow: rgba(0, 0, 0, 0.2);
+    --color-input-bg: rgba(0, 0, 0, 0.2);
+    --color-panel-bg: rgba(52, 73, 94, 0.85);
+
+    /* Typography */
+    --font-main: 'Varela Round', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Layout & Shape */
+    --radius: 12px;
+    --radius-lg: 20px;
+    --border-width: 1px;
+    --border-style: solid;
+
+    /* Components */
+    --control-size: 48px;
+    --control-size-lg: 64px;
+
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 40%, #2980b9 100%);
+}
+
+/* Rain Effect */
+body[data-theme="nature"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="rgba(255,255,255,0.05)" x="0" y="0" width="1" height="10" transform="rotate(15)"/></svg>');
+    background-size: 20px 20px;
+    animation: rain 1s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+}
+
+@keyframes rain {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 10px 20px;
+    }
+}
+
+/* Specific Overrides */
+
+/* Logo */
+body[data-theme="nature"] .logo-icon {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    box-shadow: 0 8px 16px rgba(39, 174, 96, 0.4);
+}
+
+body[data-theme="nature"] .logo h1 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Nav */
+body[data-theme="nature"] nav {
+    background: rgba(44, 62, 80, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+body[data-theme="nature"] nav button.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: #2ecc71;
+}
+
+/* Panels */
+body[data-theme="nature"] .panel {
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Inputs */
+body[data-theme="nature"] input:focus {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Primary Button */
+body[data-theme="nature"] button.primary {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+body[data-theme="nature"] button.primary:hover {
+    box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Song Items */
+body[data-theme="nature"] .song-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #2ecc71;
+}
+
+/* Player */
+body[data-theme="nature"] .album-art {
+    background: linear-gradient(135deg, #2c3e50, #000);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Controls */
+body[data-theme="nature"] .control-btn {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="nature"] .control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #2ecc71;
+}
+
+body[data-theme="nature"] .control-btn.play {
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* Extra Controls */
+body[data-theme="nature"] .controls-extra {
+    background: rgba(44, 62, 80, 0.6);
+    backdrop-filter: blur(5px);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+body[data-theme="nature"] .control-icon-btn:hover {
+    background: rgba(46, 204, 113, 0.2);
+}
+
+body[data-theme="nature"] .control-icon-btn.active {
+    background: rgba(46, 204, 113, 0.25);
+    box-shadow: 0 0 0 1px rgba(46, 204, 113, 0.3);
+}
+
+/* Queue Panel */
+body[data-theme="nature"] .queue-panel {
+    background: rgba(44, 62, 80, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Equalizer Panel */
+body[data-theme="nature"] .eq-panel {
+    background: rgba(44, 62, 80, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+body[data-theme="nature"] .eq-slider {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Add to Queue Button */
+.add-queue-btn {
+    /* Kept as example, but logic moved to base if possible or kept here if specific */
+}

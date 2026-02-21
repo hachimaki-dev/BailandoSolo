@@ -1,7 +1,9 @@
 import os
 import json
 import threading
-from flask import Flask, request, jsonify, Response, stream_with_context
+import socket
+import shutil
+from flask import Flask, request, jsonify, Response, stream_with_context, after_this_request
 from flask_cors import CORS
 import yt_dlp
 import glob
@@ -12,6 +14,66 @@ CORS(app)
 
 # Global dictionary to store progress
 download_status = {}
+
+# Profile Management
+PROFILES_CONFIG_FILE = 'profiles.json'
+
+def load_profiles():
+    """Load profiles configuration from JSON file."""
+    if os.path.exists(PROFILES_CONFIG_FILE):
+        try:
+            with open(PROFILES_CONFIG_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {'active': 'Default', 'profiles': ['Default']}
+    return {'active': 'Default', 'profiles': ['Default']}
+
+def save_profiles(config):
+    """Save profiles configuration to JSON file."""
+    try:
+        with open(PROFILES_CONFIG_FILE, 'w') as f:
+            json.dump(config, f, indent=4)
+    except Exception as e:
+        print(f"Error saving profiles: {e}")
+
+def ensure_default_profile():
+    """Ensure Default profile exists and migrate existing music if needed."""
+    config = load_profiles()
+    base_dir = os.path.join(os.getcwd(), 'downloads')
+    default_dir = os.path.join(base_dir, 'Default')
+    
+    # Create downloads directory if it doesn't exist
+    os.makedirs(base_dir, exist_ok=True)
+    
+    # Create Default profile directory
+    os.makedirs(default_dir, exist_ok=True)
+    
+    # Migrate existing music to Default profile
+    if os.path.exists(base_dir):
+        for item in os.listdir(base_dir):
+            item_path = os.path.join(base_dir, item)
+            # Skip if it's already a profile directory or the Default folder itself
+            if os.path.isdir(item_path) and item in config['profiles']:
+                continue
+            # Move files and non-profile folders to Default
+            if item != 'Default':
+                dest_path = os.path.join(default_dir, item)
+                try:
+                    if os.path.isfile(item_path):
+                        shutil.move(item_path, dest_path)
+                    elif os.path.isdir(item_path):
+                        # Move folder contents
+                        if not os.path.exists(dest_path):
+                            shutil.move(item_path, dest_path)
+                except Exception as e:
+                    print(f"Error migrating {item}: {e}")
+    
+    # Ensure Default is in profiles list
+    if 'Default' not in config['profiles']:
+        config['profiles'].append('Default')
+    
+    save_profiles(config)
+    return config
 
 def progress_hook(d):
     """
@@ -43,6 +105,120 @@ def progress_hook(d):
             'percent': 100,
             'filename': d.get('filename', 'unknown')
         }
+
+# Profile Management Endpoints
+@app.route('/api/profiles', methods=['GET'])
+def get_profiles():
+    """Get all profiles and the active one."""
+    config = load_profiles()
+    return jsonify(config)
+
+@app.route('/api/profiles', methods=['POST'])
+def create_profile():
+    """Create a new profile."""
+    data = request.json
+    profile_name = data.get('name', '').strip()
+    
+    if not profile_name:
+        return jsonify({'error': 'Profile name is required'}), 400
+    
+    config = load_profiles()
+    
+    if profile_name in config['profiles']:
+        return jsonify({'error': 'Profile already exists'}), 400
+    
+    # Create profile directory
+    profile_dir = os.path.join(os.getcwd(), 'downloads', profile_name)
+    try:
+        os.makedirs(profile_dir, exist_ok=True)
+        config['profiles'].append(profile_name)
+        save_profiles(config)
+        return jsonify({'status': 'success', 'profile': profile_name})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/profiles/<profile_name>', methods=['DELETE'])
+def delete_profile(profile_name):
+    """Delete a profile (cannot delete Default or active profile)."""
+    config = load_profiles()
+    
+    if profile_name == 'Default':
+        return jsonify({'error': 'Cannot delete Default profile'}), 400
+    
+    if profile_name == config['active']:
+        return jsonify({'error': 'Cannot delete active profile'}), 400
+    
+    if profile_name not in config['profiles']:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    # Delete profile directory
+    profile_dir = os.path.join(os.getcwd(), 'downloads', profile_name)
+    try:
+        if os.path.exists(profile_dir):
+            shutil.rmtree(profile_dir)
+        config['profiles'].remove(profile_name)
+        save_profiles(config)
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/profiles/<profile_name>/rename', methods=['POST'])
+def rename_profile(profile_name):
+    """Rename a profile (cannot rename Default)."""
+    data = request.json
+    new_name = data.get('new_name', '').strip()
+    
+    if not new_name:
+        return jsonify({'error': 'New name is required'}), 400
+    
+    if profile_name == 'Default':
+        return jsonify({'error': 'Cannot rename Default profile'}), 400
+    
+    config = load_profiles()
+    
+    if profile_name not in config['profiles']:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    if new_name in config['profiles']:
+        return jsonify({'error': 'Profile with new name already exists'}), 400
+    
+    # Rename profile directory
+    old_dir = os.path.join(os.getcwd(), 'downloads', profile_name)
+    new_dir = os.path.join(os.getcwd(), 'downloads', new_name)
+    
+    try:
+        if os.path.exists(old_dir):
+            os.rename(old_dir, new_dir)
+        
+        # Update config
+        index = config['profiles'].index(profile_name)
+        config['profiles'][index] = new_name
+        
+        if config['active'] == profile_name:
+            config['active'] = new_name
+        
+        save_profiles(config)
+        return jsonify({'status': 'success', 'new_name': new_name})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/profiles/active', methods=['POST'])
+def set_active_profile():
+    """Set the active profile."""
+    data = request.json
+    profile_name = data.get('profile')
+    
+    if not profile_name:
+        return jsonify({'error': 'Profile name is required'}), 400
+    
+    config = load_profiles()
+    
+    if profile_name not in config['profiles']:
+        return jsonify({'error': 'Profile not found'}), 404
+    
+    config['active'] = profile_name
+    save_profiles(config)
+    return jsonify({'status': 'success', 'active': profile_name})
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_playlist():
@@ -93,8 +269,12 @@ def download_thread(url, folder_name, selected_ids):
     """
     Background thread to handle the download process.
     """
+    # Get active profile
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
     # Create directory if it doesn't exist
-    base_dir = os.path.join(os.getcwd(), 'downloads', folder_name)
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile, folder_name)
     os.makedirs(base_dir, exist_ok=True)
 
     ydl_opts = {
@@ -161,18 +341,51 @@ def get_status():
 
 @app.route('/api/library', methods=['GET'])
 def get_library():
-    """List all folders in the downloads directory."""
-    base_dir = os.path.join(os.getcwd(), 'downloads')
+    """List all folders in the active profile's directory with a random thumbnail."""
+    import random
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
+    
     if not os.path.exists(base_dir):
         return jsonify([])
     
+    folders_data = []
     folders = [f for f in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, f))]
-    return jsonify(folders)
+    
+    for folder in folders:
+        folder_path = os.path.join(base_dir, folder)
+        thumbnail = None
+        
+        # Look for images in the folder (case-insensitive)
+        images = []
+        # Common image extensions
+        exts = ['*.jpg', '*.jpeg', '*.png', '*.webp', '*.JPG', '*.JPEG', '*.PNG', '*.WEBP']
+        for ext in exts:
+            images.extend(glob.glob(os.path.join(folder_path, ext)))
+            
+        if images:
+            # Pick a random image
+            selected_image = random.choice(images)
+            filename = os.path.basename(selected_image)
+            # Ensure we encode the filename for URL safety
+            from urllib.parse import quote
+            thumbnail = f"/api/stream/{quote(folder)}/{quote(filename)}"
+            
+        folders_data.append({
+            'name': folder,
+            'thumbnail': thumbnail
+        })
+        
+    return jsonify(folders_data)
 
 @app.route('/api/library/<folder>', methods=['GET'])
 def get_folder_content(folder):
-    """List all audio files in a specific folder."""
-    folder_path = os.path.join(os.getcwd(), 'downloads', folder)
+    """List all audio files in a specific folder within the active profile."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    folder_path = os.path.join(os.getcwd(), 'downloads', active_profile, folder)
+    
     if not os.path.exists(folder_path):
         return jsonify({'error': 'Folder not found'}), 404
         
@@ -203,10 +416,13 @@ def get_folder_content(folder):
 
 @app.route('/api/stream/<path:filepath>', methods=['GET'])
 def stream_file(filepath):
-    """Serve a file from the downloads directory."""
+    """Serve a file from the active profile's directory."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
     # Security check: ensure we don't traverse up
-    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', filepath))
-    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads')):
+    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', active_profile, filepath))
+    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads', active_profile)):
         return jsonify({'error': 'Access denied'}), 403
         
     if not os.path.exists(safe_path):
@@ -219,12 +435,87 @@ def index():
     """Serve the main HTML file."""
     return send_file('index.html')
 
+@app.route('/api/mobile/info', methods=['GET'])
+def get_mobile_info():
+    """Get network information for mobile access."""
+    try:
+        # Try to find the best local IP address
+        local_ip = '127.0.0.1'
+        
+        # Method 1: Connect to a public DNS (most reliable if internet available)
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+        except:
+            # Method 2: Iterate interfaces (fallback)
+            try:
+                # This is a simple heuristic fallback
+                hostname = socket.gethostname()
+                local_ip = socket.gethostbyname(hostname)
+            except:
+                pass
+        
+        port = 5001
+        mobile_url = f"http://{local_ip}:{port}/mobile"
+        
+        return jsonify({
+            'ip': local_ip,
+            'port': port,
+            'url': mobile_url
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/mobile')
+def mobile_interface():
+    """Serve the mobile HTML interface."""
+    return send_file('mobile.html')
+
+@app.route('/test-mobile')
+def test_mobile():
+    """Serve the mobile connectivity test page."""
+    return send_file('test-mobile.html')
+
+@app.route('/qr')
+def qr_page():
+    """Serve the QR code generator page."""
+    return send_file('qr.html')
+
+@app.route('/api/mobile/download/<path:filepath>', methods=['GET'])
+def download_file(filepath):
+    """Force download a file from the active profile's directory."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
+    # Security check: ensure we don't traverse up
+    safe_path = os.path.normpath(os.path.join(os.getcwd(), 'downloads', active_profile, filepath))
+    if not safe_path.startswith(os.path.join(os.getcwd(), 'downloads', active_profile)):
+        return jsonify({'error': 'Access denied'}), 403
+        
+    if not os.path.exists(safe_path):
+        return jsonify({'error': 'File not found'}), 404
+    
+    # Get just the filename for Content-Disposition
+    filename = os.path.basename(safe_path)
+    
+    # Force download with attachment header
+    return send_file(
+        safe_path,
+        as_attachment=True,
+        download_name=filename
+    )
+
 @app.route('/api/library/random', methods=['GET'])
 def get_random_songs():
-    """Get a random selection of songs from all folders."""
+    """Get a random selection of songs from all folders in the active profile."""
     import random
     
-    base_dir = os.path.join(os.getcwd(), 'downloads')
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
+    
     if not os.path.exists(base_dir):
         return jsonify([])
     
@@ -233,8 +524,10 @@ def get_random_songs():
     
     # Walk through all folders
     for root, dirs, files in os.walk(base_dir):
-        folder_name = os.path.basename(root)
-        if folder_name == 'downloads': continue
+        # Get relative path from base_dir
+        rel_path = os.path.relpath(root, base_dir)
+        if rel_path == '.':
+            continue
         
         for filename in files:
             if any(filename.endswith(ext.replace('*', '')) for ext in extensions):
@@ -245,23 +538,268 @@ def get_random_songs():
                 for thumb_ext in ['.jpg', '.png', '.webp']:
                     thumb_path = os.path.join(root, base_name + thumb_ext)
                     if os.path.exists(thumb_path):
-                        thumbnail = f"/api/stream/{folder_name}/{base_name}{thumb_ext}"
+                        thumbnail = f"/api/stream/{rel_path}/{base_name}{thumb_ext}"
                         break
                 
                 all_songs.append({
                     'filename': filename,
-                    'path': f"/api/stream/{folder_name}/{filename}",
+                    'path': f"/api/stream/{rel_path}/{filename}",
                     'thumbnail': thumbnail,
                     'title': base_name,
-                    'folder': folder_name
+                    'folder': rel_path
                 })
     
     # Shuffle and pick up to 20
     random.shuffle(all_songs)
     return jsonify(all_songs[:20])
 
+# --- Statistics Logic ---
+STATS_FILE = 'stats.json'
+
+def load_stats():
+    if os.path.exists(STATS_FILE):
+        try:
+            with open(STATS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_stats(stats):
+    try:
+        with open(STATS_FILE, 'w') as f:
+            json.dump(stats, f, indent=4)
+    except Exception as e:
+        print(f"Error saving stats: {e}")
+
+@app.route('/api/stats/track', methods=['POST'])
+def track_stat():
+    data = request.json
+    event_type = data.get('type') # 'play', 'time_update'
+    song_id = data.get('song_id') # Use filename or title as ID
+    duration = data.get('duration', 0) # For 'time_update'
+    
+    if not song_id:
+        return jsonify({'error': 'Song ID required'}), 400
+        
+    stats = load_stats()
+    
+    if song_id not in stats:
+        stats[song_id] = {
+            'play_count': 0,
+            'total_time': 0,
+            'last_played': None,
+            'title': data.get('title', song_id)
+        }
+        
+    if event_type == 'play':
+        stats[song_id]['play_count'] += 1
+        import time
+        stats[song_id]['last_played'] = time.time()
+    elif event_type == 'time_update':
+        # Add duration in seconds
+        stats[song_id]['total_time'] += duration
+        
+    save_stats(stats)
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    stats = load_stats()
+    
+    # Calculate derived stats
+    if not stats:
+        return jsonify({
+            'most_played': None,
+            'most_time': None,
+            'least_played': None,
+            'never_played': [],
+            'total_plays': 0,
+            'total_time_global': 0,
+            'top_folders': [],
+            'achievements': [],
+            'first_played': None,
+            'last_played': None,
+            'library_explored_percent': 0,
+            'unique_songs_played': 0
+        })
+        
+    # Convert dict to list for sorting
+    songs_list = []
+    for sid, data in stats.items():
+        data['id'] = sid
+        songs_list.append(data)
+        
+    # Most played
+    songs_list.sort(key=lambda x: x['play_count'], reverse=True)
+    most_played = songs_list[0] if songs_list else None
+    
+    # Most time
+    songs_list.sort(key=lambda x: x['total_time'], reverse=True)
+    most_time = songs_list[0] if songs_list else None
+    
+    # Least played (of those that have been played)
+    songs_list.sort(key=lambda x: x['play_count'])
+    least_played = songs_list[0] if songs_list else None
+    
+    # First and Last played
+    songs_with_time = [s for s in songs_list if s.get('last_played')]
+    if songs_with_time:
+        songs_with_time.sort(key=lambda x: x['last_played'])
+        first_played = songs_with_time[0]
+        last_played = songs_with_time[-1]
+    else:
+        first_played = None
+        last_played = None
+    
+    # Never played logic + folder stats
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    base_dir = os.path.join(os.getcwd(), 'downloads', active_profile)
+    all_files = []
+    folder_stats = {}
+    extensions = ['*.mp3', '*.webm', '*.m4a', '*.wav']
+    
+    if os.path.exists(base_dir):
+        for root, dirs, files in os.walk(base_dir):
+            rel_path = os.path.relpath(root, base_dir)
+            if rel_path == '.':
+                continue
+                
+            for filename in files:
+                if any(filename.endswith(ext.replace('*', '')) for ext in extensions):
+                    all_files.append(filename)
+                    
+                    # Track folder stats
+                    if rel_path not in folder_stats:
+                        folder_stats[rel_path] = {
+                            'name': rel_path,
+                            'play_count': 0,
+                            'total_time': 0,
+                            'song_count': 0
+                        }
+                    folder_stats[rel_path]['song_count'] += 1
+                    
+                    # Add stats if song has been played
+                    if filename in stats:
+                        folder_stats[rel_path]['play_count'] += stats[filename]['play_count']
+                        folder_stats[rel_path]['total_time'] += stats[filename]['total_time']
+    
+    never_played = []
+    for fname in all_files:
+        if fname not in stats:
+            never_played.append(fname)
+    
+    # Top folders
+    top_folders = sorted(folder_stats.values(), key=lambda x: x['play_count'], reverse=True)[:3]
+            
+    # Global totals
+    total_plays = sum(s['play_count'] for s in songs_list)
+    total_time_global = sum(s['total_time'] for s in songs_list)
+    unique_songs_played = len(songs_list)
+    total_songs = len(all_files)
+    library_explored_percent = (unique_songs_played / total_songs * 100) if total_songs > 0 else 0
+    
+    # Achievements
+    achievements = []
+    
+    # Time-based achievements
+    if total_time_global >= 360000:  # 100 hours
+        achievements.append({'id': 'marathon', 'icon': '🏃', 'title': 'Maratonista', 'desc': '100+ horas'})
+    elif total_time_global >= 36000:  # 10 hours
+        achievements.append({'id': 'listener', 'icon': '🎧', 'title': 'Oyente Dedicado', 'desc': '10+ horas'})
+    
+    # Exploration achievements
+    if library_explored_percent >= 75:
+        achievements.append({'id': 'explorer', 'icon': '🗺️', 'title': 'Explorador', 'desc': '75% biblioteca'})
+    elif library_explored_percent >= 50:
+        achievements.append({'id': 'adventurer', 'icon': '🧭', 'title': 'Aventurero', 'desc': '50% biblioteca'})
+    
+    # Collection achievements
+    if total_songs >= 100:
+        achievements.append({'id': 'collector', 'icon': '💎', 'title': 'Coleccionista', 'desc': '100+ canciones'})
+    elif total_songs >= 50:
+        achievements.append({'id': 'enthusiast', 'icon': '⭐', 'title': 'Entusiasta', 'desc': '50+ canciones'})
+    
+    # Play count achievements
+    if total_plays >= 500:
+        achievements.append({'id': 'addict', 'icon': '🔥', 'title': 'Adicto Musical', 'desc': '500+ plays'})
+    elif total_plays >= 100:
+        achievements.append({'id': 'fan', 'icon': '🎵', 'title': 'Super Fan', 'desc': '100+ plays'})
+    
+    return jsonify({
+        'most_played': most_played,
+        'most_time': most_time,
+        'least_played': least_played,
+        'never_played': never_played[:50],
+        'total_plays': total_plays,
+        'total_time_global': total_time_global,
+        'top_folders': top_folders,
+        'achievements': achievements,
+        'first_played': first_played,
+        'last_played': last_played,
+        'library_explored_percent': round(library_explored_percent, 1),
+        'unique_songs_played': unique_songs_played,
+        'total_songs': total_songs
+    })
+
+
+
+
+@app.route('/api/mobile/download-folder/<folder>', methods=['GET'])
+def download_folder(folder):
+    """Download an entire folder as a ZIP file."""
+    config = load_profiles()
+    active_profile = config.get('active', 'Default')
+    
+    # Security check
+    folder_path = os.path.join(os.getcwd(), 'downloads', active_profile, folder)
+    safe_path = os.path.normpath(folder_path)
+    base_downloads = os.path.join(os.getcwd(), 'downloads', active_profile)
+    
+    if not safe_path.startswith(base_downloads):
+        return jsonify({'error': 'Access denied'}), 403
+        
+    if not os.path.exists(safe_path):
+        return jsonify({'error': 'Folder not found'}), 404
+        
+    try:
+        # Create a temporary directory
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_base_name = os.path.join(temp_dir, folder)
+        
+        # Create zip with folder structure
+        parent_dir = os.path.dirname(folder_path)
+        base_name = os.path.basename(folder_path)
+        shutil.make_archive(zip_base_name, 'zip', root_dir=parent_dir, base_dir=base_name)
+        zip_path = zip_base_name + '.zip'
+        
+        # Define cleanup
+        @after_this_request
+        def remove_temp(response):
+            try:
+                shutil.rmtree(temp_dir)
+            except Exception as e:
+                print(f"Error removing temp dir: {e}")
+            return response
+            
+        return send_file(
+            zip_path,
+            as_attachment=True,
+            download_name=f"{folder}.zip"
+        )
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 if __name__ == '__main__':
+    # Initialize profiles system
+    print("Initializing profiles system...")
+    ensure_default_profile()
+    print("Profiles initialized successfully!")
+    
     # Ensure ffmpeg is available or warn user? 
     # yt-dlp usually needs ffmpeg for audio conversion.
-    print("Starting server on http://localhost:5001")
-    app.run(debug=True, port=5001)
+    print("Starting server on http://0.0.0.0:5001")
+    app.run(debug=True, host='0.0.0.0', port=5001)
+

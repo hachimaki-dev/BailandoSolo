@@ -1,0 +1,208 @@
+/* PS2 Theme - The Third Place */
+
+body[data-theme="ps2"] {
+    /* --- COLORS --- */
+    --bg-main: #000000;
+    --bg-alt: rgba(10, 20, 60, 0.6);
+    --bg-panel: rgba(0, 10, 30, 0.6);
+    --bg-input: rgba(0, 0, 0, 0.5);
+
+    --text-main: #e0e6ff;
+    --text-muted: #8ba4cc;
+    --text-inverse: #000000;
+
+    --primary: #0066ff;
+    --primary-hover: #3388ff;
+    --accent: #ff0055;
+
+    --border-color: rgba(100, 150, 255, 0.3);
+    --shadow-color: rgba(0, 10, 30, 0.8);
+
+    /* --- SHAPES --- */
+    --radius-md: 1px; /* Sharp edges for PS2 feel */
+    --radius-lg: 2px;
+    --border-width: 1px;
+    --border-style: solid;
+
+    /* --- TYPOGRAPHY --- */
+    --font-main: 'Arial', 'Helvetica', sans-serif; /* Clean sans-serif */
+
+    /* --- BACKGROUND --- */
+    background-color: #000;
+    overflow-x: hidden;
+}
+
+/* --- PS2 BACKGROUND CONTAINER --- */
+#ps2-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -10;
+    background: radial-gradient(circle at 50% 50%, #0a1535 0%, #000000 100%);
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+/* --- FOG LAYERS --- */
+.ps2-fog {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(circle at 30% 40%, rgba(0, 60, 180, 0.15), transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(0, 40, 120, 0.1), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(20, 0, 60, 0.2), transparent 70%);
+    filter: blur(40px);
+    animation: ps2-fog-rotate 60s linear infinite;
+    pointer-events: none;
+    transition: transform 0.1s ease-out;
+}
+
+.ps2-fog:nth-child(2) {
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 80, 200, 0.1), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(50, 0, 100, 0.1), transparent 40%);
+    animation-direction: reverse;
+    animation-duration: 45s;
+}
+
+/* --- CRYSTALS (TOWERS) --- */
+.ps2-crystal {
+    position: absolute;
+    background: linear-gradient(135deg, rgba(200, 220, 255, 0.1) 0%, rgba(50, 100, 200, 0.05) 100%);
+    border: 1px solid rgba(150, 200, 255, 0.2);
+    box-shadow: 
+        0 0 10px rgba(0, 100, 255, 0.1),
+        inset 0 0 20px rgba(0, 50, 150, 0.1);
+    backdrop-filter: blur(1px);
+    transform-style: preserve-3d;
+    
+    /* Parallax & Animation */
+    transform: 
+        translate3d(var(--parallax-x, 0), var(--parallax-y, 0), 0) 
+        rotateX(var(--rotate-x, 0deg)) 
+        rotateY(var(--rotate-y, 0deg));
+    
+    transition: transform 0.1s ease-out;
+    animation: ps2-float 8s ease-in-out infinite alternate;
+}
+
+/* Crystal Glow on Hover (if interactive) */
+.ps2-crystal:hover {
+    border-color: rgba(200, 230, 255, 0.6);
+    box-shadow: 0 0 20px rgba(0, 150, 255, 0.4);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes ps2-fog-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes ps2-float {
+    0% { margin-top: 0px; opacity: 0.6; }
+    100% { margin-top: -20px; opacity: 0.9; }
+}
+
+@keyframes ps2-pulse {
+    0% { box-shadow: 0 0 5px rgba(0, 100, 255, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(0, 150, 255, 0.6); }
+    100% { box-shadow: 0 0 5px rgba(0, 100, 255, 0.3); }
+}
+
+/* --- UI COMPONENT OVERRIDES --- */
+
+/* Glass Panels */
+body[data-theme="ps2"] .panel,
+body[data-theme="ps2"] .card,
+body[data-theme="ps2"] .folder-item,
+body[data-theme="ps2"] .song-item {
+    background: rgba(10, 20, 40, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(100, 150, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 2px;
+}
+
+/* Hover Effects */
+body[data-theme="ps2"] .song-item:hover,
+body[data-theme="ps2"] .folder-item:hover {
+    background: rgba(20, 50, 100, 0.7);
+    border-color: rgba(150, 200, 255, 0.6);
+    transform: scale(1.02);
+    box-shadow: 0 0 15px rgba(0, 100, 255, 0.4);
+}
+
+/* Buttons */
+body[data-theme="ps2"] button {
+    background: linear-gradient(180deg, rgba(50, 100, 200, 0.2) 0%, rgba(20, 50, 120, 0.4) 100%);
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    color: #e0e6ff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+}
+
+body[data-theme="ps2"] button:hover {
+    background: linear-gradient(180deg, rgba(80, 150, 255, 0.4) 0%, rgba(40, 80, 180, 0.6) 100%);
+    border-color: rgba(150, 220, 255, 0.8);
+    box-shadow: 0 0 10px rgba(0, 120, 255, 0.5);
+    text-shadow: 0 0 5px rgba(200, 220, 255, 0.8);
+}
+
+body[data-theme="ps2"] button.active {
+    background: rgba(0, 100, 255, 0.6);
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.8);
+}
+
+/* Inputs */
+body[data-theme="ps2"] input {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(80, 120, 200, 0.3);
+    color: #fff;
+    border-radius: 2px;
+    padding: 8px;
+}
+
+body[data-theme="ps2"] input:focus {
+    border-color: #00aaff;
+    box-shadow: 0 0 10px rgba(0, 100, 255, 0.4);
+    outline: none;
+}
+
+/* Scrollbar */
+body[data-theme="ps2"] ::-webkit-scrollbar {
+    width: 10px;
+}
+
+body[data-theme="ps2"] ::-webkit-scrollbar-track {
+    background: #050510;
+}
+
+body[data-theme="ps2"] ::-webkit-scrollbar-thumb {
+    background: #004488;
+    border: 1px solid #002244;
+}
+
+body[data-theme="ps2"] ::-webkit-scrollbar-thumb:hover {
+    background: #0066cc;
+}
+
+/* Theme Selector Button Specifics */
+body[data-theme="ps2"] .theme-btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

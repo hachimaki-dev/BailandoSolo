@@ -1,0 +1,181 @@
+/* Wii U Theme - Modern, Clean, Sky Blue Aesthetic */
+
+body[data-theme="wiiu"] {
+    /* Colors */
+    --color-bg: #E8F4F8;
+    /* Fallback */
+    --color-bg-alt: rgba(255, 255, 255, 0.95);
+    --color-text: #1f2937;
+    --color-text-muted: #6b7280;
+    --color-primary: #00A8E1;
+    --color-primary-hover: #008ec0;
+    --color-secondary: #4FC3F7;
+    --color-border: rgba(255, 255, 255, 0.3);
+    --color-shadow: rgba(0, 168, 225, 0.15);
+    --color-input-bg: rgba(249, 250, 251, 0.8);
+    --color-panel-bg: rgba(255, 255, 255, 0.95);
+
+    /* Typography */
+    --font-main: 'Varela Round', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Layout & Shape */
+    --radius: 12px;
+    --radius-lg: 20px;
+    --border-width: 1px;
+    --border-style: solid;
+
+    /* Components */
+    --control-size: 48px;
+    --control-size-lg: 64px;
+    --album-art-size: 250px;
+
+    background: linear-gradient(180deg, #E8F4F8 0%, #B8E0F0 50%, #89CFF0 100%);
+}
+
+/* Parallax Background Layers - Diagonal Dots Pattern */
+body[data-theme="wiiu"]::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image:
+        radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 25% 35%, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 45% 20%, rgba(255, 255, 255, 0.5) 2.5px, transparent 2.5px),
+        radial-gradient(circle at 60% 45%, rgba(255, 255, 255, 0.35) 1.8px, transparent 1.8px),
+        radial-gradient(circle at 75% 25%, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 85% 55%, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 15% 65%, rgba(255, 255, 255, 0.45) 2.2px, transparent 2.2px),
+        radial-gradient(circle at 35% 75%, rgba(255, 255, 255, 0.35) 1.6px, transparent 1.6px),
+        radial-gradient(circle at 50% 85%, rgba(255, 255, 255, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.35) 1.8px, transparent 1.8px),
+        radial-gradient(circle at 20% 90%, rgba(255, 255, 255, 0.4) 2px, transparent 2px);
+    background-size: 180px 180px;
+    background-position: 0 0, 40px 60px, 80px 20px, 120px 80px, 30px 100px, 90px 40px,
+        50px 120px, 110px 70px, 70px 140px, 140px 90px, 100px 30px, 60px 110px;
+    animation: parallaxDots1 40s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+}
+
+body[data-theme="wiiu"]::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image:
+        radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 38% 48%, rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 58% 18%, rgba(255, 255, 255, 0.2) 1.3px, transparent 1.3px),
+        radial-gradient(circle at 78% 58%, rgba(255, 255, 255, 0.35) 1.8px, transparent 1.8px),
+        radial-gradient(circle at 28% 78%, rgba(255, 255, 255, 0.25) 1.5px, transparent 1.5px),
+        radial-gradient(circle at 48% 38%, rgba(255, 255, 255, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 68% 88%, rgba(255, 255, 255, 0.28) 1.6px, transparent 1.6px),
+        radial-gradient(circle at 88% 28%, rgba(255, 255, 255, 0.32) 1.7px, transparent 1.7px);
+    background-size: 200px 200px;
+    background-position: 20px 30px, 70px 80px, 130px 40px, 50px 90px,
+        100px 50px, 150px 100px, 80px 130px, 120px 60px;
+    animation: parallaxDots2 50s linear infinite reverse;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+}
+
+@keyframes parallaxDots1 {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-180px, -180px) rotate(-5deg);
+    }
+}
+
+@keyframes parallaxDots2 {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-200px, -200px) rotate(5deg);
+    }
+}
+
+/* Specific Overrides that can't be handled by vars alone */
+
+/* Logo Gradient */
+body[data-theme="wiiu"] .logo-icon {
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
+    box-shadow: 0 8px 16px rgba(0, 168, 225, 0.4);
+}
+
+/* Nav Blur */
+body[data-theme="wiiu"] nav {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Panel Blur */
+body[data-theme="wiiu"] .panel {
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Button Gradient */
+body[data-theme="wiiu"] button.primary {
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
+}
+
+/* Song Item Gradient */
+body[data-theme="wiiu"] .song-item {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+body[data-theme="wiiu"] .song-item:hover {
+    background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%);
+}
+
+/* Album Art Gradient & Shape */
+body[data-theme="wiiu"] .album-art {
+    background: linear-gradient(135deg, #1f2937, #111827);
+    border-radius: 50%;
+    /* Wii U specific */
+    overflow: visible;
+    /* For visualizer */
+}
+
+body[data-theme="wiiu"] .album-art img {
+    border-radius: 50%;
+}
+
+/* Control Buttons 3D Effect */
+body[data-theme="wiiu"] .control-btn {
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+    border: none;
+}
+
+body[data-theme="wiiu"] .control-btn:hover {
+    box-shadow: 6px 6px 12px #d1d1d1, -6px -6px 12px #ffffff;
+}
+
+body[data-theme="wiiu"] .control-btn:active {
+    box-shadow: inset 3px 3px 6px #d1d1d1, inset -3px -3px 6px #ffffff;
+}
+
+body[data-theme="wiiu"] .control-btn.play {
+    background: linear-gradient(135deg, #00A8E1, #4FC3F7);
+    box-shadow: 0 8px 20px rgba(0, 168, 225, 0.4);
+}
+
+/* Progress Bar Customization */
+body[data-theme="wiiu"] .progress-fill {
+    background: linear-gradient(90deg, #00A8E1, #4FC3F7) !important;
+    box-shadow: 0 0 10px rgba(0, 168, 225, 0.4) !important;
+}
