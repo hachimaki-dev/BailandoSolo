@@ -1,0 +1,536 @@
+/* SNES Theme - Retro, Pixelated, 16-bit Era */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body[data-theme="snes"] {
+    /* Colors */
+    --color-bg: #7c7c7c;
+    --color-bg-alt: #e4e4e4;
+    --color-text: #000000;
+    --color-text-muted: #5a5a5a;
+    --color-primary: #ff5a5a;
+    --color-primary-hover: #ff6a6a;
+    --color-secondary: #5a5aff;
+    --color-border: #000000;
+    --color-shadow: rgba(0, 0, 0, 0.5);
+    /* Harder shadow */
+    --color-input-bg: #ffffff;
+    --color-panel-bg: #e4e4e4;
+
+    /* Typography */
+    --font-main: 'Press Start 2P', 'Courier New', monospace;
+    --font-size-base: 12px;
+    /* Smaller base size for pixel font */
+    --font-size-sm: 10px;
+    --font-size-xs: 8px;
+
+    /* Layout & Shape */
+    --radius: 0;
+    --radius-lg: 0;
+    --radius-full: 0;
+    --border-width: 4px;
+    --border-style: solid;
+
+    /* Components */
+    --control-size: 48px;
+    --control-size-lg: 64px;
+
+    /* Background Pattern */
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px);
+    animation: scanlines 8s linear infinite;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+@keyframes scanlines {
+    0% {
+        background-position: 0 0, 0 0;
+    }
+
+    100% {
+        background-position: 0 100px, 100px 0;
+    }
+}
+
+/* CRT Effect */
+body[data-theme="snes"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px);
+    pointer-events: none;
+    z-index: 1000;
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.95;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.95;
+    }
+}
+
+/* Pixel Border Animation */
+@keyframes pixelBorder {
+
+    0%,
+    100% {
+        box-shadow: -4px -4px 0 #fff, 4px -4px 0 #fff, -4px 4px 0 #000, 4px 4px 0 #000;
+    }
+
+    50% {
+        box-shadow: -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #fff, 4px 4px 0 #fff;
+    }
+}
+
+/* Specific Overrides */
+
+/* Logo */
+body[data-theme="snes"] .logo-icon {
+    background: #5a5aff;
+    color: #ffff00;
+    box-shadow: inset -2px -2px 0 #000, inset 2px 2px 0 #8a8aff, 4px 4px 0 #000;
+    animation: pixelBorder 2s ease-in-out infinite;
+    border: 4px solid #000;
+}
+
+body[data-theme="snes"] .logo h1 {
+    text-shadow: 3px 3px 0 #000;
+    letter-spacing: 2px;
+}
+
+/* Nav */
+body[data-theme="snes"] nav {
+    background: #c4c4c4;
+    box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 4px 4px 0 #000;
+}
+
+body[data-theme="snes"] nav button {
+    background: #b4b4b4;
+    border: 3px solid #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
+    text-transform: uppercase;
+}
+
+body[data-theme="snes"] nav button.active {
+    background: #5a5aff;
+    color: #fff;
+    box-shadow: inset 1px 1px 0 #000, inset -1px -1px 0 #8a8aff;
+    transform: translateY(2px);
+}
+
+/* Panels */
+body[data-theme="snes"] .panel {
+    box-shadow: inset -3px -3px 0 #7c7c7c, inset 3px 3px 0 #fff, 6px 6px 0 #000;
+}
+
+/* Inputs */
+body[data-theme="snes"] input {
+    box-shadow: inset 2px 2px 0 #7c7c7c;
+    font-family: 'Courier New', monospace;
+}
+
+body[data-theme="snes"] input:focus {
+    box-shadow: inset 2px 2px 0 #7c7c7c, 0 0 0 3px #ffff00;
+}
+
+/* Primary Button */
+body[data-theme="snes"] button.primary {
+    box-shadow: inset -2px -2px 0 #c42a2a, inset 2px 2px 0 #ff8a8a, 4px 4px 0 #000;
+    text-shadow: 2px 2px 0 #000;
+    text-transform: uppercase;
+}
+
+body[data-theme="snes"] button.primary:hover {
+    box-shadow: inset -2px -2px 0 #c42a2a, inset 2px 2px 0 #ff9a9a, 6px 6px 0 #000;
+}
+
+body[data-theme="snes"] button.primary:active {
+    box-shadow: inset 2px 2px 0 #c42a2a, 2px 2px 0 #000;
+}
+
+/* Song Items */
+body[data-theme="snes"] .song-item {
+    box-shadow: 3px 3px 0 #7c7c7c;
+    border: 3px solid #000;
+}
+
+body[data-theme="snes"] .song-item:hover {
+    background: #ffff00;
+    box-shadow: 4px 4px 0 #000;
+    color: black;
+}
+
+body[data-theme="snes"] .song-thumb {
+    border: 3px solid #000;
+    image-rendering: pixelated;
+}
+
+/* Player */
+body[data-theme="snes"] .album-art {
+    background: #000;
+    box-shadow: inset -3px -3px 0 #3a3a3a, inset 3px 3px 0 #1a1a1a, 6px 6px 0 #000;
+}
+
+body[data-theme="snes"] .progress-bar {
+    background: #3a3a3a;
+    border-top: 2px solid #000;
+}
+
+body[data-theme="snes"] .progress-fill {
+    background: #00ff00;
+    box-shadow: 0 0 8px #00ff00;
+}
+
+/* Controls */
+body[data-theme="snes"] .control-btn {
+    background: #c4c4c4;
+    border: 3px solid #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff, 3px 3px 0 #000;
+}
+
+body[data-theme="snes"] .control-btn.play {
+    background: #5a5aff;
+    box-shadow: inset -2px -2px 0 #2a2aaf, inset 2px 2px 0 #8a8aff, 4px 4px 0 #000;
+}
+
+/* Folder Items */
+body[data-theme="snes"] .folder-item {
+    background: #ffaa00;
+    border: 4px solid #000;
+    box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffda5a, 5px 5px 0 #000;
+}
+
+body[data-theme="snes"] .folder-item:hover {
+    background: #ffba20;
+    box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffea7a, 7px 7px 0 #000;
+}
+
+/* Theme Selector */
+body[data-theme="snes"] .theme-selector {
+    background: #c4c4c4;
+    box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 4px 4px 0 #000;
+}
+
+body[data-theme="snes"] .theme-btn {
+    background: #b4b4b4;
+    border: 3px solid #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
+}
+
+body[data-theme="snes"] .theme-btn.active {
+    background: #5a5aff;
+    box-shadow: inset 1px 1px 0 #2a2aaf, inset -1px -1px 0 #8a8aff;
+}
+
+/* Scrollbar */
+body[data-theme="snes"] ::-webkit-scrollbar {
+    width: 16px;
+}
+
+body[data-theme="snes"] ::-webkit-scrollbar-track {
+    background: #7c7c7c;
+    border: 2px solid #000;
+}
+
+body[data-theme="snes"] ::-webkit-scrollbar-thumb {
+    background: #c4c4c4;
+    border: 2px solid #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
+    border-radius: 0;
+}
+
+/* Profile Manager SNES Overrides */
+body[data-theme="snes"] .profile-fab {
+    border-radius: 0;
+    background: #5a5aff;
+    /* Blue button */
+    border: 3px solid #000;
+    box-shadow: inset -2px -2px 0 #2a2aaf, inset 2px 2px 0 #8a8aff, 4px 4px 0 #000;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+}
+
+body[data-theme="snes"] .profile-fab:hover {
+    transform: none;
+    background: #6a6aff;
+    box-shadow: inset -2px -2px 0 #2a2aaf, inset 2px 2px 0 #9a9aff, 4px 4px 0 #000;
+}
+
+body[data-theme="snes"] .profile-fab.active {
+    background: #ff5a5a;
+    /* Red when open */
+    box-shadow: inset 2px 2px 0 #c42a2a, inset -2px -2px 0 #ff8a8a;
+    transform: translateY(2px);
+}
+
+body[data-theme="snes"] .profile-menu {
+    border-radius: 0;
+    background: #e4e4e4;
+    border: 4px solid #000;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+    backdrop-filter: none;
+}
+
+body[data-theme="snes"] .profile-menu-header {
+    background: #c4c4c4;
+    border-bottom: 4px solid #000;
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 15px;
+}
+
+body[data-theme="snes"] .profile-menu-header h3 {
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 #fff;
+}
+
+body[data-theme="snes"] .profile-item {
+    border-bottom: 2px solid #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+}
+
+body[data-theme="snes"] .profile-item:hover {
+    background: #ffff00;
+    color: #000;
+}
+
+body[data-theme="snes"] .profile-name {
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+}
+
+body[data-theme="snes"] .profile-item:hover .profile-name {
+    color: #000;
+}
+
+body[data-theme="snes"] .profile-icon {
+    color: #5a5aff;
+}
+
+body[data-theme="snes"] .btn-action {
+    border-radius: 0;
+    opacity: 1;
+    border: 2px solid #000;
+    background: #fff;
+    margin-left: 4px;
+}
+
+body[data-theme="snes"] .btn-action:hover {
+    background: #5a5aff;
+    color: #fff;
+}
+
+body[data-theme="snes"] .btn-delete:hover {
+    background: #ff5a5a;
+    color: #fff;
+}
+
+body[data-theme="snes"] .profile-create {
+    border-top: 4px solid #000;
+    background: #c4c4c4;
+}
+
+body[data-theme="snes"] .btn-create {
+    border-radius: 0;
+    background: #b4b4b4;
+    border: 3px solid #000;
+    box-shadow: inset -1px -1px 0 #7c7c7c, inset 1px 1px 0 #fff;
+    color: #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+}
+
+body[data-theme="snes"] .btn-create:hover {
+    background: #5a5aff;
+    color: #fff;
+    transform: none;
+    box-shadow: inset -1px -1px 0 #2a2aaf, inset 1px 1px 0 #8a8aff;
+}
+
+body[data-theme="snes"] .profile-input {
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: inset 2px 2px 0 #7c7c7c;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    background: #fff;
+    color: #000;
+}
+
+body[data-theme="snes"] .profile-input:focus {
+    outline: none;
+    background: #ffff00;
+}
+
+body[data-theme="snes"] .btn-confirm,
+body[data-theme="snes"] .btn-cancel {
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0 #000;
+}
+
+body[data-theme="snes"] .btn-confirm {
+    background: #00ff00;
+    color: #000;
+}
+
+body[data-theme="snes"] .btn-cancel {
+    background: #ff5a5a;
+    color: #000;
+}
+
+body[data-theme="snes"] .error-message {
+    background: #ff5a5a;
+    color: #fff;
+    border-top: 2px solid #000;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    padding: 10px;
+}
+
+/* Disable transitions for retro feel */
+body[data-theme="snes"] .profile-fab,
+body[data-theme="snes"] .profile-menu,
+body[data-theme="snes"] .profile-item,
+body[data-theme="snes"] .btn-action,
+body[data-theme="snes"] .btn-create {
+    transition: none;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+    body[data-theme="snes"] .main-grid {
+        grid-template-columns: 1fr;
+        padding-bottom: 120px;
+        /* Space for fixed player */
+    }
+
+    body[data-theme="snes"] .player {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        top: auto;
+        z-index: 100;
+        background: var(--color-panel-bg);
+        border-top: 4px solid #000;
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    body[data-theme="snes"] .player h3 {
+        display: none;
+    }
+
+    body[data-theme="snes"] .album-art {
+        width: 60px;
+        height: 60px;
+        margin: 0;
+        border: 2px solid #000;
+        flex-shrink: 0;
+    }
+
+    body[data-theme="snes"] .player-info {
+        text-align: left;
+        margin: 0 10px;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    body[data-theme="snes"] .player-title,
+    body[data-theme="snes"] .player-artist {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    body[data-theme="snes"] .controls {
+        margin: 0;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    body[data-theme="snes"] .control-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    body[data-theme="snes"] .control-btn.play {
+        width: 42px;
+        height: 42px;
+    }
+
+    body[data-theme="snes"] .controls-extra {
+        display: none;
+    }
+
+    body[data-theme="snes"] .time-info {
+        display: none;
+    }
+
+    /* Adjust Theme Selector position on mobile */
+    body[data-theme="snes"] .theme-selector {
+        bottom: 130px;
+        /* Above the player */
+        right: 10px;
+        transform: scale(0.8);
+        transform-origin: bottom right;
+    }
+
+    body[data-theme="snes"] .parallax-settings-btn {
+        bottom: 130px;
+        left: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    body[data-theme="snes"] {
+        padding: 10px;
+    }
+
+    body[data-theme="snes"] .logo h1 {
+        font-size: 14px;
+    }
+
+    body[data-theme="snes"] nav {
+        overflow-x: auto;
+        padding-bottom: 8px;
+    }
+
+    body[data-theme="snes"] nav button {
+        padding: 8px 12px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    body[data-theme="snes"] .player-artist {
+        display: none;
+    }
+}

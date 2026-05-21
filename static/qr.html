@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - Bailando Solo Mobile</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --color-bg: #7c7c7c;
+            --color-panel-bg: #e4e4e4;
+            --color-text: #000000;
+            --color-primary: #5a5aff;
+            --color-secondary: #ff5a5a;
+            --font-main: 'Press Start 2P', cursive;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--color-text);
+            image-rendering: pixelated;
+        }
+
+        /* CRT Scanline Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px);
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card {
+            background: var(--color-panel-bg);
+            border: 4px solid #000;
+            padding: 30px;
+            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 6px 6px 0 #000;
+            border-radius: 0;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 0 #ccc;
+            line-height: 1.5;
+        }
+
+        .subtitle {
+            opacity: 0.8;
+            margin-bottom: 30px;
+            font-size: 0.7rem;
+            color: #555;
+        }
+
+        #qrcode {
+            background: #fff;
+            padding: 20px;
+            border: 4px solid #000;
+            display: inline-block;
+            margin: 20px 0;
+            box-shadow: 6px 6px 0 #000;
+            image-rendering: pixelated;
+        }
+
+        .url-box {
+            background: #fff;
+            padding: 15px;
+            border: 4px solid #000;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            box-shadow: inset 4px 4px 0 #ccc;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .instructions {
+            text-align: left;
+            margin-top: 30px;
+            padding: 20px;
+            background: #c4c4c4;
+            border: 4px solid #000;
+            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
+        }
+
+        .instructions h3 {
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+            color: #000;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin: 10px 0;
+            line-height: 1.6;
+            font-size: 0.6rem;
+        }
+
+        .btn {
+            background: #5a5aff;
+            border: 4px solid #000;
+            color: #fff;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 0.7rem;
+            box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: none;
+            background: #6a6aff;
+        }
+
+        .btn:active {
+            box-shadow: inset 2px 2px 0 #000;
+            transform: translate(2px, 2px);
+        }
+
+        .btn-secondary {
+            background: #ff5a5a;
+            box-shadow: inset -2px -2px 0 #aa0000, inset 2px 2px 0 #ffaaaa;
+        }
+
+        .btn-secondary:hover {
+            background: #ff6a6a;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ffff00;
+            border: 4px solid #000;
+            font-size: 0.6rem;
+            color: #000;
+            box-shadow: 4px 4px 0 #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>📱 Acceso Móvil</h1>
+            <p class="subtitle">Escanea el código QR con tu móvil</p>
+
+            <div id="qrcode"></div>
+
+            <div class="url-box" id="url">Cargando...</div>
+
+            <a href="#" class="btn btn-secondary" id="testBtn">🧪 Probar Conexión</a>
+            <a href="/mobile" class="btn">🎵 Ir a Móvil</a>
+
+            <div class="instructions">
+                <h3>📋 Instrucciones:</h3>
+                <ol>
+                    <li>Asegúrate de que tu móvil esté en la <strong>misma red WiFi</strong></li>
+                    <li>Abre la cámara de tu móvil</li>
+                    <li>Apunta al código QR</li>
+                    <li>Toca la notificación que aparece</li>
+                </ol>
+            </div>
+
+            <div class="info">
+                💡 <strong>Tip:</strong> Si el QR no funciona, copia manualmente la URL mostrada arriba en el navegador
+                de tu móvil.
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Generator Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <script>
+        async function init() {
+            try {
+                // Get mobile info from server
+                const response = await fetch('/api/mobile/info');
+                const data = await response.json();
+
+                // Display URL
+                document.getElementById('url').textContent = data.url;
+                document.getElementById('testBtn').href = data.url.replace('/mobile', '/test-mobile');
+
+                // Generate QR Code
+                new QRCode(document.getElementById('qrcode'), {
+                    text: data.url,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                document.getElementById('url').textContent = 'Error: ' + error.message;
+                document.getElementById('qrcode').innerHTML = '<p style="color: #ff3b30; padding: 40px;">No se pudo generar el código QR</p>';
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
