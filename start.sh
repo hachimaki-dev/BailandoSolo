@@ -6,31 +6,30 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-PORT=${BAILANDO_PORT:-5001}
+echo -e "${BLUE}🚀 Configurando entorno de desarrollo de Bailando Solo...${NC}"
 
-echo -e "${BLUE}🚀 Iniciando Bailando Solo...${NC}"
-
-# 1. Crear entorno virtual si no existe
+# 1. Configurar Backend (Python)
+echo -e "${BLUE}📦 Verificando entorno de Python...${NC}"
 if [ ! -d "venv" ]; then
-    echo -e "${BLUE}📦 Creando entorno virtual seguro (venv)...${NC}"
     python3 -m venv venv
+    echo -e "${GREEN}✓ Entorno virtual creado.${NC}"
 fi
 
-# 2. Activar entorno virtual
 source venv/bin/activate
+pip install -r requirements.txt > /dev/null
+echo -e "${GREEN}✓ Dependencias de Python instaladas.${NC}"
 
-# 3. Instalar dependencias
-echo -e "${BLUE}⬇️  Verificando dependencias...${NC}"
-pip install -r requirements.txt
-
-# 4. Check for port conflicts
-if lsof -Pi :$PORT -sTCP:LISTEN -t >/dev/null 2>&1; then
-    echo -e "${RED}⚠️  Puerto $PORT está ocupado. Liberando...${NC}"
-    lsof -ti:$PORT | xargs kill -9 2>/dev/null
-    sleep 1
+# 2. Configurar Frontend (Node/Electron)
+echo -e "${BLUE}📦 Verificando dependencias de Node.js...${NC}"
+if [ ! -d "node_modules" ]; then
+    pnpm install
 fi
 
-# 5. Iniciar servidor
-echo -e "${GREEN}🎵 Servidor listo!${NC}"
-echo -e "${GREEN}👉 Abre http://localhost:$PORT en tu navegador para empezar.${NC}"
-python3 server.py
+if [ ! -d "ui/node_modules" ]; then
+    pnpm --dir ui install
+fi
+echo -e "${GREEN}✓ Dependencias de Node instaladas.${NC}"
+
+# 3. Iniciar entorno de desarrollo
+echo -e "${GREEN}🎵 Iniciando la aplicación (Electron + Flask)...${NC}"
+pnpm run dev

@@ -7,10 +7,15 @@ let pythonProcess;
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const isDev = process.argv.includes('--dev');
+  const iconPath = isDev
+    ? path.join(__dirname, 'ui', 'public', 'favicon.png')
+    : path.join(__dirname, 'ui', 'dist', 'favicon.png');
 
   mainWindow = new BrowserWindow({
     width: Math.round(width * 0.9),
     height: Math.round(height * 0.9),
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -20,16 +25,13 @@ function createWindow() {
     show: false // Don't show until ready
   });
 
-  const isDev = process.argv.includes('--dev');
-
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
+    // Open DevTools for debugging only in dev mode
+    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, 'ui', 'dist', 'index.html'));
   }
-
-  // Open DevTools for debugging
-  mainWindow.webContents.openDevTools();
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
@@ -41,17 +43,24 @@ function createWindow() {
 }
 
 function startPythonServer() {
-  // Asumimos que el venv ya está creado en la carpeta del proyecto
-  // Determine python path based on platform
   const isWin = process.platform === 'win32';
-  const pythonExecutable = isWin ? 'python.exe' : 'python3';
-  const venvPath = isWin ? path.join('venv', 'Scripts') : path.join('venv', 'bin');
-  const pythonPath = path.join(__dirname, venvPath, pythonExecutable);
-  const scriptPath = path.join(__dirname, 'server.py');
+  const binName = isWin ? 'bailandosolo-server.exe' : 'bailandosolo-server';
 
-  console.log(`Iniciando servidor Python: ${pythonPath} ${scriptPath}`);
+  if (app.isPackaged) {
+    // En producción, ejecutamos el binario empaquetado (PyInstaller)
+    const binPath = path.join(process.resourcesPath, binName);
+    console.log(`Iniciando servidor compilado: ${binPath}`);
+    pythonProcess = spawn(binPath, []);
+  } else {
+    // En desarrollo, usamos el entorno virtual
+    const pythonExecutable = isWin ? 'python.exe' : 'python3';
+    const venvPath = isWin ? path.join('venv', 'Scripts') : path.join('venv', 'bin');
+    const pythonPath = path.join(__dirname, venvPath, pythonExecutable);
+    const scriptPath = path.join(__dirname, 'server.py');
 
-  pythonProcess = spawn(pythonPath, [scriptPath]);
+    console.log(`Iniciando servidor Python (Dev): ${pythonPath} ${scriptPath}`);
+    pythonProcess = spawn(pythonPath, [scriptPath]);
+  }
 
   pythonProcess.stdout.on('data', (data) => {
     console.log(`Python: ${data}`);

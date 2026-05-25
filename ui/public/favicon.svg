@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0c20" />
+      <stop offset="50%" stop-color="#15102a" />
+      <stop offset="100%" stop-color="#06040a" />
+    </linearGradient>
+
+    <!-- Border Glow Gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="50%" stop-color="#7a22ff" />
+      <stop offset="100%" stop-color="#00f0ff" />
+    </linearGradient>
+
+    <!-- Vinyl Disc Gradient -->
+    <radialGradient id="vinylGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#242145" />
+      <stop offset="70%" stop-color="#141126" />
+      <stop offset="100%" stop-color="#0b0a14" />
+    </radialGradient>
+
+    <!-- Center Label Gradient (Vaporwave / Retro) -->
+    <linearGradient id="labelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff007f" />
+      <stop offset="40%" stop-color="#a819ff" />
+      <stop offset="100%" stop-color="#00f0ff" />
+    </linearGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Subtle Drop Shadow -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Background Squircle with Neon Border -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="8" filter="url(#shadow)" />
+
+  <!-- Vinyl Record Body -->
+  <circle cx="256" cy="256" r="184" fill="url(#vinylGrad)" stroke="#1a1830" stroke-width="3" />
+
+  <!-- Vinyl Grooves -->
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#2b284c" stroke-width="1.5" stroke-dasharray="15 6" />
+  <circle cx="256" cy="256" r="152" fill="none" stroke="#201e38" stroke-width="1" />
+  <circle cx="256" cy="256" r="136" fill="none" stroke="#2b284c" stroke-width="1.5" stroke-dasharray="35 10" />
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#201e38" stroke-width="1" />
+  <circle cx="256" cy="256" r="104" fill="none" stroke="#2b284c" stroke-width="1.2" stroke-dasharray="8 4" />
+  <circle cx="256" cy="256" r="88" fill="none" stroke="#1d1b33" stroke-width="1" />
+
+  <!-- Vinyl Sheen / Light Reflection (Conical reflection simulation) -->
+  <path d="M 256 256 L 126 126 A 184 184 0 0 1 386 126 Z" fill="rgba(255, 255, 255, 0.04)" />
+  <path d="M 256 256 L 386 386 A 184 184 0 0 1 126 386 Z" fill="rgba(255, 255, 255, 0.04)" />
+
+  <!-- Outer Ring of Center Label -->
+  <circle cx="256" cy="256" r="76" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.3" />
+
+  <!-- Center Label Sticker -->
+  <circle cx="256" cy="256" r="72" fill="url(#labelGrad)" />
+
+  <!-- Headphones Overlay (wrapping around the center label) -->
+  <g filter="url(#neonGlow)">
+    <!-- Headband Arc -->
+    <path d="M 166 256 A 90 90 0 0 1 346 256" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" />
+    
+    <!-- Left Earcup Outer -->
+    <rect x="146" y="220" width="36" height="72" rx="12" fill="#ffffff" />
+    <!-- Left Earcup Inner Cushion -->
+    <rect x="170" y="226" width="12" height="60" rx="6" fill="#15102a" />
+    
+    <!-- Right Earcup Outer -->
+    <rect x="330" y="220" width="36" height="72" rx="12" fill="#ffffff" />
+    <!-- Right Earcup Inner Cushion -->
+    <rect x="330" y="226" width="12" height="60" rx="6" fill="#15102a" />
+
+    <!-- Headband joint lines/brackets -->
+    <line x1="166" y1="220" x2="166" y2="210" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
+    <line x1="346" y1="220" x2="346" y2="210" stroke="#ffffff" stroke-width="8" stroke-linecap="round" />
+  </g>
+
+  <!-- Center Record Hole & Musical Note combined -->
+  <!-- We place a small center circle representing the record center spindle hole -->
+  <circle cx="256" cy="256" r="22" fill="#0f0c20" />
+  
+  <!-- A glowing musical eighth note in the center, overlapping the hole or inside the label -->
+  <path d="M 250 220 L 250 262 A 12 10 0 1 1 234 252 A 12 10 0 0 1 250 262 L 250 230 C 265 230 272 242 272 242 L 272 228 C 272 228 268 220 250 220 Z" fill="#ffffff" />
+
+</svg>

@@ -4,8 +4,35 @@
   "description": "Descargador de Playlists de Alta Fidelidad",
   "main": "main.js",
   "scripts": {
-    "start": "npm run build --prefix ui && electron .",
-    "dev": "concurrently \"npm run dev --prefix ui\" \"wait-on tcp:5173 && electron . --dev\""
+    "start": "pnpm --dir ui run build && electron .",
+    "dev": "concurrently \"pnpm --dir ui run dev\" \"wait-on tcp:5173 && electron . --dev\"",
+    "build": "pnpm --dir ui run build",
+    "dist": "pnpm run build && electron-builder"
+  },
+  "build": {
+    "appId": "com.bailandosolo.app",
+    "productName": "Bailando Solo",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "ui/dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "dist",
+        "to": ".",
+        "filter": ["bailandosolo-server", "bailandosolo-server.exe"]
+      }
+    ],
+    "linux": {
+      "target": ["AppImage", "deb"]
+    },
+    "win": {
+      "target": ["nsis"]
+    }
   },
   "keywords": [],
   "author": "",
@@ -13,6 +40,12 @@
   "devDependencies": {
     "concurrently": "^9.2.1",
     "electron": "^33.4.11",
+    "electron-builder": "^25.1.8",
     "wait-on": "^9.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron"
+    ]
   }
 }

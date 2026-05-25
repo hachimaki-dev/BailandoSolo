@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bailando Solo - El Reproductor Soberano</title>
+  <meta name="description" content="Descarga tus playlists de alta fidelidad, organiza tu música localmente y recupera tu soberanía digital con Bailando Solo. Cero suscripciones, cero publicidad.">
+  <style>
+    /* --- RESET & ACCESIBILIDAD --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      image-rendering: pixelated;
+    }
+
+    /* Fuentes Clásicas del Sistema */
+    body {
+      font-family: "Tahoma", "MS Sans Serif", "Arial", sans-serif;
+      font-size: 13px;
+      color: #000000;
+      background-color: #008080; /* Teal clásico de Windows 95 */
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* --- PALETA DE COLORES WIN95 --- */
+    :root {
+      --win-bg: #c0c0c0;
+      --win-white: #ffffff;
+      --win-gray: #808080;
+      --win-dark-gray: #404040;
+      --win-blue-dark: #000080;
+      --win-blue-light: #1084d0;
+      --win-text: #000000;
+      --win-text-disabled: #808080;
+      --win-yellow: #ffffcc;
+    }
+
+    /* --- BORDES CLÁSICOS --- */
+    .outset-border {
+      border-top: 2px solid var(--win-white);
+      border-left: 2px solid var(--win-white);
+      border-right: 2px solid var(--win-dark-gray);
+      border-bottom: 2px solid var(--win-dark-gray);
+      box-shadow: 1px 1px 0px 0px var(--win-text),
+                  inset 1px 1px 0px 0px var(--win-bg);
+    }
+
+    .outset-button {
+      border-top: 2px solid var(--win-white);
+      border-left: 2px solid var(--win-white);
+      border-right: 2px solid var(--win-dark-gray);
+      border-bottom: 2px solid var(--win-dark-gray);
+      box-shadow: 1px 1px 0px 0px var(--win-text);
+      background-color: var(--win-bg);
+      cursor: pointer;
+    }
+
+    .outset-button:active, .outset-button.active {
+      border-top: 2px solid var(--win-dark-gray);
+      border-left: 2px solid var(--win-dark-gray);
+      border-right: 2px solid var(--win-white);
+      border-bottom: 2px solid var(--win-white);
+      box-shadow: inset 1px 1px 0px 0px var(--win-text);
+      padding: 1px 0px 0px 1px;
+    }
+
+    .inset-border {
+      border-top: 2px solid var(--win-dark-gray);
+      border-left: 2px solid var(--win-dark-gray);
+      border-right: 2px solid var(--win-white);
+      border-bottom: 2px solid var(--win-white);
+      box-shadow: inset 1px 1px 0px 0px var(--win-text);
+      background-color: var(--win-white);
+    }
+
+    /* --- CONTENEDOR ESCRITORIO --- */
+    #desktop {
+      position: relative;
+      width: 100vw;
+      height: calc(100vh - 40px);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 20px;
+    }
+
+    /* Iconos del Escritorio */
+    .desktop-icon {
+      width: 80px;
+      height: 75px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--win-white);
+      cursor: pointer;
+      font-size: 11px;
+      text-shadow: 1px 1px 1px #000;
+      border: 1px transparent dotted;
+      border-radius: 2px;
+      padding: 4px;
+    }
+
+    .desktop-icon:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .desktop-icon:focus, .desktop-icon.selected {
+      background-color: rgba(0, 0, 128, 0.5);
+      border: 1px white dotted;
+      outline: none;
+    }
+
+    .desktop-icon svg {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 6px;
+      filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.7));
+    }
+
+    /* --- VENTANA DE WINDOWS 95 --- */
+    .window {
+      position: absolute;
+      top: 5%;
+      left: 15%;
+      width: 70%;
+      max-width: 900px;
+      background-color: var(--win-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      min-width: 320px;
+    }
+
+    .window.maximized {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+    }
+
+    .window.minimized {
+      display: none;
+    }
+
+    .title-bar {
+      padding: 3px 3px 3px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--win-blue-grad);
+      color: var(--win-white);
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      cursor: move;
+    }
+
+    .title-bar-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .title-bar-text svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .title-bar-controls {
+      display: flex;
+      gap: 2px;
+    }
+
+    .title-bar-controls button {
+      width: 16px;
+      height: 14px;
+      font-size: 9px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 2px;
+    }
+
+    .title-bar-controls button:active {
+      padding: 1px 0 0 1px;
+    }
+
+    /* Menu de Ventana */
+    .menu-bar {
+      display: flex;
+      padding: 2px 6px;
+      border-bottom: 1px solid var(--win-gray);
+      gap: 12px;
+    }
+
+    .menu-item {
+      position: relative;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+
+    .menu-item::first-letter {
+      text-decoration: underline;
+    }
+
+    .menu-item:hover {
+      background-color: var(--win-blue-dark);
+      color: var(--win-white);
+    }
+
+    .menu-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: var(--win-bg);
+      z-index: 100;
+      min-width: 150px;
+    }
+
+    .menu-item:hover .menu-dropdown {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 4px 12px;
+      color: var(--win-text);
+      display: flex;
+      justify-content: space-between;
+      text-decoration: none;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--win-blue-dark);
+      color: var(--win-white);
+    }
+
+    .dropdown-separator {
+      height: 1px;
+      background-color: var(--win-gray);
+      border-bottom: 1px solid var(--win-white);
+      margin: 2px 0;
+    }
+
+    /* Cuerpo de la Ventana */
+    .window-body {
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      flex-grow: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 120px);
+    }
+
+    /* Barra lateral izquierda de la Ventana */
+    .window-sidebar {
+      width: 180px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 10px;
+      background: linear-gradient(180deg, #eaeaea, var(--win-bg));
+    }
+
+    .vinyl-container {
+      width: 110px;
+      height: 110px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .vinyl-svg {
+      width: 100px;
+      height: 100px;
+      animation: spin 3s linear infinite;
+      animation-play-state: running;
+      filter: drop-shadow(2px 3px 0px rgba(0,0,0,0.3));
+    }
+
+    .vinyl-arm {
+      position: absolute;
+      width: 45px;
+      height: 60px;
+      top: 5px;
+      right: 5px;
+      transform-origin: 35px 10px;
+      transform: rotate(15deg);
+      transition: transform 0.5s ease-in-out;
+      filter: drop-shadow(1px 2px 0px rgba(0,0,0,0.3));
+    }
+
+    .vinyl-container.paused .vinyl-svg {
+      animation-play-state: paused;
+    }
+
+    .vinyl-container.paused .vinyl-arm {
+      transform: rotate(-15deg);
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .retro-badge-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      margin-top: auto;
+    }
+
+    .badge-win95 {
+      width: 88px;
+      height: 31px;
+      border: 1px solid #000;
+      font-size: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-family: monospace;
+      letter-spacing: -0.5px;
+    }
+
+    /* Panel de Contenido Principal */
+    .window-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Encabezado del Producto */
+    .product-header {
+      border-bottom: 2px solid var(--win-gray);
+      padding-bottom: 12px;
+    }
+
+    .product-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--win-blue-dark);
+      letter-spacing: -0.5px;
+      text-shadow: 1px 1px 0px var(--win-white);
+      margin-bottom: 4px;
+    }
+
+    .product-subtitle {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--win-dark-gray);
+    }
+
+    /* Caja de Alerta Retro */
+    .retro-alert {
+      background-color: var(--win-yellow);
+      border: 1px solid var(--win-gray);
+      padding: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .retro-alert svg {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    /* Secciones */
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      background-color: var(--win-blue-dark);
+      color: var(--win-white);
+      padding: 2px 6px;
+      margin-bottom: 10px;
+    }
+
+    /* Consola DOS / Código de Instalación */
+    .dos-console {
+      background-color: #000000;
+      color: #00ff00;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12px;
+      padding: 12px;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .dos-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+      color: #888;
+      font-size: 10px;
+    }
+
+    .dos-copy-btn {
+      background: #222;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      font-size: 10px;
+      padding: 2px 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .dos-copy-btn:hover {
+      background: #00ff00;
+      color: #000;
+    }
+
+    .dos-copy-btn:active {
+      transform: scale(0.95);
+    }
+
+    .dos-prompt {
+      color: #aaa;
+    }
+
+    .dos-comment {
+      color: #008800;
+      font-style: italic;
+    }
+
+    /* Tabla de Requisitos */
+    .req-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .req-table th, .req-table td {
+      border: 1px solid var(--win-gray);
+      padding: 6px;
+      text-align: left;
+    }
+
+    .req-table th {
+      background-color: var(--win-bg);
+      font-weight: bold;
+    }
+
+    .req-table td {
+      background-color: var(--win-white);
+    }
+
+    /* Lista de Características (Estilo Explorer) */
+    .features-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+      padding: 8px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px;
+      background: var(--win-white);
+      border: 1px solid var(--win-gray);
+    }
+
+    .feature-item svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* --- BARRA DE TAREAS WIN95 --- */
+    #taskbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      height: 40px;
+      background-color: var(--win-bg);
+      border-top: 2px solid var(--win-white);
+      display: flex;
+      align-items: center;
+      padding: 3px 6px;
+      z-index: 1000;
+      gap: 6px;
+      box-shadow: 0 -1px 0px 0px var(--win-gray);
+    }
+
+    /* Botón Inicio */
+    #start-button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+      padding: 3px 8px 3px 6px;
+      font-size: 12px;
+      height: 28px;
+    }
+
+    #start-button svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Lista de Ventanas Activas */
+    #tasks-list {
+      flex-grow: 1;
+      display: flex;
+      gap: 4px;
+    }
+
+    .task-button {
+      height: 28px;
+      min-width: 100px;
+      max-width: 150px;
+      padding: 3px 8px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    .task-button svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* Bandeja de Sistema */
+    #systray {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      height: 28px;
+      font-size: 11px;
+    }
+
+    #systray svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* --- MENÚ INICIO WIN95 --- */
+    #start-menu {
+      display: none;
+      position: absolute;
+      bottom: 40px;
+      left: 2px;
+      width: 220px;
+      background-color: var(--win-bg);
+      z-index: 1001;
+      padding: 3px;
+    }
+
+    #start-menu.open {
+      display: flex;
+    }
+
+    .start-menu-sidebar {
+      width: 32px;
+      background: linear-gradient(180deg, var(--win-blue-dark), var(--win-blue-light));
+      color: var(--win-white);
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 4px;
+      font-weight: bold;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 0px #000;
+    }
+
+    .start-menu-list {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .start-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      text-decoration: none;
+      color: var(--win-text);
+      cursor: pointer;
+    }
+
+    .start-menu-item:hover {
+      background-color: var(--win-blue-dark);
+      color: var(--win-white);
+    }
+
+    .start-menu-item svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* --- DIALOGOS EXTRAS --- */
+    .dialog-box {
+      position: absolute;
+      top: 30%;
+      left: 35%;
+      width: 300px;
+      background-color: var(--win-bg);
+      z-index: 1100;
+      display: none;
+    }
+
+    .dialog-body {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      text-align: center;
+    }
+
+    .dialog-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dialog-buttons button {
+      padding: 4px 20px;
+      min-width: 70px;
+    }
+
+    /* --- PANTALLAZO AZUL / APAGADO (Efectos Divertidos) --- */
+    #shutdown-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000000;
+      color: #ff9900;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: "Courier New", Courier, monospace;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #shutdown-screen.open {
+      display: flex;
+    }
+
+    #bsod-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #0000aa;
+      color: var(--win-white);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: "Courier New", Courier, monospace;
+      padding: 40px;
+      line-height: 1.5;
+    }
+
+    #bsod-screen.open {
+      display: flex;
+    }
+
+    .bsod-title {
+      background-color: var(--win-white);
+      color: #0000aa;
+      padding: 2px 10px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .bsod-btn {
+      background: var(--win-bg);
+      border: 2px solid var(--win-white);
+      color: #000;
+      font-family: "Tahoma", sans-serif;
+      padding: 4px 15px;
+      margin-top: 30px;
+      cursor: pointer;
+    }
+
+    /* --- RESPONSIVIDAD (MOBILE) --- */
+    @media (max-width: 768px) {
+      #desktop {
+        padding: 10px;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+      }
+      .desktop-icon {
+        width: 70px;
+        height: 65px;
+      }
+      .window {
+        width: 96%;
+        left: 2%;
+        top: 2%;
+        height: calc(100vh - 60px);
+      }
+      .window-body {
+        flex-direction: column;
+      }
+      .window-sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 8px;
+      }
+      .vinyl-container {
+        width: 60px;
+        height: 60px;
+      }
+      .vinyl-svg {
+        width: 50px;
+        height: 50px;
+      }
+      .vinyl-arm {
+        width: 25px;
+        height: 35px;
+      }
+      .retro-badge-list {
+        display: none;
+      }
+      .dialog-box {
+        width: 90%;
+        left: 5%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA DE APAGADO -->
+  <div id="shutdown-screen">
+    <p style="font-size: 24px; margin-bottom: 20px;">Bailando Solo OS</p>
+    <p style="color: #ff0000; font-size: 18px; margin-bottom: 10px;">PROCESO TERMINADO CON ÉXITO</p>
+    <p>Ahora puede apagar su equipo de música con seguridad.</p>
+    <button class="outset-button" style="margin-top: 30px; padding: 6px 15px;" onclick="restartOS()">Reiniciar Sistema</button>
+  </div>
+
+  <!-- PANTALLA AZUL DE LA MUERTE (BSOD) -->
+  <div id="bsod-screen">
+    <div class="bsod-title">Windows 95 / Bailando Solo Exception</div>
+    <p>Se ha producido una excepción fatal 0E en 0028:C001D3AD en el módulo VXD yt-dlp.</p>
+    <p>La suscripción mensual de música intentó escribir en memoria protegida de tu billetera.</p>
+    <br>
+    <p>* Presione REINICIAR para recuperar el control de su biblioteca de MP3s.</p>
+    <p>* Presione cualquier otra tecla para darse por vencido y volver a pagar suscripciones premium.</p>
+    <br>
+    <button class="bsod-btn" onclick="restartOS()">REINICIAR SISTEMA</button>
+  </div>
+
+  <!-- ESCRITORIO -->
+  <div id="desktop">
+    <!-- Iconos del escritorio -->
+    <div class="desktop-icon" tabindex="0" onclick="selectIcon(this)" ondblclick="openSystemSpecs()">
+      <!-- SVG PC -->
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="3" width="26" height="18" fill="#C0C0C0" stroke="black" stroke-width="2"/>
+        <rect x="6" y="6" width="20" height="12" fill="#000080"/>
+        <path d="M12 21L9 27H23L20 21H12Z" fill="#C0C0C0" stroke="black" stroke-width="2"/>
+        <rect x="6" y="27" width="20" height="2" fill="black"/>
+      </svg>
+      <span>Mi PC</span>
+    </div>
+
+    <div class="desktop-icon" tabindex="0" onclick="selectIcon(this)" ondblclick="openRecycleBin()">
+      <!-- SVG Papelera -->
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="8" width="20" height="20" fill="#C0C0C0" stroke="black" stroke-width="2"/>
+        <line x1="4" y1="5" x2="28" y2="5" stroke="black" stroke-width="2"/>
+        <rect x="11" y="2" width="10" height="3" fill="#C0C0C0" stroke="black" stroke-width="2"/>
+        <line x1="10" y1="12" x2="10" y2="24" stroke="black" stroke-width="2"/>
+        <line x1="16" y1="12" x2="16" y2="24" stroke="black" stroke-width="2"/>
+        <line x1="22" y1="12" x2="22" y2="24" stroke="black" stroke-width="2"/>
+      </svg>
+      <span>Papelera de Reciclaje</span>
+    </div>
+
+    <div class="desktop-icon" tabindex="0" onclick="selectIcon(this)" ondblclick="restoreMainWindow()">
+      <!-- SVG Bailando Solo Acceso Directo -->
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" fill="#111" stroke="black" stroke-width="2"/>
+        <circle cx="16" cy="16" r="6" fill="#f0a30a" stroke="black" stroke-width="1"/>
+        <circle cx="16" cy="16" r="1" fill="black"/>
+        <path d="M2 16H6M26 16H30" stroke="#333" stroke-width="1"/>
+        <path d="M12 2L15 6M17 26L20 30" stroke="white" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span>Bailando Solo.lnk</span>
+    </div>
+
+    <!-- VENTANA PRINCIPAL -->
+    <div id="main-window" class="window outset-border">
+      <!-- Barra de Título -->
+      <div class="title-bar" onmousedown="dragStart(event)">
+        <div class="title-bar-text">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="14" fill="#000000"/>
+            <circle cx="16" cy="16" r="5" fill="#f0a30a"/>
+            <path d="M10 10L14 14" stroke="white" stroke-width="1"/>
+          </svg>
+          <span>BailandoSolo_v1.0.exe</span>
+        </div>
+        <div class="title-bar-controls">
+          <button class="outset-button" onclick="minimizeWindow()" title="Minimizar">_</button>
+          <button class="outset-button" onclick="toggleMaximizeWindow()" title="Maximizar">⛶</button>
+          <button class="outset-button" onclick="minimizeWindow()" title="Cerrar">X</button>
+        </div>
+      </div>
+
+      <!-- Barra de Menú -->
+      <div class="menu-bar">
+        <div class="menu-item">
+          Archivo
+          <div class="menu-dropdown outset-border">
+            <a href="https://github.com/hachimaki-dev/BailandoSolo" class="dropdown-item" target="_blank"><span>Ver Repositorio</span><span>Ctrl+G</span></a>
+            <div class="dropdown-separator"></div>
+            <div class="dropdown-item" onclick="triggerBSOD()"><span>Generar Error Fatal</span><span>F13</span></div>
+            <div class="dropdown-item" onclick="shutdownSystem()"><span>Cerrar App</span><span>Alt+F4</span></div>
+          </div>
+        </div>
+        <div class="menu-item">
+          Edición
+          <div class="menu-dropdown outset-border">
+            <div class="dropdown-item" onclick="copyConsoleCode()"><span>Copiar Comandos</span><span>Ctrl+C</span></div>
+          </div>
+        </div>
+        <div class="menu-item">
+          Ayuda
+          <div class="menu-dropdown outset-border">
+            <div class="dropdown-item" onclick="openSystemSpecs()"><span>Acerca de...</span><span>F1</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuerpo del Software -->
+      <div class="window-body">
+        
+        <!-- Sidebar Izquierdo -->
+        <div class="window-sidebar inset-border">
+          <div class="vinyl-container" id="vinyl-box">
+            <!-- SVG Tocadiscos -->
+            <svg class="vinyl-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="48" fill="#111111" stroke="#333333" stroke-width="2"/>
+              <circle cx="50" cy="50" r="40" stroke="#222222" stroke-width="1"/>
+              <circle cx="50" cy="50" r="30" stroke="#222222" stroke-width="1"/>
+              <circle cx="50" cy="50" r="20" stroke="#222222" stroke-width="1"/>
+              <circle cx="50" cy="50" r="14" fill="#ff5555"/>
+              <circle cx="50" cy="50" r="3" fill="#ffffff"/>
+            </svg>
+            <svg class="vinyl-arm" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Brazo reproductor -->
+              <path d="M35 10 L15 10 L15 45 L25 55" stroke="#cccccc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="22" y="52" width="6" height="10" fill="#888888" transform="rotate(15 25 57)"/>
+              <circle cx="35" cy="10" r="6" fill="#888888"/>
+            </svg>
+          </div>
+          
+          <button class="outset-button" style="width: 100%; padding: 4px; font-size: 11px;" onclick="toggleVinyl()">
+            Reproducir / Pausa
+          </button>
+
+          <div style="font-size: 10px; text-align: center; margin-top: 10px; width: 100%; display: flex; flex-direction: column; gap: 6px;">
+            <a href="https://github.com/hachimaki-dev/BailandoSolo" target="_blank" class="outset-button" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; text-decoration: none; color: #000; font-weight: bold; font-size: 11px;">
+              <span>⭐ Dar una Estrella</span>
+            </a>
+            <a href="https://github.com/hachimaki-dev/BailandoSolo/issues" target="_blank" class="outset-button" style="display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px; text-decoration: none; color: #000; font-weight: bold; font-size: 11px;">
+              <span>💬 Dejar Reseña</span>
+            </a>
+          </div>
+
+          <div class="retro-badge-list">
+            <div class="badge-win95">
+              <span>WIN 95/NT</span>
+            </div>
+            <div class="badge-win95" style="background: #000080; border-color: #000080;">
+              <span>yt-dlp core</span>
+            </div>
+            <div style="font-size: 9px; text-align: center; color: #555;">
+              Optimizado para 640x480
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenido Derecho -->
+        <div class="window-content">
+          
+          <div class="product-header">
+            <h1 class="product-title">Bailando Solo</h1>
+            <p class="product-subtitle">Tu música. Tus reglas. Tu disco duro.</p>
+          </div>
+
+          <!-- Alerta de advertencia retro -->
+          <div class="retro-alert">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 22H22L12 2Z" fill="#ffcc00" stroke="black" stroke-width="2" stroke-linejoin="round"/>
+              <rect x="11" y="9" width="2" height="6" fill="black"/>
+              <rect x="11" y="17" width="2" height="2" fill="black"/>
+            </svg>
+            <div style="font-size: 11px; line-height: 1.3;">
+              <strong>¡ADVERTENCIA DE SOBERANÍA DIGITAL!</strong> El streaming corporativo daña seriamente tu biblioteca. Recupera tu música localmente libre de trackers.
+            </div>
+          </div>
+
+          <!-- Pestaña de Arranque Rápido -->
+          <div>
+            <div class="section-title">ARRIBA LA MÚSICA (Arranque Rápido en Local)</div>
+            <p style="margin-bottom: 8px;">Selecciona tu sistema e ingresa estos comandos en tu terminal:</p>
+            
+            <!-- Barra de Pestañas Retro -->
+            <div class="retro-tabs" style="display: flex; gap: 4px; margin-bottom: -2px; padding-left: 10px; z-index: 2; position: relative;">
+              <div class="retro-tab" onclick="switchTab('bash')" id="tab-bash" style="padding: 6px 12px 4px 12px; background: var(--win-bg); border-top: 2px solid var(--win-white); border-left: 2px solid var(--win-white); border-right: 2px solid var(--win-dark-gray); cursor: pointer; font-weight: bold; border-bottom: none; z-index: 3; margin-top: 0;">Bash (Linux/macOS)</div>
+              <div class="retro-tab" onclick="switchTab('powershell')" id="tab-powershell" style="padding: 4px 12px; background: #b0b0b0; border-top: 2px solid var(--win-white); border-left: 2px solid var(--win-white); border-right: 2px solid var(--win-dark-gray); border-bottom: 2px solid var(--win-dark-gray); cursor: pointer; z-index: 1; margin-top: 2px;">PowerShell (Windows)</div>
+            </div>
+
+            <!-- Consola Bash -->
+            <div id="console-bash" class="dos-console inset-border" style="border-top: 2px solid var(--win-white); min-height: 200px;">
+              <div class="dos-header">
+                <span>Terminal - bash/zsh (Linux/macOS)</span>
+                <button class="dos-copy-btn" onclick="copyConsoleCode('bash')" id="copy-btn-bash">Copiar</button>
+              </div>
+              <div>
+                <span class="dos-comment"># 1. Clona el repositorio oficial</span><br>
+                <span class="dos-prompt">user@host:~$</span> <span>git clone https://github.com/hachimaki-dev/BailandoSolo.git</span><br>
+                <br>
+                <span class="dos-comment"># 2. Entra al directorio</span><br>
+                <span class="dos-prompt">user@host:~$</span> <span>cd BailandoSolo</span><br>
+                <br>
+                <span class="dos-comment"># 3. Otorga permisos y arranca la App</span><br>
+                <span class="dos-prompt">user@host:~/BailandoSolo$</span> <span>chmod +x start.sh</span><br>
+                <span class="dos-prompt">user@host:~/BailandoSolo$</span> <span>./start.sh</span><br>
+                <br>
+                <span class="dos-comment"># ¡Y listoco! El script automatiza venv, dependencias y abre Electron. xDD</span>
+              </div>
+            </div>
+
+            <!-- Consola PowerShell -->
+            <div id="console-powershell" class="dos-console inset-border" style="border-top: 2px solid var(--win-white); display: none; min-height: 200px; padding: 0; overflow: hidden;">
+              <div class="dos-header" style="color: #5cf; border-bottom: 1px solid #005588; background: #012456; padding: 8px 12px 4px 12px; margin-bottom: 0;">
+                <span>PowerShell (Windows)</span>
+                <button class="dos-copy-btn" onclick="copyConsoleCode('powershell')" id="copy-btn-powershell" style="color: #5cf; border-color: #005588; background: #003366;">Copiar</button>
+              </div>
+              <div style="color: #ffffff; background-color: #012456; font-family: 'Courier New', Courier, monospace; font-size: 12px; padding: 12px; height: calc(100% - 25px); overflow-y: auto;">
+                <span style="color: #8cc6ff;"># 1. Clona el repositorio</span><br>
+                <span style="color: #00ff00;">PS C:\></span> <span>git clone https://github.com/hachimaki-dev/BailandoSolo.git</span><br>
+                <br>
+                <span style="color: #8cc6ff;"># 2. Entra al directorio</span><br>
+                <span style="color: #00ff00;">PS C:\></span> <span>cd BailandoSolo</span><br>
+                <br>
+                <span style="color: #8cc6ff;"># 3. Levanta el entorno de Python y dependencias</span><br>
+                <span style="color: #00ff00;">PS C:\BailandoSolo></span> <span>python -m venv venv</span><br>
+                <span style="color: #00ff00;">PS C:\BailandoSolo></span> <span>.\venv\Scripts\Activate.ps1</span><br>
+                <span style="color: #00ff00;">PS C:\BailandoSolo></span> <span>pip install -r requirements.txt</span><br>
+                <br>
+                <span style="color: #8cc6ff;"># 4. Instala librerías front y arranca</span><br>
+                <span style="color: #00ff00;">PS C:\BailandoSolo></span> <span>pnpm install; pnpm --dir ui install; pnpm run dev</span><br>
+                <br>
+                <span style="color: #8cc6ff;"># ¡Listo para reproducir sin intermediarios! xDD</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Características de la aplicación -->
+          <div>
+            <div class="section-title">CARACTERÍSTICAS DEL SISTEMA</div>
+            <div class="features-list">
+              <div class="feature-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+                <span>Descarga playlists completas</span>
+              </div>
+              <div class="feature-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+                <span>Sin trackers ni analytics</span>
+              </div>
+              <div class="feature-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Soporte multiusuario local</span>
+              </div>
+              <div class="feature-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
+                </svg>
+                <span>Motor rápido yt-dlp</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requisitos de sistema -->
+          <div>
+            <div class="section-title">COMPATIBILIDAD & REQUISITOS</div>
+            <table class="req-table">
+              <thead>
+                <tr>
+                  <th>Componente</th>
+                  <th>Requisito Mínimo</th>
+                  <th>Uso</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Node.js</strong></td>
+                  <td>Versión 18+</td>
+                  <td>Entorno para Electron, Vite y la interfaz gráfica.</td>
+                </tr>
+                <tr>
+                  <td><strong>Python</strong></td>
+                  <td>Versión 3.10+</td>
+                  <td>Backend de la aplicación y llamadas a yt-dlp.</td>
+                </tr>
+                <tr>
+                  <td><strong>Ffmpeg</strong></td>
+                  <td>Instalado en el PATH</td>
+                  <td>Opcional, pero vital para la conversión limpia a MP3.</td>
+                </tr>
+                <tr>
+                  <td><strong>S.O.</strong></td>
+                  <td>Linux, Windows, macOS</td>
+                  <td>Probado intensamente en sistemas Unix de cochera.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Apoya el Software Libre y Créditos -->
+          <div>
+            <div class="section-title">APOYA EL SOFTWARE LIBRE & CRÉDITOS</div>
+            <div class="inset-border" style="padding: 10px; background-color: var(--win-white); line-height: 1.4; font-size: 11px;">
+              <p style="margin-bottom: 8px;">
+                <strong>¡Apoya nuestro repositorio!</strong> Si esta herramienta te es útil para recuperar el control de tu biblioteca musical, por favor déjanos una <strong>estrellita ⭐</strong> o comparte una reseña en GitHub. Apoyar el desarrollo independiente y el código abierto nos ayuda a seguir resistiendo al software corporativo rentista.
+              </p>
+              <div style="height: 1px; background-color: var(--win-gray); margin: 8px 0;"></div>
+              <p style="font-weight: bold; margin-bottom: 4px;">Propiedad Intelectual y Créditos:</p>
+              <ul style="margin-left: 16px; display: flex; flex-direction: column; gap: 3px;">
+                <li><strong>yt-dlp</strong> (Licencia Unlicense) - Motor de línea de comandos para descargas de audio y video.</li>
+                <li><strong>Electron</strong> (Licencia MIT) - Framework para la arquitectura de escritorio nativa de la app.</li>
+                <li><strong>Vue.js 3</strong> (Licencia MIT) - El framework reactivo detrás de nuestra interfaz interactiva.</li>
+                <li><strong>Vite</strong> (Licencia MIT) - Servidor de desarrollo y compilador de frontend ultrarrápido.</li>
+                <li><strong>Flask</strong> (Licencia BSD-3-Clause) - Microservidor web local en Python.</li>
+                <li><strong>qrcode</strong> (Licencia MIT) - Librería para la generación de códigos de vinculación móvil.</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- DIÁLOGO: ACERCA DE / PROPIEDADES -->
+    <div id="specs-dialog" class="dialog-box outset-border">
+      <div class="title-bar">
+        <div class="title-bar-text">Acerca de Bailando Solo</div>
+        <div class="title-bar-controls">
+          <button class="outset-button" onclick="closeDialog('specs-dialog')">X</button>
+        </div>
+      </div>
+      <div class="dialog-body">
+        <!-- SVG Logo Grande -->
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px;">
+          <circle cx="16" cy="16" r="14" fill="#000000" stroke="#ffffff" stroke-width="1"/>
+          <circle cx="16" cy="16" r="5" fill="#f0a30a"/>
+        </svg>
+        <p><strong>Bailando Solo v1.0.0</strong></p>
+        <p style="font-size: 11px; color: var(--win-dark-gray);">Hecho para los amantes de la música independiente y digitalmente libre.</p>
+        <p style="font-size: 10px;">Copyright &copy; 2026 Hachimaki-dev</p>
+        <div class="dialog-buttons">
+          <button class="outset-button" onclick="closeDialog('specs-dialog')">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIÁLOGO: PAPELERA DE RECICLAJE -->
+    <div id="recycle-dialog" class="dialog-box outset-border">
+      <div class="title-bar">
+        <div class="title-bar-text">Papelera de Reciclaje</div>
+        <div class="title-bar-controls">
+          <button class="outset-button" onclick="closeDialog('recycle-dialog')">X</button>
+        </div>
+      </div>
+      <div class="dialog-body">
+        <p><strong>Papelera Vacía</strong></p>
+        <p style="font-size: 11px;">Aquí no hay nada. Solo tiramos las suscripciones de streaming que ya no pagamos.</p>
+        <div class="dialog-buttons">
+          <button class="outset-button" onclick="closeDialog('recycle-dialog')">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARRA DE TAREAS -->
+  <div id="taskbar">
+    <!-- Botón Inicio -->
+    <button id="start-button" class="outset-button" onclick="toggleStartMenu()">
+      <!-- Mini logo Windows -->
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="6" height="6" fill="#ff5555"/>
+        <rect x="8" y="1" width="6" height="6" fill="#55ff55"/>
+        <rect x="1" y="8" width="6" height="6" fill="#5555ff"/>
+        <rect x="8" y="8" width="6" height="6" fill="#ffff55"/>
+      </svg>
+      <span>Inicio</span>
+    </button>
+
+    <!-- Lista de tareas activas -->
+    <div id="tasks-list">
+      <button class="outset-button task-button active" id="task-window" onclick="toggleMainWindow()">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="14" fill="#000000"/>
+          <circle cx="16" cy="16" r="5" fill="#f0a30a"/>
+        </svg>
+        <span>BailandoSolo_v1...</span>
+      </button>
+    </div>
+
+    <!-- Bandeja del sistema (Systray) -->
+    <div id="systray" class="inset-border">
+      <!-- Icono de Sonido -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+      <!-- Reloj -->
+      <span id="systray-clock">00:00 AM</span>
+    </div>
+  </div>
+
+  <!-- MENÚ INICIO -->
+  <div id="start-menu" class="outset-border">
+    <div class="start-menu-sidebar">
+      <span>BailandoSolo95</span>
+    </div>
+    <div class="start-menu-list">
+      <a href="https://github.com/hachimaki-dev/BailandoSolo" class="start-menu-item" target="_blank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+        </svg>
+        <span>GitHub Repo</span>
+      </a>
+      <div class="start-menu-item" onclick="openSystemSpecs()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span>Acerca de la App</span>
+      </div>
+      <div class="start-menu-item" onclick="triggerBSOD()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Excepción Fatal</span>
+      </div>
+      <div style="height: 1px; background-color: var(--win-gray); margin: 5px 0;"></div>
+      <div class="start-menu-item" onclick="shutdownSystem()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+          <line x1="12" y1="2" x2="12" y2="12"/>
+        </svg>
+        <span>Apagar Sistema</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- RELOJ ---
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // el número 0 debe ser 12
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      const strTime = hours + ':' + minutes + ' ' + ampm;
+      document.getElementById('systray-clock').textContent = strTime;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // --- APOYO AL SOFTWARE LIBRE ---
+    // Métricas fakes eliminadas para mantener la transparencia e integridad del proyecto.
+
+    // --- MANEJO DE SELECCIÓN DE ICONOS ---
+    function selectIcon(iconEl) {
+      // Quitar selección a todos
+      document.querySelectorAll('.desktop-icon').forEach(icon => {
+        icon.classList.remove('selected');
+      });
+      // Añadir al seleccionado
+      iconEl.classList.add('selected');
+      // Evitar que el clic en el desktop lo deseleccione inmediatamente
+      event.stopPropagation();
+    }
+
+    // Deseleccionar al hacer clic en el escritorio
+    document.getElementById('desktop').addEventListener('click', () => {
+      document.querySelectorAll('.desktop-icon').forEach(icon => {
+        icon.classList.remove('selected');
+      });
+      // Cerrar menú inicio si está abierto
+      document.getElementById('start-menu').classList.remove('open');
+    });
+
+    // --- CONTROL DE VENTANA ---
+    const mainWindow = document.getElementById('main-window');
+    const taskButton = document.getElementById('task-window');
+
+    function toggleMainWindow() {
+      if (mainWindow.classList.contains('minimized')) {
+        mainWindow.classList.remove('minimized');
+        taskButton.classList.add('active');
+      } else {
+        mainWindow.classList.add('minimized');
+        taskButton.classList.remove('active');
+      }
+    }
+
+    function minimizeWindow() {
+      mainWindow.classList.add('minimized');
+      taskButton.classList.remove('active');
+    }
+
+    function restoreMainWindow() {
+      mainWindow.classList.remove('minimized');
+      taskButton.classList.add('active');
+      mainWindow.style.zIndex = 10;
+    }
+
+    function toggleMaximizeWindow() {
+      mainWindow.classList.toggle('maximized');
+    }
+
+    // --- DIÁLOGOS ---
+    function openSystemSpecs() {
+      const dialog = document.getElementById('specs-dialog');
+      dialog.style.display = 'block';
+      dialog.style.zIndex = 1200;
+    }
+
+    function openRecycleBin() {
+      const dialog = document.getElementById('recycle-dialog');
+      dialog.style.display = 'block';
+      dialog.style.zIndex = 1200;
+    }
+
+    function closeDialog(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    // --- MENÚ INICIO ---
+    function toggleStartMenu() {
+      const menu = document.getElementById('start-menu');
+      menu.classList.toggle('open');
+      event.stopPropagation();
+    }
+
+    // --- EFECTO TOCADISCOS ---
+    function toggleVinyl() {
+      const box = document.getElementById('vinyl-box');
+      box.classList.toggle('paused');
+    }
+
+    // --- COPIAR CÓDIGO ---
+    function copyConsoleCode(type) {
+      let code = '';
+      let btnId = '';
+      if (type === 'bash') {
+        code = `git clone https://github.com/hachimaki-dev/BailandoSolo.git\ncd BailandoSolo\nchmod +x start.sh\n./start.sh`;
+        btnId = 'copy-btn-bash';
+      } else {
+        code = `git clone https://github.com/hachimaki-dev/BailandoSolo.git\ncd BailandoSolo\npython -m venv venv\n.\\venv\\Scripts\\Activate.ps1\npip install -r requirements.txt\npnpm install\npnpm --dir ui install\npnpm run dev`;
+        btnId = 'copy-btn-powershell';
+      }
+      
+      navigator.clipboard.writeText(code).then(() => {
+        const copyBtn = document.getElementById(btnId);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = '¡Copiado!';
+        copyBtn.style.color = '#ffffff';
+        copyBtn.style.backgroundColor = '#008800';
+        
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.color = type === 'bash' ? '#00ff00' : '#5cf';
+          copyBtn.style.backgroundColor = type === 'bash' ? '#222222' : '#003366';
+        }, 2000);
+      }).catch(err => {
+        alert('No se pudo copiar automáticamente: \n' + code);
+      });
+    }
+
+    // --- CAMBIAR PESTAÑA CONSOLA ---
+    function switchTab(type) {
+      const tabBash = document.getElementById('tab-bash');
+      const tabPS = document.getElementById('tab-powershell');
+      const conBash = document.getElementById('console-bash');
+      const conPS = document.getElementById('console-powershell');
+      
+      if (type === 'bash') {
+        tabBash.style.backgroundColor = 'var(--win-bg)';
+        tabBash.style.borderBottom = 'none';
+        tabBash.style.paddingTop = '6px';
+        tabBash.style.marginTop = '0px';
+        tabBash.style.fontWeight = 'bold';
+        tabBash.style.zIndex = '3';
+        
+        tabPS.style.backgroundColor = '#b0b0b0';
+        tabPS.style.borderBottom = '2px solid var(--win-dark-gray)';
+        tabPS.style.paddingTop = '4px';
+        tabPS.style.marginTop = '2px';
+        tabPS.style.fontWeight = 'normal';
+        tabPS.style.zIndex = '1';
+        
+        conBash.style.display = 'block';
+        conPS.style.display = 'none';
+      } else {
+        tabPS.style.backgroundColor = 'var(--win-bg)';
+        tabPS.style.borderBottom = 'none';
+        tabPS.style.paddingTop = '6px';
+        tabPS.style.marginTop = '0px';
+        tabPS.style.fontWeight = 'bold';
+        tabPS.style.zIndex = '3';
+        
+        tabBash.style.backgroundColor = '#b0b0b0';
+        tabBash.style.borderBottom = '2px solid var(--win-dark-gray)';
+        tabBash.style.paddingTop = '4px';
+        tabBash.style.marginTop = '2px';
+        tabBash.style.fontWeight = 'normal';
+        tabBash.style.zIndex = '1';
+        
+        conBash.style.display = 'none';
+        conPS.style.display = 'block';
+      }
+    }
+
+    // --- PANTALLAZO AZUL Y APAGADO ---
+    function triggerBSOD() {
+      document.getElementById('bsod-screen').classList.add('open');
+    }
+
+    function shutdownSystem() {
+      document.getElementById('shutdown-screen').classList.add('open');
+    }
+
+    function restartOS() {
+      document.getElementById('bsod-screen').classList.remove('open');
+      document.getElementById('shutdown-screen').classList.remove('open');
+      restoreMainWindow();
+    }
+
+    // --- ARRASTRE DE VENTANA ---
+    let isDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    function dragStart(e) {
+      // Ignorar si está maximizada
+      if (mainWindow.classList.contains('maximized')) return;
+      
+      isDragging = true;
+      // Obtener compensaciones de clic dentro de la barra de título
+      const rect = mainWindow.getBoundingClientRect();
+      dragOffsetX = e.clientX - rect.left;
+      dragOffsetY = e.clientY - rect.top;
+      
+      document.addEventListener('mousemove', dragMove);
+      document.addEventListener('mouseup', dragEnd);
+    }
+
+    function dragMove(e) {
+      if (!isDragging) return;
+      // Evitar que la ventana salga de la pantalla por completo
+      const x = Math.max(0, Math.min(window.innerWidth - 100, e.clientX - dragOffsetX));
+      const y = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - dragOffsetY));
+      
+      mainWindow.style.left = x + 'px';
+      mainWindow.style.top = y + 'px';
+      mainWindow.style.position = 'absolute';
+    }
+
+    function dragEnd() {
+      isDragging = false;
+      document.removeEventListener('mousemove', dragMove);
+      document.removeEventListener('mouseup', dragEnd);
+    }
+  </script>
+</body>
+</html>

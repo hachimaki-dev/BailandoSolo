@@ -11,11 +11,16 @@ HOST = '0.0.0.0'
 
 # Paths (relative to project root)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOWNLOADS_DIR = os.path.join(PROJECT_ROOT, 'downloads')
-PROFILES_CONFIG_FILE = os.path.join(PROJECT_ROOT, 'profiles.json')
-STATS_FILE = os.path.join(PROJECT_ROOT, 'stats.json')
 STATIC_DIR = os.path.join(PROJECT_ROOT, 'static')
 UI_DIST_DIR = os.path.join(PROJECT_ROOT, 'ui', 'dist')
+
+# User Data (stored in user home directory to prevent permission issues when packaged)
+USER_DATA_DIR = os.path.expanduser('~/.bailandosolo')
+os.makedirs(USER_DATA_DIR, exist_ok=True)
+
+DOWNLOADS_DIR = os.path.join(USER_DATA_DIR, 'downloads')
+PROFILES_CONFIG_FILE = os.path.join(USER_DATA_DIR, 'profiles.json')
+STATS_FILE = os.path.join(USER_DATA_DIR, 'stats.json')
 
 # Audio file extensions (used by library and stats)
 AUDIO_EXTENSIONS = ['.mp3', '.webm', '.m4a', '.wav']

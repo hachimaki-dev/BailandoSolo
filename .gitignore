@@ -3,3 +3,12 @@ venv
 __pycache__
 downloads
 .DS_Store
+
+# User data (should not be in repo)
+profiles.json
+stats.json
+
+# Build artifacts
+build/
+dist/
+release/
