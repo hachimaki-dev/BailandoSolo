@@ -22,14 +22,14 @@ echo -e "${GREEN}✓ Dependencias de Python instaladas.${NC}"
 # 2. Configurar Frontend (Node/Electron)
 echo -e "${BLUE}📦 Verificando dependencias de Node.js...${NC}"
 if [ ! -d "node_modules" ]; then
-    pnpm install
+    npm install
 fi
 
 if [ ! -d "ui/node_modules" ]; then
-    pnpm --dir ui install
+    npm --prefix ui install
 fi
 echo -e "${GREEN}✓ Dependencias de Node instaladas.${NC}"
 
 # 3. Iniciar entorno de desarrollo
 echo -e "${GREEN}🎵 Iniciando la aplicación (Electron + Flask)...${NC}"
-pnpm run dev
+npm run dev

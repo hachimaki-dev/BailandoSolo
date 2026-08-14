@@ -4,10 +4,10 @@
   "description": "Descargador de Playlists de Alta Fidelidad",
   "main": "main.js",
   "scripts": {
-    "start": "pnpm --dir ui run build && electron .",
-    "dev": "concurrently \"pnpm --dir ui run dev\" \"wait-on tcp:5173 && electron . --dev\"",
-    "build": "pnpm --dir ui run build",
-    "dist": "pnpm run build && electron-builder"
+    "start": "npm --prefix ui run build && electron .",
+    "dev": "concurrently \"npm --prefix ui run dev\" \"wait-on tcp:5173 && electron . --dev\"",
+    "build": "npm --prefix ui run build",
+    "dist": "npm run build && electron-builder"
   },
   "build": {
     "appId": "com.bailandosolo.app",
@@ -42,10 +42,5 @@
     "electron": "^33.4.11",
     "electron-builder": "^25.1.8",
     "wait-on": "^9.0.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "electron"
-    ]
   }
 }
