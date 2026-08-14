@@ -3,7 +3,7 @@
  * API client for browsing, searching, and managing the local audio library.
  */
 
-const API_BASE = '/api'
+import { API_BASE, streamUrl } from '../config'
 
 export const LibraryService = {
   async getFolders() {
@@ -104,8 +104,6 @@ export const LibraryService = {
 
   getThumbnailUrl(path) {
     if (!path) return null
-    if (path.startsWith('http')) return path
-    if (path.startsWith('/')) return path
-    return `/${path}`
+    return streamUrl(path)
   }
 }

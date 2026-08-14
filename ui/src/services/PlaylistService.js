@@ -3,7 +3,7 @@
  * Handles user playlists, dynamic rule evaluation for Smart Crates, and playlist sync.
  */
 
-const API_BASE = '/api'
+import { API_BASE } from '../config'
 
 export const PlaylistService = {
   async getPlaylists() {

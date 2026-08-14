@@ -50,7 +50,9 @@ function startPythonServer() {
     // En producción, ejecutamos el binario empaquetado (PyInstaller)
     const binPath = path.join(process.resourcesPath, binName);
     console.log(`Iniciando servidor compilado: ${binPath}`);
-    pythonProcess = spawn(binPath, []);
+    pythonProcess = spawn(binPath, [], {
+      env: { ...process.env, PYTHONUNBUFFERED: '1' }
+    });
   } else {
     // En desarrollo, usamos el entorno virtual
     const pythonExecutable = isWin ? 'python.exe' : 'python3';
@@ -59,8 +61,14 @@ function startPythonServer() {
     const scriptPath = path.join(__dirname, 'server.py');
 
     console.log(`Iniciando servidor Python (Dev): ${pythonPath} ${scriptPath}`);
-    pythonProcess = spawn(pythonPath, [scriptPath]);
+    pythonProcess = spawn(pythonPath, [scriptPath], {
+      env: { ...process.env, PYTHONUNBUFFERED: '1' }
+    });
   }
+
+  pythonProcess.on('error', (err) => {
+    console.error('Failed to start python process:', err);
+  });
 
   pythonProcess.stdout.on('data', (data) => {
     console.log(`Python: ${data}`);

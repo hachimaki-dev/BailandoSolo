@@ -52,6 +52,7 @@
 
 <script setup>
 import { ref, watch, nextTick } from 'vue'
+import { apiUrl } from '../config'
 
 const props = defineProps({
   isOpen: Boolean
@@ -78,7 +79,7 @@ const loadQR = async () => {
       QRCode = module.default
     }
     
-    const response = await fetch('/api/mobile/info')
+    const response = await fetch(apiUrl('/api/mobile/info'))
     if (!response.ok) throw new Error('No se pudo obtener la información de red')
     
     const data = await response.json()

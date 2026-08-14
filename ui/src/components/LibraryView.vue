@@ -205,6 +205,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { LibraryService } from '../services/LibraryService'
+import { streamUrl } from '../config'
 
 const props = defineProps({
   folders: { type: Array, default: () => [] },
@@ -222,13 +223,12 @@ const defaultThumb = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 
 const getThumbnailUrl = (path) => {
   if (!path) return null
-  if (path.startsWith('http')) return path
-  return path.startsWith('/') ? path : `/${path}`
+  return streamUrl(path)
 }
 
 const getThumbnail = (song) => {
   if (!song) return defaultThumb
-  if (song.thumbnail) return getThumbnailUrl(song.thumbnail)
+  if (song.thumbnail) return streamUrl(song.thumbnail)
   const hash = song.title ? song.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 1
   const coverNum = (hash % 9) + 1
   return new URL(`../assets/styles/no_cover/${coverNum}.png`, import.meta.url).href

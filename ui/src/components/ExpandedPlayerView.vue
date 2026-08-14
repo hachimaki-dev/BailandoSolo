@@ -158,6 +158,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { streamUrl } from '../config'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -176,7 +177,7 @@ const props = defineProps({
 const emit = defineEmits([
   'close', 'play', 'pause', 'prev', 'next', 'seek', 
   'toggle-shuffle', 'toggle-repeat', 'toggle-eq', 'toggle-queue', 
-  'volume-change', 'play-queue-item', 'remove-queue-item', 'toggle-karaoke'
+  'volume-change', 'play-queue-item', 'remove-queue-item'
 ])
 
 const volume = ref(1)
@@ -214,8 +215,7 @@ const formatTime = (seconds) => {
 
 const getThumbnail = (song) => {
   if (!song) return null
-  if (song.thumbnail && song.thumbnail.startsWith('http')) return song.thumbnail
-  if (song.thumbnail) return song.thumbnail.startsWith('/') ? song.thumbnail : `/${song.thumbnail}`
+  if (song.thumbnail) return streamUrl(song.thumbnail)
   return null
 }
 

@@ -1,5 +1,7 @@
 
-const API_URL = '/api/stats';
+import { API_BASE } from '../config'
+
+const API_URL = `${API_BASE}/stats`;
 
 export const StatsService = {
     async trackPlay(song) {

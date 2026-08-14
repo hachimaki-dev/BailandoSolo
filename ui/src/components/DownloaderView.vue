@@ -231,6 +231,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { LibraryService } from '../services/LibraryService'
+import { apiUrl, streamUrl } from '../config'
 
 const props = defineProps({
   allSongs: { type: Array, default: () => [] }
@@ -320,10 +321,8 @@ const analyze = async () => {
   playlist.value = null
   duplicatesList.value = []
 
-  analysisPhaseText.value = '1/3 Conectando con YouTube...'
-
   try {
-    const response = await fetch('/api/analyze', {
+    const response = await fetch(apiUrl('/api/analyze'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url: url.value })
@@ -334,7 +333,6 @@ const analyze = async () => {
       throw new Error(err.error || 'Error al analizar URL')
     }
 
-    analysisPhaseText.value = '2/3 Extrayendo metadatos y carátulas...'
     const data = await response.json()
 
     data.songs = data.songs.map(s => ({
@@ -344,31 +342,16 @@ const analyze = async () => {
       speed: 0
     }))
 
-    if (!folder.value && data.title) {
-      folder.value = data.title.replace(/[^a-zA-Z0-9_-]/gi, '_').replace(/_+/g, '_').slice(0, 30)
-    }
-
-    analysisPhaseText.value = '3/3 Comprobando duplicados en la biblioteca...'
-    const dupCheck = await LibraryService.checkDuplicates(data.songs.map(s => ({
-      id: s.id,
-      title: s.title,
-      uploader: s.uploader
-    })))
-
-    duplicatesList.value = dupCheck.duplicates || []
-
-    // Select based on omitDuplicates toggle
-    if (omitDuplicates.value && duplicatesList.value.length > 0) {
-      const dupSet = new Set(duplicatesList.value.map(d => d.id))
-      selectedSongIds.value = new Set(data.songs.filter(s => !dupSet.has(s.id)).map(s => s.id))
-      if (selectedSongIds.value.size === 0 && data.songs.length > 0) {
-        selectedSongIds.value = new Set(data.songs.map(s => s.id))
-      }
-    } else {
-      selectedSongIds.value = new Set(data.songs.map(s => s.id))
-    }
-
     playlist.value = data
+    selectedSongIds.value = new Set(data.songs.map(s => s.id))
+
+    // Pre-fill folder name if empty
+    if (!folder.value && data.title) {
+      folder.value = data.title.replace(/[\\/*?:"<>|]/g, '').trim()
+    }
+
+    analysisPhaseText.value = '3/3 Verificando canciones en biblioteca...'
+    await checkDuplicatesInLibrary(data.songs)
   } catch (e) {
     alert('Error al analizar: ' + e.message)
   } finally {
@@ -376,12 +359,28 @@ const analyze = async () => {
   }
 }
 
+const checkDuplicatesInLibrary = async (songs) => {
+  try {
+    const items = songs.map(s => ({ id: s.id, title: s.title, uploader: s.uploader }))
+    const data = await LibraryService.checkDuplicates(items)
+    duplicatesList.value = data.duplicates || []
+
+    // If auto-omit is true, uncheck duplicates
+    if (omitDuplicates.value && duplicatesList.value.length > 0) {
+      duplicatesList.value.forEach(d => {
+        selectedSongIds.value.delete(d.id)
+      })
+    }
+  } catch (e) {
+    console.error('Error checking duplicates:', e)
+  }
+}
+
 const startBatchDownload = async () => {
-  if (!playlist.value || selectedSongs.value.length === 0) return
+  if (!playlist.value || selectedSongIds.value.size === 0) return
   isStartingDownload.value = true
 
   const idsToDownload = Array.from(selectedSongIds.value)
-
   playlist.value.songs.forEach(s => {
     if (selectedSongIds.value.has(s.id)) {
       s.status = 'waiting'
@@ -389,7 +388,7 @@ const startBatchDownload = async () => {
   })
 
   try {
-    await fetch('/api/download', {
+    await fetch(apiUrl('/api/download'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -413,7 +412,7 @@ const startBatchDownload = async () => {
 
 const updateDownloadProgress = async () => {
   try {
-    const res = await fetch('/api/status')
+    const res = await fetch(apiUrl('/api/status'))
     if (!res.ok) return
     const statusMap = await res.json()
 
@@ -428,7 +427,7 @@ const updateDownloadProgress = async () => {
       })
     }
   } catch (e) {
-    console.error('Polling error:', e)
+    console.error('Error polling status:', e)
   }
 }
 
@@ -471,7 +470,7 @@ const startPreview = (song) => {
 
   previewTimeout.value = setTimeout(() => {
     try {
-      let audioUrl = song.url || (song.path ? (song.path.startsWith('/') ? song.path : `/${song.path}`) : `/api/stream/${encodeURIComponent(song.filename)}`)
+      let audioUrl = song.url || (song.path ? streamUrl(song.path) : streamUrl(`/api/stream/${encodeURIComponent(song.filename)}`))
       const audio = previewAudio.value
       
       audio.onloadedmetadata = () => {

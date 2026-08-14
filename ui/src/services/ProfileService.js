@@ -1,4 +1,4 @@
-const API_BASE = '/api'
+import { API_BASE } from '../config'
 
 export const ProfileService = {
     async getProfiles() {

@@ -214,8 +214,7 @@ const formatTime = (seconds) => {
 
 const getThumbnail = (song) => {
   if (!song) return null
-  if (song.thumbnail && song.thumbnail.startsWith('http')) return song.thumbnail
-  if (song.thumbnail) return song.thumbnail.startsWith('/') ? song.thumbnail : `/${song.thumbnail}`
+  if (song.thumbnail) return streamUrl(song.thumbnail)
   
   const hash = song.title ? song.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 1
   const coverNum = (hash % 9) + 1
@@ -227,9 +226,9 @@ watch(() => props.currentSong, (newSong) => {
     if (newSong.url) {
       audio.value.src = newSong.url
     } else if (newSong.path) {
-      audio.value.src = newSong.path.startsWith('http') ? newSong.path : (newSong.path.startsWith('/') ? newSong.path : `/${newSong.path}`)
+      audio.value.src = streamUrl(newSong.path)
     } else if (newSong.filename) {
-      audio.value.src = `/api/stream/${encodeURIComponent(newSong.filename)}`
+      audio.value.src = streamUrl(`/api/stream/${encodeURIComponent(newSong.filename)}`)
     }
     if (props.isPlaying) audio.value.play().catch(e => console.log('Auto-play blocked:', e))
   }
