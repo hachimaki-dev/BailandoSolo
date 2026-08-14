@@ -1,6 +1,6 @@
 """
 Bailando Solo — Download routes.
-Handles YouTube analysis, download initiation, and progress tracking.
+Handles YouTube analysis, download initiation, progress tracking and duplicate handling.
 """
 
 import os
@@ -20,52 +20,65 @@ downloads_bp = Blueprint('downloads', __name__)
 
 def _progress_hook(d):
     """Callback hook for yt-dlp to update download progress."""
-    if d['status'] == 'downloading':
-        video_id = d.get('info_dict', {}).get('id', 'unknown')
+    info = d.get('info_dict') or {}
+    video_id = info.get('id', 'unknown')
 
-        # Calculate percentage
-        total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate')
+    if d['status'] == 'downloading':
+        total_bytes = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
         downloaded_bytes = d.get('downloaded_bytes', 0)
 
-        if total_bytes:
+        if total_bytes > 0:
             percent = (downloaded_bytes / total_bytes) * 100
         else:
             percent = 0
 
         update_download_status(video_id, {
             'status': 'downloading',
-            'percent': percent,
-            'filename': d.get('filename', 'unknown'),
+            'percent': round(percent, 1),
+            'filename': os.path.basename(d.get('filename', 'unknown')),
             'speed': d.get('speed', 0),
-            'eta': d.get('eta', 0)
+            'eta': d.get('eta', 0),
+            'downloaded_bytes': downloaded_bytes,
+            'total_bytes': total_bytes
         })
     elif d['status'] == 'finished':
-        video_id = d.get('info_dict', {}).get('id', 'unknown')
         update_download_status(video_id, {
             'status': 'finished',
             'percent': 100,
-            'filename': d.get('filename', 'unknown')
+            'filename': os.path.basename(d.get('filename', 'unknown')),
+            'speed': 0,
+            'eta': 0
+        })
+    elif d['status'] == 'error':
+        update_download_status(video_id, {
+            'status': 'error',
+            'percent': 0,
+            'error': str(d.get('error', 'Error desconocido'))
         })
 
 
-def _download_thread(url, folder_name, selected_ids):
-    """Background thread to handle the download process."""
-    # Get active profile
+def _download_thread(url, folder_name, selected_ids, quality='192', naming_template='default'):
+    """Background thread to handle the download process with custom options."""
     config = load_profiles()
     active_profile = config.get('active', 'Default')
 
-    # Create directory if it doesn't exist
     base_dir = os.path.join(DOWNLOADS_DIR, active_profile, folder_name)
     os.makedirs(base_dir, exist_ok=True)
+
+    # Template output
+    if naming_template == 'artist_title':
+        outtmpl = os.path.join(base_dir, '%(artist,uploader)s - %(title)s.%(ext)s')
+    else:
+        outtmpl = os.path.join(base_dir, '%(title)s.%(ext)s')
 
     ydl_opts = {
         'format': 'bestaudio/best',
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
-            'preferredquality': '192',
+            'preferredquality': str(quality),
         }],
-        'outtmpl': os.path.join(base_dir, '%(title)s.%(ext)s'),
+        'outtmpl': outtmpl,
         'writethumbnail': True,
         'progress_hooks': [_progress_hook],
         'ignoreerrors': True,
@@ -73,9 +86,8 @@ def _download_thread(url, folder_name, selected_ids):
 
     urls_to_download = []
     if 'list=' in url and not selected_ids:
-        urls_to_download = [url]  # Download whole playlist
+        urls_to_download = [url]
     elif selected_ids:
-        # Construct video URLs from IDs
         urls_to_download = [f"https://www.youtube.com/watch?v={vid}" for vid in selected_ids]
     else:
         urls_to_download = [url]
@@ -84,7 +96,7 @@ def _download_thread(url, folder_name, selected_ids):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             ydl.download(urls_to_download)
     except Exception as e:
-        print(f"Download error: {e}")
+        print(f"Download thread error: {e}")
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
@@ -92,7 +104,7 @@ def _download_thread(url, folder_name, selected_ids):
 @downloads_bp.route('/api/analyze', methods=['POST'])
 def analyze_playlist():
     """Analyze a YouTube URL and return song/playlist metadata."""
-    data = request.json
+    data = request.json or {}
     url = data.get('url')
 
     if not url:
@@ -107,7 +119,6 @@ def analyze_playlist():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 
-            # Handle both single video and playlist
             if 'entries' in info:
                 entries = info['entries']
                 title = info.get('title', 'Playlist')
@@ -115,16 +126,23 @@ def analyze_playlist():
                 entries = [info]
                 title = info.get('title', 'Video')
 
-            # Clean up entries
             songs = []
             for entry in entries:
-                if entry:  # entry can be None if video is deleted
+                if entry:
+                    # Clean artist & title heuristic
+                    raw_title = entry.get('title') or 'Sin título'
+                    uploader = entry.get('uploader') or 'Desconocido'
+                    
+                    thumbnail_url = None
+                    if entry.get('thumbnails'):
+                        thumbnail_url = entry.get('thumbnails')[-1].get('url')
+
                     songs.append({
                         'id': entry.get('id'),
-                        'title': entry.get('title'),
-                        'uploader': entry.get('uploader'),
+                        'title': raw_title,
+                        'uploader': uploader,
                         'duration': entry.get('duration'),
-                        'thumbnail': entry.get('thumbnails')[-1]['url'] if entry.get('thumbnails') else None
+                        'thumbnail': thumbnail_url
                     })
 
             return jsonify({
@@ -138,17 +156,32 @@ def analyze_playlist():
 
 @downloads_bp.route('/api/download', methods=['POST'])
 def start_download():
-    """Start downloading songs in a background thread."""
-    data = request.json
+    """Start downloading songs in a background thread with quality and template options."""
+    data = request.json or {}
     url = data.get('url')
     folder_name = data.get('folder_name', 'Music')
     selected_ids = data.get('selected_ids', [])
+    quality = data.get('quality', '192')
+    naming_template = data.get('naming_template', 'default')
 
     if not url:
         return jsonify({'error': 'URL is required'}), 400
 
-    # Start download in a separate thread
-    thread = threading.Thread(target=_download_thread, args=(url, folder_name, selected_ids))
+    # Mark selected IDs as waiting in state immediately
+    for sid in selected_ids:
+        update_download_status(sid, {
+            'status': 'waiting',
+            'percent': 0,
+            'speed': 0,
+            'eta': 0
+        })
+
+    # Start download in background thread
+    thread = threading.Thread(
+        target=_download_thread,
+        args=(url, folder_name, selected_ids, quality, naming_template)
+    )
+    thread.daemon = True
     thread.start()
 
     return jsonify({'status': 'started', 'message': 'Download started in background'})

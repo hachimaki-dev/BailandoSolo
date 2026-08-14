@@ -1,13 +1,17 @@
 {
-  "name": "Bailando Solo",
-  "version": "1.0.0",
-  "description": "Descargador de Playlists de Alta Fidelidad",
+  "name": "bailandosolo",
+  "version": "2.0.0",
+  "description": "Reproductor y Descargador de Música Retro",
   "main": "main.js",
   "scripts": {
     "start": "npm --prefix ui run build && electron .",
     "dev": "concurrently \"npm --prefix ui run dev\" \"wait-on tcp:5173 && electron . --dev\"",
     "build": "npm --prefix ui run build",
-    "dist": "npm run build && electron-builder"
+    "build:backend": "./build_backend.sh",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux"
   },
   "build": {
     "appId": "com.bailandosolo.app",
@@ -24,14 +28,31 @@
       {
         "from": "dist",
         "to": ".",
-        "filter": ["bailandosolo-server", "bailandosolo-server.exe"]
+        "filter": [
+          "bailandosolo-server",
+          "bailandosolo-server.exe"
+        ]
       }
     ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.music"
+    },
     "linux": {
-      "target": ["AppImage", "deb"]
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Audio"
     },
     "win": {
-      "target": ["nsis"]
+      "target": [
+        "nsis",
+        "portable"
+      ]
     }
   },
   "keywords": [],

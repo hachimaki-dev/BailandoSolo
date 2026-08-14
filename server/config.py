@@ -21,7 +21,9 @@ os.makedirs(USER_DATA_DIR, exist_ok=True)
 DOWNLOADS_DIR = os.path.join(USER_DATA_DIR, 'downloads')
 PROFILES_CONFIG_FILE = os.path.join(USER_DATA_DIR, 'profiles.json')
 STATS_FILE = os.path.join(USER_DATA_DIR, 'stats.json')
+PLAYLISTS_FILE = os.path.join(USER_DATA_DIR, 'playlists.json')
 
 # Audio file extensions (used by library and stats)
 AUDIO_EXTENSIONS = ['.mp3', '.webm', '.m4a', '.wav']
 IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
+

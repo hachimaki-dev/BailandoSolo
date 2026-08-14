@@ -5,7 +5,6 @@
     <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'nature' }" @click="setTheme('nature')" title="Tema Puerto Montt">🌧️</button>
     <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'ps2' }" @click="setTheme('ps2')" title="Tema PS2">🌌</button>
     <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'cassette' }" @click="setTheme('cassette')" title="Tema Cassette">📼</button>
-    <button v-if="showExperimental" class="theme-btn" :class="{ active: currentTheme === 'karaoke' }" @click="setTheme('karaoke')" title="Tema Karaoke">🎤</button>
     <div class="separator"></div>
     <button class="theme-btn" @click="$emit('open-stats')" title="Estadísticas">📊</button>
   </div>

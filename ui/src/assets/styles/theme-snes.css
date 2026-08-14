@@ -421,92 +421,23 @@ body[data-theme="snes"] .btn-create {
 }
 
 /* Responsive Design */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
     body[data-theme="snes"] .main-grid {
         grid-template-columns: 1fr;
-        padding-bottom: 120px;
-        /* Space for fixed player */
+        gap: 16px;
+        padding-bottom: 20px;
     }
 
     body[data-theme="snes"] .player {
-        position: fixed;
-        bottom: 0;
-        left: 0;
+        position: relative;
         width: 100%;
-        top: auto;
-        z-index: 100;
-        background: var(--color-panel-bg);
-        border-top: 4px solid #000;
-        padding: 10px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.5);
+        max-width: 460px;
+        margin: 0 auto;
     }
 
-    body[data-theme="snes"] .player h3 {
-        display: none;
-    }
-
-    body[data-theme="snes"] .album-art {
-        width: 60px;
-        height: 60px;
-        margin: 0;
-        border: 2px solid #000;
-        flex-shrink: 0;
-    }
-
-    body[data-theme="snes"] .player-info {
-        text-align: left;
-        margin: 0 10px;
-        flex: 1;
-        overflow: hidden;
-    }
-
-    body[data-theme="snes"] .player-title,
-    body[data-theme="snes"] .player-artist {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    body[data-theme="snes"] .controls {
-        margin: 0;
-        gap: 8px;
-        flex-shrink: 0;
-    }
-
-    body[data-theme="snes"] .control-btn {
-        width: 36px;
-        height: 36px;
-    }
-
-    body[data-theme="snes"] .control-btn.play {
-        width: 42px;
-        height: 42px;
-    }
-
-    body[data-theme="snes"] .controls-extra {
-        display: none;
-    }
-
-    body[data-theme="snes"] .time-info {
-        display: none;
-    }
-
-    /* Adjust Theme Selector position on mobile */
+    /* Theme Selector */
     body[data-theme="snes"] .theme-selector {
-        bottom: 130px;
-        /* Above the player */
-        right: 10px;
-        transform: scale(0.8);
-        transform-origin: bottom right;
-    }
-
-    body[data-theme="snes"] .parallax-settings-btn {
-        bottom: 130px;
-        left: 10px;
+        transform: scale(0.9);
     }
 }
 
@@ -524,13 +455,67 @@ body[data-theme="snes"] .btn-create {
         padding-bottom: 8px;
     }
 
-    body[data-theme="snes"] nav button {
-        padding: 8px 12px;
-        font-size: 10px;
-        white-space: nowrap;
-    }
-
     body[data-theme="snes"] .player-artist {
         display: none;
     }
+}
+
+/* SNES Tables & Lists */
+body[data-theme="snes"] .retro-table-container {
+    background: #c4c4c4;
+    border: 3px solid #000;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #7c7c7c, 4px 4px 0 #000;
+}
+
+body[data-theme="snes"] .retro-table thead th {
+    background: #a8a8a8;
+    color: #000;
+    border-bottom: 2px solid #000;
+    border-right: 1px solid #7c7c7c;
+    box-shadow: inset 1px 1px 0 #fff;
+}
+
+body[data-theme="snes"] .retro-table tbody tr {
+    background: #d4d4d4;
+    border-bottom: 1px solid #000;
+}
+
+body[data-theme="snes"] .retro-table tbody tr:nth-child(even) {
+    background: #c8c8c8;
+}
+
+body[data-theme="snes"] .retro-table tbody tr:hover {
+    background: #ffba20 !important;
+    color: #000 !important;
+    box-shadow: inset 2px 2px 0 #ffea7a, inset -2px -2px 0 #c47a00;
+}
+
+body[data-theme="snes"] .retro-table tbody tr:hover td {
+    color: #000 !important;
+}
+
+body[data-theme="snes"] .retro-table tbody td {
+    border-right: 1px solid #999;
+}
+
+body[data-theme="snes"] .retro-tabs {
+    background: transparent;
+    border-bottom: 2px solid #000;
+    gap: 4px;
+}
+
+body[data-theme="snes"] .retro-tab-btn {
+    background: #b4b4b4;
+    border: 2px solid #000;
+    border-bottom: none;
+    box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #7c7c7c;
+    font-family: var(--font-pixel);
+    font-size: 8px;
+    padding: 6px 12px;
+}
+
+body[data-theme="snes"] .retro-tab-btn.active {
+    background: #5a5aff;
+    color: #fff;
+    box-shadow: inset 2px 2px 0 #8a8aff, inset -2px -2px 0 #2a2aaf;
 }

@@ -1,9 +1,11 @@
 <template>
-  <div class="stats-panel" :class="{ open: isOpen }">
-    <div class="stats-header">
-      <h2>📊 ESTADÍSTICAS</h2>
-      <button class="close-btn" @click="$emit('close')">×</button>
-    </div>
+  <div>
+    <div v-if="isOpen" class="stats-backdrop" @click="$emit('close')"></div>
+    <div class="stats-panel" :class="{ open: isOpen }">
+      <div class="stats-header">
+        <h2>📊 ESTADÍSTICAS</h2>
+        <button class="close-btn" @click="$emit('close')" title="Cerrar (Esc)">✕</button>
+      </div>
 
     <div v-if="loading" class="loading">Cargando...</div>
     <div v-else-if="error" class="error-message">{{ error }}</div>
@@ -160,6 +162,7 @@
 
     </div>
   </div>
+</div>
 </template>
 
 <script setup>
@@ -249,6 +252,17 @@ const formatDate = (timestamp) => {
 </script>
 
 <style scoped>
+.stats-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 1999;
+}
+
 .stats-panel {
   position: fixed;
   top: 0;
@@ -256,12 +270,12 @@ const formatDate = (timestamp) => {
   width: 400px;
   height: 100vh;
   background: var(--bg-panel);
-  box-shadow: -5px 0 20px var(--shadow-color);
+  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.5);
   z-index: 2000;
-  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: right 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
   display: flex;
   flex-direction: column;
-  border-left: var(--border-width) var(--border-style) var(--border-color);
+  border-left: 3px solid #000000;
   overflow: hidden;
 }
 
@@ -273,8 +287,8 @@ const formatDate = (timestamp) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: var(--border-width) var(--border-style) var(--border-color);
+  padding: 16px 20px;
+  border-bottom: 3px solid #000000;
   flex-shrink: 0;
 }
 
@@ -289,21 +303,33 @@ const formatDate = (timestamp) => {
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  color: var(--text-main);
-  font-size: 2rem;
+  background: #ff5a5a;
+  border: 2px solid #000000;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
   cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.2s;
   padding: 0;
-  line-height: 1;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
   margin-left: 10px;
+  box-shadow: 2px 2px 0px #000000;
+  transition: all 0.1s ease;
 }
 
 .close-btn:hover {
-  opacity: 1;
+  background: #ff3333;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.close-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: inset 1px 1px 0px #000000;
 }
 
 .loading, .error-message {

@@ -114,25 +114,27 @@ onMounted(() => {
 
 .parallax-settings-btn {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1000;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  bottom: 12px;
+  left: 12px;
+  z-index: 999;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #00f0ff;
+  border: 1.5px solid #000000;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  opacity: 0.3;
   transition: all 0.2s;
 }
 
 .parallax-settings-btn:hover {
-  background: rgba(0, 0, 0, 0.8);
-  transform: scale(1.1);
+  opacity: 1;
+  background: #000000;
+  transform: scale(1.05);
 }
 
 .parallax-modal-overlay {

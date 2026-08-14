@@ -1,0 +1,98 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target_name: mac
+          - os: windows-latest
+            target_name: win
+          - os: ubuntu-latest
+            target_name: linux
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Python Backend Binary (PyInstaller)
+        shell: bash
+        run: |
+          pyinstaller --name bailandosolo-server --onefile --hidden-import flask_cors --hidden-import yt_dlp server.py
+
+      - name: Install Frontend & Electron Dependencies
+        run: |
+          npm ci
+          npm --prefix ui ci
+
+      - name: Build Vite Frontend
+        run: |
+          npm --prefix ui run build
+
+      - name: Package with Electron Builder (Mac)
+        if: matrix.target_name == 'mac'
+        run: |
+          npx electron-builder --mac
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package with Electron Builder (Windows)
+        if: matrix.target_name == 'win'
+        run: |
+          npx electron-builder --win
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Package with Electron Builder (Linux)
+        if: matrix.target_name == 'linux'
+        run: |
+          npx electron-builder --linux
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            release/*.dmg
+            release/*.zip
+            release/*.exe
+            release/*.AppImage
+            release/*.deb
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
