@@ -1,9 +1,13 @@
 const { app, BrowserWindow, screen } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
+const http = require('http');
 
 let mainWindow;
 let pythonProcess;
+
+const SERVER_PORT = 5001;
+const SERVER_URL = `http://127.0.0.1:${SERVER_PORT}`;
 
 function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -20,17 +24,22 @@ function createWindow() {
       nodeIntegration: true,
       contextIsolation: false
     },
-    titleBarStyle: 'hiddenInset', // Estilo nativo de Mac
+    titleBarStyle: 'hiddenInset',
     backgroundColor: '#0f0c29',
-    show: false // Don't show until ready
+    show: false
   });
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
-    // Open DevTools for debugging only in dev mode
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, 'ui', 'dist', 'index.html'));
+    // En producción, cargamos desde el servidor Flask (same-origin).
+    // Esto elimina todos los problemas de CORS y audio silenciado.
+    waitForServer(() => {
+      if (mainWindow) {
+        mainWindow.loadURL(SERVER_URL);
+      }
+    });
   }
 
   mainWindow.once('ready-to-show', () => {
@@ -42,19 +51,44 @@ function createWindow() {
   });
 }
 
+/**
+ * Espera a que el servidor Flask esté listo antes de cargar la UI.
+ * Reintenta cada 300ms hasta 30 segundos máximo.
+ */
+function waitForServer(callback, retries = 100) {
+  const check = () => {
+    const req = http.get(SERVER_URL, (res) => {
+      if (res.statusCode === 200) {
+        callback();
+      } else if (retries > 0) {
+        setTimeout(check, 300);
+        retries--;
+      }
+    });
+    req.on('error', () => {
+      if (retries > 0) {
+        setTimeout(check, 300);
+        retries--;
+      } else {
+        console.error('Server failed to start after 30s');
+      }
+    });
+    req.end();
+  };
+  check();
+}
+
 function startPythonServer() {
   const isWin = process.platform === 'win32';
   const binName = isWin ? 'bailandosolo-server.exe' : 'bailandosolo-server';
 
   if (app.isPackaged) {
-    // En producción, ejecutamos el binario empaquetado (PyInstaller)
     const binPath = path.join(process.resourcesPath, binName);
     console.log(`Iniciando servidor compilado: ${binPath}`);
     pythonProcess = spawn(binPath, [], {
       env: { ...process.env, PYTHONUNBUFFERED: '1' }
     });
   } else {
-    // En desarrollo, usamos el entorno virtual
     const pythonExecutable = isWin ? 'python.exe' : 'python3';
     const venvPath = isWin ? path.join('venv', 'Scripts') : path.join('venv', 'bin');
     const pythonPath = path.join(__dirname, venvPath, pythonExecutable);
