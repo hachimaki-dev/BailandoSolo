@@ -223,21 +223,38 @@ const getThumbnail = (song) => {
 
 watch(() => props.currentSong, (newSong) => {
   if (newSong && audio.value) {
+    let resolvedSrc = ''
     if (newSong.url) {
-      audio.value.src = newSong.url
+      resolvedSrc = newSong.url
     } else if (newSong.path) {
-      audio.value.src = streamUrl(newSong.path)
+      resolvedSrc = streamUrl(newSong.path)
+    } else if (newSong.folder && newSong.filename) {
+      resolvedSrc = streamUrl(`/api/stream/${encodeURIComponent(newSong.folder)}/${encodeURIComponent(newSong.filename)}`)
     } else if (newSong.filename) {
-      audio.value.src = streamUrl(`/api/stream/${encodeURIComponent(newSong.filename)}`)
+      resolvedSrc = streamUrl(`/api/stream/${encodeURIComponent(newSong.filename)}`)
     }
-    if (props.isPlaying) audio.value.play().catch(e => console.log('Auto-play blocked:', e))
+    
+    audio.value.src = resolvedSrc
+    audio.value.load()
+    if (props.isPlaying) {
+      const playPromise = audio.value.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(e => console.warn('Playback blocked:', e))
+      }
+    }
   }
 })
 
 watch(() => props.isPlaying, (playing) => {
   if (audio.value) {
-    if (playing) audio.value.play().catch(e => console.log('Play blocked:', e))
-    else audio.value.pause()
+    if (playing) {
+      const playPromise = audio.value.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(e => console.warn('Play blocked:', e))
+      }
+    } else {
+      audio.value.pause()
+    }
   }
 })
 

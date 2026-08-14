@@ -347,6 +347,14 @@ const initAudio = ({ audio, canvas }) => {
       canvasEl.height = 400
       drawVisualizer()
     }
+
+    const unlockAudio = () => {
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => console.log('AudioContext resumed'))
+      }
+    }
+    window.addEventListener('click', unlockAudio, { passive: true })
+    window.addEventListener('keydown', unlockAudio, { passive: true })
   } catch (e) {
     console.error('Web Audio API error:', e)
   }

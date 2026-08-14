@@ -9,7 +9,16 @@ from flask_cors import CORS
 def create_app():
     """Create and configure the Flask application."""
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "*"}})
+
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, Range'
+        response.headers['Access-Control-Expose-Headers'] = 'Content-Range, Accept-Ranges, Content-Length'
+        response.headers['Accept-Ranges'] = 'bytes'
+        return response
 
     # Register all route blueprints
     from server.routes.profiles import profiles_bp, ensure_default_profile
