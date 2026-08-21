@@ -21,6 +21,7 @@
     },
     "files": [
       "main.js",
+      "preload.js",
       "package.json",
       "ui/dist/**/*"
     ],
@@ -35,13 +36,29 @@
       }
     ],
     "mac": {
+      "icon": "build/icon.icns",
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64", "x64"]
+        }
       ],
       "category": "public.app-category.music"
     },
+    "dmg": {
+      "background": "build/background.png",
+      "iconSize": 120,
+      "window": {
+        "width": 640,
+        "height": 400
+      }
+    },
     "linux": {
+      "icon": "build/icon.png",
       "target": [
         "AppImage",
         "deb"
@@ -49,10 +66,17 @@
       "category": "Audio"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "portable"
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     }
   },
   "keywords": [],

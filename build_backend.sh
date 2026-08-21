@@ -23,8 +23,8 @@ pip install -r requirements.txt
 pip install pyinstaller
 
 # 4. Limpiar builds anteriores
-echo -e "${BLUE}🧹 Limpiando builds anteriores...${NC}"
-rm -rf build/ dist/ server.spec
+echo -e "${BLUE}🧹 Limpiando builds anteriores de PyInstaller...${NC}"
+rm -rf build/bailandosolo-server dist/bailandosolo-server server.spec bailandosolo-server.spec
 
 # 5. Ejecutar PyInstaller
 echo -e "${BLUE}🔨 Ejecutando PyInstaller...${NC}"

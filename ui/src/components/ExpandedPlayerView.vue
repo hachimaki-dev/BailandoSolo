@@ -216,7 +216,9 @@ const formatTime = (seconds) => {
 const getThumbnail = (song) => {
   if (!song) return null
   if (song.thumbnail) return streamUrl(song.thumbnail)
-  return null
+  const hash = song.title ? song.title.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : 1
+  const coverNum = (hash % 9) + 1
+  return new URL(`../assets/styles/no_cover/${coverNum}.png`, import.meta.url).href
 }
 
 const drawExpandedVisualizer = () => {

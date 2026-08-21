@@ -123,6 +123,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import EqualizerPanel from './EqualizerPanel.vue'
+import { streamUrl } from '../config'
 
 const props = defineProps({
   currentSong: Object,

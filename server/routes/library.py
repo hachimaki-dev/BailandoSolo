@@ -11,7 +11,7 @@ from urllib.parse import quote
 
 from flask import Blueprint, jsonify, request, send_file
 
-from server.config import DOWNLOADS_DIR, AUDIO_EXTENSIONS, IMAGE_EXTENSIONS, UI_DIST_DIR
+from server.config import DOWNLOADS_DIR, AUDIO_EXTENSIONS, IMAGE_EXTENSIONS
 from server.routes.profiles import load_profiles
 
 library_bp = Blueprint('library', __name__)
@@ -362,21 +362,3 @@ def get_random_songs():
     return jsonify(all_songs[:20])
 
 
-@library_bp.route('/assets/<path:filename>')
-def serve_assets(filename):
-    """Serve static assets from the Vue build."""
-    safe_path = os.path.normpath(os.path.join(UI_DIST_DIR, 'assets', filename))
-    if not safe_path.startswith(os.path.join(UI_DIST_DIR, 'assets')):
-        return jsonify({'error': 'Access denied'}), 403
-    if not os.path.exists(safe_path):
-        return jsonify({'error': 'File not found'}), 404
-    return send_file(safe_path)
-
-
-@library_bp.route('/')
-def index():
-    """Serve the main HTML file."""
-    index_path = os.path.join(UI_DIST_DIR, 'index.html')
-    if os.path.exists(index_path):
-        return send_file(index_path)
-    return "Error: ui/dist/index.html not found. Please build the UI first.", 404

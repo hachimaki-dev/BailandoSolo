@@ -68,7 +68,7 @@
         :repeatMode="repeatMode"
         :isQueueOpen="isQueueOpen"
         :isEqOpen="isEqOpen"
-        @play="isPlaying = true"
+        @play="handlePlay"
         @pause="isPlaying = false"
         @next="nextSong"
         @prev="prevSong"
@@ -117,7 +117,7 @@
     :queue="queue"
     :analyserNode="analyserNode"
     @close="showExpandedPlayer = false"
-    @play="isPlaying = true"
+    @play="handlePlay"
     @pause="isPlaying = false"
     @prev="prevSong"
     @next="nextSong"
@@ -394,6 +394,17 @@ const drawVisualizer = () => {
 
 // ─── Playback Controls ─────────────────────────────────────────────────────────
 
+const handlePlay = () => {
+  if (!currentSong.value && allSongs.value.length > 0) {
+    handlePlaySong({ song: allSongs.value[0], index: 0, list: allSongs.value })
+    return
+  }
+  isPlaying.value = true
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
+}
+
 const handlePlaySong = ({ song, index, list }) => {
   currentPlaylist.value = list || allSongs.value
   currentIndex.value = index !== undefined ? index : currentPlaylist.value.findIndex(s => s.path === song.path)
@@ -410,6 +421,9 @@ const nextSong = () => {
     const next = queue.value.shift()
     currentSong.value = next
     isPlaying.value = true
+    if (audioContext && audioContext.state === 'suspended') {
+      audioContext.resume()
+    }
     return
   }
 
@@ -422,6 +436,9 @@ const nextSong = () => {
   }
   currentSong.value = currentPlaylist.value[currentIndex.value]
   isPlaying.value = true
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
 }
 
 const prevSong = () => {
@@ -429,6 +446,9 @@ const prevSong = () => {
   currentIndex.value = (currentIndex.value - 1 + currentPlaylist.value.length) % currentPlaylist.value.length
   currentSong.value = currentPlaylist.value[currentIndex.value]
   isPlaying.value = true
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
 }
 
 const seekAudio = (time) => {
@@ -458,6 +478,9 @@ const playQueueItem = (index) => {
   queue.value.splice(index, 1)
   currentSong.value = song
   isPlaying.value = true
+  if (audioContext && audioContext.state === 'suspended') {
+    audioContext.resume()
+  }
 }
 
 const removeFromQueue = (index) => {

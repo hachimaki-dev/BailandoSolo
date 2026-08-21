@@ -12,7 +12,6 @@ HOST = '0.0.0.0'
 # Paths (relative to project root)
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_DIR = os.path.join(PROJECT_ROOT, 'static')
-UI_DIST_DIR = os.path.join(PROJECT_ROOT, 'ui', 'dist')
 
 # User Data (stored in user home directory to prevent permission issues when packaged)
 USER_DATA_DIR = os.path.expanduser('~/.bailandosolo')
