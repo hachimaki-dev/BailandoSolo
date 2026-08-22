@@ -421,7 +421,14 @@ body[data-theme="snes"] .btn-create {
 }
 
 /* Responsive Design */
-@media (max-width: 960px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+    body[data-theme="snes"] .main-grid {
+        grid-template-columns: 1fr 300px;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 768px) {
     body[data-theme="snes"] .main-grid {
         grid-template-columns: 1fr;
         gap: 16px;

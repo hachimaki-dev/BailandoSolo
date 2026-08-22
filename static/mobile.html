@@ -3,773 +3,1863 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bailando Solo Mobile</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bailando Solo Mobile — Reproductor Retro PWA</title>
+    
+    <!-- PWA Manifest & Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bailando Solo">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- JSZip (Local with CDN fallback) -->
+    <script src="/static/js/jszip.min.js"></script>
+    <script>
+        if (typeof JSZip === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>');
+        }
+    </script>
+
+    <style>
         :root {
-            --color-bg: #7c7c7c;
-            --color-panel-bg: #e4e4e4;
-            --color-text: #000000;
-            --color-primary: #5a5aff;
-            --color-secondary: #ff5a5a;
-            --font-main: 'Press Start 2P', cursive;
+            --color-bg: #0f0f1a;
+            --color-panel: #1e1e2f;
+            --color-panel-light: #2a2a40;
+            --color-border: #000000;
+            --color-primary: #00f0ff;
+            --color-accent: #ff007f;
+            --color-success: #39ff14;
+            --color-warning: #ffb703;
+            --color-retro-blue: #5a5aff;
+            --color-text: #ffffff;
+            --color-text-muted: #a0a0b8;
+            --font-pixel: 'Press Start 2P', monospace;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: var(--font-main);
+            font-family: var(--font-mono);
             background-color: var(--color-bg);
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px),
-                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 0, 0, .1) 2px, rgba(0, 0, 0, .1) 4px);
-            background-attachment: fixed;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(90, 90, 255, 0.15) 0%, transparent 70%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .2) 2px, rgba(0, 0, 0, .2) 4px);
             min-height: 100vh;
-            padding: 20px;
-            padding-bottom: 160px;
+            padding: 12px;
+            padding-bottom: 120px;
             color: var(--color-text);
-            image-rendering: pixelated;
+            overflow-x: hidden;
+            user-select: none;
         }
 
-        /* CRT Scanline Effect */
+        /* Scanline Overlay */
         body::before {
             content: '';
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(0deg,
-                    rgba(0, 0, 0, 0.15),
-                    rgba(0, 0, 0, 0.15) 1px,
-                    transparent 1px,
-                    transparent 2px);
+            width: 100vw;
+            height: 100vh;
+            background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08) 1px, transparent 1px, transparent 2px);
             pointer-events: none;
             z-index: 9999;
         }
 
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            background: #5a5aff;
-            padding: 20px;
-            border: 4px solid #000;
-            box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.5), inset 4px 4px 0 rgba(255, 255, 255, 0.5), 6px 6px 0 #000;
-            color: #fff;
-            text-shadow: 3px 3px 0 #000;
-        }
-
-        .header h1 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-
-        .header p {
-            font-size: 0.6rem;
-            opacity: 0.9;
-        }
-
-        .card {
-            background: var(--color-panel-bg);
-            border: 4px solid #000;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff, 6px 6px 0 #000;
-            border-radius: 0;
-        }
-
-        .breadcrumb {
+        /* Retro App Header */
+        .app-header {
+            background: #222233;
+            border: 3px solid var(--color-border);
+            box-shadow: inset 2px 2px 0 #444455, inset -2px -2px 0 #111119, 4px 4px 0 #000000;
+            padding: 12px;
+            margin-bottom: 12px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
-            margin-bottom: 20px;
-            font-size: 0.7rem;
         }
 
-        .breadcrumb button {
-            background: #c4c4c4;
-            border: 4px solid #000;
-            color: #000;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-size: 0.7rem;
-            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
-        }
-
-        .breadcrumb button:active {
-            box-shadow: inset 2px 2px 0 #000;
-            transform: translateY(2px);
-        }
-
-        .folder-item {
-            background: #ffaa00;
-            box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffda5a, 6px 6px 0 #000;
+        .header-top {
             display: flex;
             align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            transition: transform 0.1s;
+            justify-content: space-between;
+            gap: 8px;
         }
 
-        .folder-item:active {
-            transform: translate(4px, 4px);
-            box-shadow: inset -2px -2px 0 #c47a00, inset 2px 2px 0 #ffda5a, 2px 2px 0 #000;
-        }
-
-        .song-item {
-            background: #e4e4e4;
+        .brand-box {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 8px;
+        }
+
+        .brand-logo {
+            font-size: 20px;
+            animation: pulse-disc 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-disc {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .brand-title {
+            font-family: var(--font-pixel);
+            font-size: 10px;
+            color: var(--color-primary);
+            text-shadow: 1px 1px 0 #000;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-subtitle {
+            font-size: 9px;
+            color: var(--color-text-muted);
+        }
+
+        .header-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pill {
+            font-family: var(--font-pixel);
+            font-size: 7px;
+            padding: 4px 7px;
+            border: 2px solid #000;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-online {
+            background: #004422;
+            color: var(--color-success);
+            border-color: var(--color-success);
+            box-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
+        }
+
+        .status-offline {
+            background: #442200;
+            color: var(--color-warning);
+            border-color: var(--color-warning);
+        }
+
+        .btn-pwa-install {
+            background: linear-gradient(180deg, #ff007f, #b30059);
+            color: #ffffff;
+            font-family: var(--font-pixel);
+            font-size: 7.5px;
+            padding: 6px 9px;
+            border: 2px solid #000;
+            box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5), 2px 2px 0 #000;
             cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 4px;
+            animation: bounce-install 2s infinite;
         }
 
-        .song-item:hover {
-            background: #ffff00;
+        @keyframes bounce-install {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-3px); }
+            60% { transform: translateY(-1.5px); }
         }
 
-        .folder-item .icon,
-        .song-item .icon {
-            font-size: 1.5rem;
-            min-width: 40px;
-            text-align: center;
+        /* Navigation Tabs */
+        .nav-dock {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: #11111a;
+            padding: 4px;
+            border: 2px solid #000;
         }
 
-        .folder-item .name,
-        .song-item .name {
-            flex: 1;
-            font-size: 0.7rem;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .download-btn {
-            background: #5a5aff;
-            border: 4px solid #000;
-            color: #fff;
-            padding: 8px 12px;
+        .nav-btn {
+            font-family: var(--font-pixel);
+            font-size: 8px;
+            padding: 9px 6px;
+            border: 2px solid #000;
+            background: #333344;
+            color: #cccccc;
             cursor: pointer;
-            font-family: var(--font-main);
-            font-size: 0.6rem;
-            box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
-            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: inset 1px 1px 0 #555566, 1px 1px 0 #000;
+            transition: all 0.15s ease;
+        }
+
+        .nav-btn.active {
+            background: var(--color-retro-blue);
+            color: #ffffff;
+            border-color: #00f0ff;
+            box-shadow: inset 2px 2px 0 #8888ff, inset -2px -2px 0 #222288, 2px 2px 0 #000;
+        }
+
+        /* Action Toolbar */
+        .action-toolbar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .btn-retro-action {
+            font-family: var(--font-pixel);
+            font-size: 7.5px;
+            padding: 10px 8px;
+            border: 2px solid #000;
+            background: linear-gradient(180deg, #3a3a55 0%, #252538 100%);
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: inset 1px 1px 0 #666688, inset -1px -1px 0 #111122, 3px 3px 0 #000;
             text-transform: uppercase;
         }
 
-        .download-btn:active {
-            box-shadow: inset 2px 2px 0 #000;
-            transform: translateY(2px);
+        .btn-retro-action:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset 1px 1px 0 #000;
         }
 
-        .folder-download {
-            background: #ff5a5a;
-            width: 100%;
-            margin-bottom: 20px;
-            padding: 15px;
-            font-size: 0.7rem;
-            box-shadow: inset -4px -4px 0 #aa0000, inset 4px 4px 0 #ffaaaa, 6px 6px 0 #000;
+        .btn-retro-accent {
+            background: linear-gradient(180deg, #00b4d8 0%, #0077b6 100%);
+            border-color: #00f0ff;
         }
 
-        .folder-download:active {
-            box-shadow: inset 4px 4px 0 #000;
-            transform: translate(4px, 4px);
+        .btn-retro-pink {
+            background: linear-gradient(180deg, #ff007f 0%, #a60053 100%);
         }
 
-        .search-bar {
-            width: 100%;
-            padding: 15px;
-            border: 4px solid #000;
-            background: #fff;
-            color: #000;
-            margin-bottom: 15px;
-            font-family: var(--font-main);
-            font-size: 0.7rem;
-            border-radius: 0;
-            box-shadow: inset 4px 4px 0 #ccc;
+        /* Search Strip */
+        .search-strip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 3px solid #000;
+            padding: 6px 10px;
+            box-shadow: inset 2px 2px 0 #888888, 3px 3px 0 #000;
+            margin-bottom: 12px;
         }
 
-        .search-bar::placeholder {
-            color: #999;
-        }
-
-        .search-bar:focus {
+        .search-strip input {
+            flex: 1;
+            border: none;
             outline: none;
-            background: #ffffcc;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: #000000;
+            font-weight: 600;
+            background: transparent;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 0.8rem;
-            text-shadow: 2px 2px 0 #000;
+        .search-strip input::placeholder {
+            color: #888888;
         }
 
-        .error {
-            background: #ff5a5a;
-            color: white;
-            padding: 15px;
-            border: 4px solid #000;
-            text-align: center;
-            margin: 20px 0;
-            box-shadow: 6px 6px 0 #000;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 40px;
-            opacity: 0.8;
-            font-size: 0.7rem;
-        }
-
-        .song-thumbnail {
-            width: 40px;
-            height: 40px;
+        /* Breadcrumb Navigation */
+        .breadcrumb-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #252538;
             border: 2px solid #000;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .btn-back {
+            font-family: var(--font-pixel);
+            font-size: 8px;
+            background: #444455;
+            color: #ffffff;
+            border: 2px solid #000;
+            padding: 6px 10px;
+            cursor: pointer;
+            box-shadow: inset 1px 1px 0 #777788, 1px 1px 0 #000;
+        }
+
+        .breadcrumb-text {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 60%;
+        }
+
+        /* Cassette Grid (Folders) */
+        .cassette-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .cassette-card {
+            background: #2a2a3e;
+            border: 3px solid #000000;
+            box-shadow: inset 1px 1px 0 #555577, inset -1px -1px 0 #111122, 4px 4px 0 #000000;
+            border-radius: 4px;
+            padding: 8px;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cassette-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset 1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+        .cassette-art-box {
+            width: 100%;
+            aspect-ratio: 1.5;
+            background: #11111a;
+            border: 2px solid #000;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+
+        .cassette-art-img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
-        /* Player Styles */
-        .player-bar {
+        .cassette-art-fallback {
+            font-size: 28px;
+        }
+
+        .cassette-badge-count {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.85);
+            color: var(--color-primary);
+            font-family: var(--font-pixel);
+            font-size: 6px;
+            padding: 2px 4px;
+            border: 1px solid var(--color-primary);
+            border-radius: 2px;
+        }
+
+        .cassette-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cassette-name {
+            font-family: var(--font-pixel);
+            font-size: 7.5px;
+            color: #ffffff;
+            line-height: 1.3;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 4px;
+        }
+
+        .cassette-meta {
+            font-size: 10px;
+            color: var(--color-text-muted);
+        }
+
+        /* Song List Cards */
+        .song-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .song-row {
+            background: #1e1e2f;
+            border: 2px solid #000;
+            box-shadow: inset 1px 1px 0 #444466, 2px 2px 0 #000;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.1s ease;
+        }
+
+        .song-row:active, .song-row.playing {
+            background: #2a2a48;
+            border-color: var(--color-primary);
+        }
+
+        .song-row.playing {
+            box-shadow: inset 2px 2px 0 #00f0ff, 2px 2px 0 #000;
+        }
+
+        .song-thumb {
+            width: 38px;
+            height: 38px;
+            border: 2px solid #000;
+            background: #111;
+            object-fit: cover;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .song-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .song-title {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 12px;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-sub {
+            font-size: 10px;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .offline-tag {
+            font-family: var(--font-pixel);
+            font-size: 6px;
+            background: #004422;
+            color: var(--color-success);
+            padding: 1px 3px;
+            border: 1px solid var(--color-success);
+            border-radius: 2px;
+        }
+
+        .song-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-song-action {
+            background: #333348;
+            border: 1.5px solid #000;
+            color: #ffffff;
+            font-size: 12px;
+            padding: 6px 8px;
+            cursor: pointer;
+            box-shadow: inset 1px 1px 0 #666688;
+        }
+
+        .btn-song-action:active {
+            transform: translate(1px, 1px);
+        }
+
+        /* Sticky Mini Player */
+        .player-bottom-deck {
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 100%;
-            background: #c4c4c4;
+            width: 100vw;
+            background: #181824;
             border-top: 4px solid #000;
-            padding: 15px;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            padding: 8px 12px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            z-index: 1000;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-            box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.2);
+            gap: 6px;
         }
 
-        .player-bar.visible {
-            transform: translateY(0);
-        }
-
-        .player-main {
+        .mini-player-row {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
-        .mini-thumbnail {
+        .mini-art {
+            width: 44px;
+            height: 44px;
+            border: 2px solid #000;
+            background: #000;
+            object-fit: cover;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .mini-info {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .mini-title {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 12px;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-artist {
+            font-size: 10px;
+            color: var(--color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-deck-control {
+            background: #333348;
+            border: 2px solid #000;
+            color: #ffffff;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: inset 1px 1px 0 #666688, 2px 2px 0 #000;
+        }
+
+        .btn-deck-control.play-btn {
+            background: var(--color-retro-blue);
+            color: #ffffff;
+            width: 44px;
+            height: 44px;
+            font-size: 18px;
+            border-color: #00f0ff;
+        }
+
+        .mini-progress-strip {
+            width: 100%;
+            height: 6px;
+            background: #000000;
+            border: 1px solid #444455;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f0ff, #39ff14);
+            width: 0%;
+        }
+
+        /* Fullscreen Player Modal / Expanded View */
+        .player-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #12121e;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .player-modal.open {
+            display: flex;
+        }
+
+        .modal-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-close-deck {
+            font-family: var(--font-pixel);
+            font-size: 9px;
+            padding: 8px 12px;
+            background: #ff0055;
+            color: #ffffff;
+            border: 2px solid #000;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        /* Animated Retro Cassette Display */
+        .cassette-hero-deck {
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1.6;
+            margin: 15px auto;
+            background: #252538;
+            border: 4px solid #000;
+            box-shadow: inset 2px 2px 0 #555577, inset -2px -2px 0 #111122, 6px 6px 0 #000;
+            position: relative;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .cassette-window {
+            background: #0b0b12;
+            border: 2px solid #000;
+            border-radius: 4px;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cassette-reel {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            border: 4px solid #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .cassette-reel::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background: #0b0b12;
+            border-radius: 50%;
+            border: 2px solid #000;
+        }
+
+        .cassette-reel.spinning {
+            animation: spin-reel 2s linear infinite;
+        }
+
+        @keyframes spin-reel {
+            100% { transform: rotate(360deg); }
+        }
+
+        .tape-strip {
+            height: 8px;
+            background: #3a1a00;
+            border-top: 1px solid #ffaa00;
+            border-bottom: 1px solid #ffaa00;
+            width: 45%;
+        }
+
+        .cassette-label-strip {
+            background: #ffffff;
+            border: 2px solid #000;
+            padding: 4px 8px;
+            text-align: center;
+            font-family: var(--font-pixel);
+            font-size: 7.5px;
+            color: #000000;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .expanded-info {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .expanded-title {
+            font-family: var(--font-mono);
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .expanded-artist {
+            font-size: 13px;
+            color: var(--color-primary);
+        }
+
+        .expanded-progress-box {
+            margin: 15px 0;
+        }
+
+        .scrubber-bar {
+            width: 100%;
+            height: 12px;
+            background: #000000;
+            border: 2px solid #444455;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .scrubber-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f0ff, #ff007f);
+            width: 0%;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-top: 4px;
+            font-family: var(--font-mono);
+        }
+
+        .expanded-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .expanded-ctrl-btn {
+            background: #252538;
+            border: 3px solid #000;
+            color: #ffffff;
             width: 50px;
             height: 50px;
-            border: 4px solid #000;
-            object-fit: cover;
-            background: #000;
-        }
-
-        .track-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .track-title {
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.7rem;
-            margin-bottom: 8px;
-            color: #000;
-        }
-
-        .track-artist {
-            font-size: 0.6rem;
-            color: #555;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .control-btn {
-            background: #b4b4b4;
-            border: 4px solid #000;
-            color: #000;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            box-shadow: inset -2px -2px 0 #7c7c7c, inset 2px 2px 0 #fff;
-        }
-
-        .control-btn:active {
-            box-shadow: inset 2px 2px 0 #000;
-            transform: translate(2px, 2px);
-        }
-
-        .play-btn {
-            background: #5a5aff;
-            color: #fff;
-            box-shadow: inset -2px -2px 0 #0000aa, inset 2px 2px 0 #aaaaff;
-        }
-
-        .progress-area {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.6rem;
-            color: #000;
-        }
-
-        .progress-bar {
-            flex: 1;
-            height: 12px;
-            background: #000;
-            border: 2px solid #fff;
-            position: relative;
+            font-size: 20px;
             cursor: pointer;
-            box-shadow: inset 2px 2px 0 #000;
+            box-shadow: inset 1px 1px 0 #666688, 3px 3px 0 #000;
         }
 
-        .progress-fill {
-            position: absolute;
-            left: 0;
+        .expanded-ctrl-btn.active {
+            background: var(--color-primary);
+            color: #000000;
+        }
+
+        .expanded-ctrl-btn.main-play {
+            width: 64px;
+            height: 64px;
+            font-size: 26px;
+            background: var(--color-retro-blue);
+            border-color: #00f0ff;
+        }
+
+        /* Modal Overlay for Scan & Extraction Dialogs */
+        .dialog-overlay {
+            position: fixed;
             top: 0;
-            height: 100%;
-            background: #00ff00;
-            width: 0%;
-            box-shadow: inset -1px -1px 0 #004400, inset 1px 1px 0 #ccffcc;
-        }
-
-        .progress-handle {
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(3px);
+            z-index: 3000;
             display: none;
-            /* Retro style doesn't usually have handles */
-        }
-
-        /* Cassette Folder Styles */
-        .folder-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-            padding: 10px 0;
-        }
-
-        .cassette-folder {
-            cursor: pointer;
-            transition: transform 0.2s;
-            width: 100%;
-            aspect-ratio: 1.6;
-            position: relative;
-        }
-
-        .cassette-folder:active {
-            transform: scale(0.98);
-            border-radius: 8px;
-            padding: 6px;
-            display: flex;
-            flex-direction: column;
-            box-shadow:
-                inset 0 0 10px rgba(0, 0, 0, 0.8),
-                2px 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid #555;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cassette-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .cassette-body::before,
-        .cassette-body::after {
-            content: '';
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #111;
-            border-radius: 50%;
-            top: 6px;
-            box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.2);
-            z-index: 2;
-        }
-
-        .cassette-body::before {
-            left: 6px;
-        }
-
-        .cassette-body::after {
-            right: 6px;
-        }
-
-        .cassette-label {
-            flex: 1;
-            /* background: #f4f4f4; Removed paper background */
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 2px;
-            z-index: 2;
+            padding: 20px;
         }
 
-        .cassette-art {
-            width: 85%;
-            height: 75%;
-            object-fit: cover;
-            border: 2px solid #fff;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            transform: rotate(-1deg);
-            z-index: 1;
-        }
-
-        .cassette-art-placeholder {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        .dialog-overlay.open {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 24px;
-            color: rgba(255, 255, 255, 0.8);
         }
 
-        .cassette-title-strip {
-            position: absolute;
-            top: 10px;
-            left: 0;
+        .dialog-box {
+            background: #1e1e2f;
+            border: 4px solid #000;
+            box-shadow: inset 2px 2px 0 #555577, 8px 8px 0 #000;
+            padding: 20px;
+            max-width: 480px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 4px 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transform: rotate(-2deg);
-            border: 1px solid #ccc;
-            z-index: 2;
-        }
-
-        .cassette-title {
-            display: block;
-            font-family: var(--font-main);
-            font-weight: bold;
-            font-size: 0.6rem;
-            color: #000;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
             text-align: center;
+        }
+
+        .dialog-title {
+            font-family: var(--font-pixel);
+            font-size: 11px;
+            color: var(--color-primary);
+            margin-bottom: 12px;
             text-transform: uppercase;
         }
 
-        .cassette-bottom {
-            height: 25%;
-            position: relative;
-            margin-top: 4px;
-            z-index: 2;
+        .dialog-desc {
+            font-size: 12px;
+            color: #cccccc;
+            margin-bottom: 16px;
+            line-height: 1.5;
         }
 
-        .cassette-holes {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60%;
-            display: flex;
-            justify-content: space-between;
-            z-index: 3;
-        }
-
-        .hole {
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border-radius: 50%;
-            border: 4px solid #fff;
-            box-shadow: inset 0 0 0 2px #000;
-            position: relative;
-        }
-
-        .hole::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 6px;
-            height: 6px;
-            background: transparent;
-            border-left: 2px solid #000;
-            border-right: 2px solid #000;
-        }
-
-        .cassette-trapezoid {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60%;
-            height: 100%;
-            background: #2a2a2a;
-            clip-path: polygon(10% 0, 90% 0, 100% 100%, 0% 100%);
-            z-index: 1;
-            border-top: 1px solid #444;
-        }
-
-        /* SNES Pixel Art Style for Cassettes */
-        .cassette-body {
-            border: 4px solid #000;
-            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.5);
-            border-radius: 4px;
-            image-rendering: pixelated;
-        }
-
-        .cassette-overlay {
-            background: rgba(0, 0, 0, 0.1);
-            background-image:
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.2) 2px, rgba(0, 0, 0, 0.2) 4px);
-            box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .cassette-title-strip {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 8px;
-            border: 2px solid #000;
-            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
-            background: #fff;
-            transform: rotate(0deg);
-            top: 15px;
-            padding: 6px 4px;
-        }
-
-        .cassette-trapezoid {
-            border-top: 2px solid #000;
-            background: rgba(0, 0, 0, 0.6);
-            clip-path: polygon(15% 0, 85% 0, 100% 100%, 0% 100%);
-        }
-
-        .hole {
-            border: 3px solid #000;
-            box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.5);
-            background: #fff;
-        }
-
-        .hole::after {
-            border-left: 4px solid #000;
-            border-right: 4px solid #000;
-            height: 8px;
-            width: 8px;
-        }
-
-        .cassette-body::before,
-        .cassette-body::after {
-            box-shadow: none;
+        .dialog-progress-bar {
+            width: 100%;
+            height: 16px;
             background: #000;
-            width: 8px;
-            height: 8px;
-            border: 1px solid #555;
+            border: 2px solid #555;
+            margin-bottom: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dialog-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff007f, #39ff14);
+            width: 0%;
+            transition: width 0.15s ease;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* Hidden file input */
+        #folderPickerInput, #zipPickerInput {
+            display: none;
+        }
+
+        /* Empty States & Feedback */
+        .empty-box {
+            background: #1e1e2f;
+            border: 2px dashed #444466;
+            padding: 30px 15px;
+            text-align: center;
+            color: var(--color-text-muted);
+            margin: 15px 0;
+        }
+
+        .empty-box-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #00f0ff;
+            color: #000000;
+            font-family: var(--font-pixel);
+            font-size: 8px;
+            padding: 10px 16px;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0 #000;
+            z-index: 4000;
+            transition: transform 0.3s ease;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🎵 Bailando Solo Mobile</h1>
-            <p>Descarga tu música favorita</p>
-        </div>
+        <!-- Master Header -->
+        <header class="app-header">
+            <div class="header-top">
+                <div class="brand-box">
+                    <span class="brand-logo">💿</span>
+                    <div>
+                        <div class="brand-title">BAILANDO SOLO</div>
+                        <div class="brand-subtitle">PWA Mobile Player</div>
+                    </div>
+                </div>
 
-        <div class="breadcrumb" id="breadcrumb" style="display: none;">
-            <button onclick="goBack()">← Volver</button>
-            <span id="currentPath"></span>
-        </div>
-
-        <div id="content">
-            <div class="loading">Cargando...</div>
-        </div>
-    </div>
-
-    <!-- Player Bar -->
-    <div class="player-bar" id="playerBar">
-        <div class="player-main">
-            <img src="" alt="" class="mini-thumbnail" id="playerThumb">
-            <div class="track-info">
-                <div class="track-title" id="playerTitle">Selecciona una canción</div>
-                <div class="track-artist" id="playerStatus">Reproductor listo</div>
-            </div>
-            <div class="controls">
-                <button class="control-btn" onclick="prevSong()">⏮️</button>
-                <button class="control-btn play-btn" onclick="togglePlay()" id="playBtn">▶️</button>
-                <button class="control-btn" onclick="nextSong()">⏭️</button>
-            </div>
-        </div>
-        <div class="progress-area">
-            <span id="currentTime">0:00</span>
-            <div class="progress-bar" onclick="seek(event)">
-                <div class="progress-fill" id="progressFill">
-                    <div class="progress-handle"></div>
+                <div class="header-badges">
+                    <button id="pwaInstallBtn" class="btn-pwa-install" onclick="triggerPwaInstall()">
+                        📲 Instalar App
+                    </button>
+                    <div id="connectionStatus" class="status-pill status-online">
+                        <span>●</span> EN LÍNEA
+                    </div>
                 </div>
             </div>
-            <span id="duration">0:00</span>
+
+            <!-- View Switcher -->
+            <nav class="nav-dock">
+                <button class="nav-btn active" id="tabServerBtn" onclick="switchView('server')">
+                    📡 Servidor Local
+                </button>
+                <button class="nav-btn" id="tabOfflineBtn" onclick="switchView('offline')">
+                    💾 Mi Teléfono (<span id="offlineCountBadge">0</span>)
+                </button>
+            </nav>
+        </header>
+
+        <!-- Actions Toolbar (Scanner & Importer) -->
+        <div class="action-toolbar">
+            <button class="btn-retro-action btn-retro-accent" onclick="startLocalScan()">
+                🔍 Barrer Archivos
+            </button>
+            <button class="btn-retro-action btn-retro-pink" onclick="triggerZipImport()">
+                📦 Importar ZIP / Audio
+            </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-strip">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="Buscar canciones, casetes o artistas..." oninput="handleSearch(this.value)">
+        </div>
+
+        <!-- Breadcrumbs -->
+        <div class="breadcrumb-bar" id="breadcrumbBar" style="display: none;">
+            <button class="btn-back" onclick="goBackToFolders()">← Volver</button>
+            <span class="breadcrumb-text" id="breadcrumbFolder">Carpeta</span>
+            <button class="btn-retro-action" id="btnFolderDownloadZip" onclick="downloadCurrentFolderZip()" style="font-size: 7px; padding: 4px 8px;">
+                📦 Guardar Todo (.zip)
+            </button>
+        </div>
+
+        <!-- Main View Area -->
+        <main id="mainViewContent">
+            <div class="empty-box">
+                <div class="empty-box-icon">⏳</div>
+                <p>Cargando música...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Hidden File Pickers for Scanning & ZIP Import -->
+    <input type="file" id="folderPickerInput" webkitdirectory directory multiple accept="audio/*,.zip,application/zip" onchange="handleFileInputScan(event)">
+    <input type="file" id="zipPickerInput" multiple accept="audio/*,.zip,application/zip,application/x-zip-compressed" onchange="handleFileInputScan(event)">
+
+    <!-- Sticky Bottom Player Deck -->
+    <div class="player-bottom-deck" id="miniPlayerDeck">
+        <div class="mini-progress-strip" onclick="seekMiniPlayer(event)">
+            <div class="mini-progress-fill" id="miniProgressFill"></div>
+        </div>
+        <div class="mini-player-row">
+            <img src="/static/icons/icon-192.png" id="miniThumb" class="mini-art" onclick="openExpandedPlayer()">
+            <div class="mini-info" onclick="openExpandedPlayer()">
+                <div class="mini-title" id="miniTitle">Selecciona una pista</div>
+                <div class="mini-artist" id="miniArtist">Bailando Solo Mobile</div>
+            </div>
+            <div class="mini-controls">
+                <button class="btn-deck-control" onclick="prevTrack()" title="Anterior">⏮️</button>
+                <button class="btn-deck-control play-btn" id="miniPlayBtn" onclick="togglePlay()" title="Reproducir / Pausa">▶️</button>
+                <button class="btn-deck-control" onclick="nextTrack()" title="Siguiente">⏭️</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        let currentFolder = null;
-        let currentSongs = [];
-        let audio = new Audio();
-        let isPlaying = false;
-        let currentIndex = -1;
+    <!-- Fullscreen Player Modal -->
+    <div class="player-modal" id="expandedPlayerModal">
+        <div class="modal-top-bar">
+            <button class="btn-back" onclick="closeExpandedPlayer()">↓ Minimizar</button>
+            <span style="font-family: var(--font-pixel); font-size: 9px; color: var(--color-primary);">DECK REPRODUCTOR</span>
+            <button class="btn-retro-action" id="btnSaveToOffline" onclick="saveCurrentTrackToOffline()" style="font-size: 8px;">
+                💾 Guardar Offline
+            </button>
+        </div>
 
-        // Player Event Listeners
-        audio.addEventListener('timeupdate', updateProgress);
-        audio.addEventListener('ended', nextSong);
-        audio.addEventListener('loadedmetadata', () => {
-            document.getElementById('duration').textContent = formatTime(audio.duration);
+        <!-- Animated Cassette Graphic -->
+        <div class="cassette-hero-deck">
+            <div class="cassette-label-strip" id="expandedCassetteLabel">BAILANDO SOLO</div>
+            <div class="cassette-window">
+                <div class="cassette-reel" id="reelLeft"></div>
+                <div class="tape-strip"></div>
+                <div class="cassette-reel" id="reelRight"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 8px; font-family: var(--font-pixel); color: #888;">
+                <span>SIDE A</span>
+                <span>HI-FI STEREO</span>
+            </div>
+        </div>
+
+        <div class="expanded-info">
+            <div class="expanded-title" id="expandedTitle">Sin Canción</div>
+            <div class="expanded-artist" id="expandedArtist">Artista Desconocido</div>
+        </div>
+
+        <!-- Scrubber -->
+        <div class="expanded-progress-box">
+            <div class="scrubber-bar" onclick="seekExpanded(event)">
+                <div class="scrubber-fill" id="expandedProgressFill"></div>
+            </div>
+            <div class="time-labels">
+                <span id="expandedCurrentTime">0:00</span>
+                <span id="expandedDuration">0:00</span>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="expanded-controls-row">
+            <button class="expanded-ctrl-btn" id="btnShuffle" onclick="toggleShuffle()" title="Aleatorio">🔀</button>
+            <button class="expanded-ctrl-btn" onclick="prevTrack()" title="Anterior">⏮️</button>
+            <button class="expanded-ctrl-btn main-play" id="expandedPlayBtn" onclick="togglePlay()" title="Play / Pause">▶️</button>
+            <button class="expanded-ctrl-btn" onclick="nextTrack()" title="Siguiente">⏭️</button>
+            <button class="expanded-ctrl-btn" id="btnRepeat" onclick="toggleRepeat()" title="Repetir">🔁</button>
+        </div>
+    </div>
+
+    <!-- Progress / Action Dialog Overlay -->
+    <div class="dialog-overlay" id="dialogOverlay">
+        <div class="dialog-box">
+            <div class="dialog-title" id="dialogTitle">Procesando...</div>
+            <div class="dialog-desc" id="dialogDesc">Extrayendo archivos y agregando a la biblioteca...</div>
+            <div class="dialog-progress-bar">
+                <div class="dialog-progress-fill" id="dialogProgressFill"></div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-retro-action btn-retro-pink" id="btnDialogCancel" onclick="closeDialog()" style="display: none;">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastBox">¡Notificación!</div>
+
+    <!-- Core App Logic -->
+    <script>
+        /* ═══════════════════════════════════════════════════════════════════════════
+           INDEXEDDB ENGINE — Persistent Local & Offline Storage
+           ═══════════════════════════════════════════════════════════════════════════ */
+        const DB_NAME = 'BailandoSoloDB';
+        const DB_VERSION = 1;
+        let db = null;
+
+        function openDatabase() {
+            return new Promise((resolve, reject) => {
+                if (db) return resolve(db);
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+                req.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains('songs')) {
+                        const songStore = database.createObjectStore('songs', { keyPath: 'id' });
+                        songStore.createIndex('folder', 'folder', { unique: false });
+                        songStore.createIndex('title', 'title', { unique: false });
+                    }
+                    if (!database.objectStoreNames.contains('folders')) {
+                        database.createObjectStore('folders', { keyPath: 'name' });
+                    }
+                };
+
+                req.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbSaveSong(songObj) {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction(['songs', 'folders'], 'readwrite');
+                const songStore = tx.objectStore('songs');
+                const folderStore = tx.objectStore('folders');
+
+                songStore.put(songObj);
+
+                // Update folder count
+                const folderName = songObj.folder || 'Descargas';
+                const folderReq = folderStore.get(folderName);
+                folderReq.onsuccess = () => {
+                    const f = folderReq.result || { name: folderName, count: 0, thumbnail: songObj.thumbnail || '' };
+                    f.count = (f.count || 0) + 1;
+                    if (songObj.thumbnail && !f.thumbnail) f.thumbnail = songObj.thumbnail;
+                    folderStore.put(f);
+                };
+
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbGetAllSongs() {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('songs', 'readonly');
+                const store = tx.objectStore('songs');
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbGetSongsByFolder(folderName) {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('songs', 'readonly');
+                const store = tx.objectStore('songs');
+                const index = store.index('folder');
+                const req = index.getAll(folderName);
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbGetAllFolders() {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('folders', 'readonly');
+                const store = tx.objectStore('folders');
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbDeleteSong(songId) {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction(['songs', 'folders'], 'readwrite');
+                tx.objectStore('songs').delete(songId);
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           STATE & VARIABLES
+           ═══════════════════════════════════════════════════════════════════════════ */
+        let currentView = 'server'; // 'server' | 'offline'
+        let currentFolder = null;
+        let serverFolders = [];
+        let serverSongs = [];
+        let offlineSongs = [];
+        let activePlaylist = [];
+        let activeIndex = -1;
+        let currentAudioBlobUrl = null;
+
+        // Player state
+        const audio = new Audio();
+        let isPlaying = false;
+        let isShuffle = false;
+        let repeatMode = 'off'; // 'off' | 'all' | 'one'
+        let deferredPwaPrompt = null;
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           PWA SERVICE WORKER & INSTALLATION
+           ═══════════════════════════════════════════════════════════════════════════ */
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((reg) => {
+                        console.log('[PWA] Service Worker registrado:', reg.scope);
+                        // Check for SW updates
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showToast('Nueva versión disponible (actualizada)');
+                                }
+                            };
+                        };
+                    })
+                    .catch((err) => console.warn('[PWA] Error al registrar SW:', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPwaPrompt = e;
+            const installBtn = document.getElementById('pwaInstallBtn');
+            if (installBtn) installBtn.style.display = 'inline-flex';
         });
 
-        async function loadFolders() {
-            try {
-                const response = await fetch('/api/library');
-                const folders = await response.json();
-
-                const content = document.getElementById('content');
-                const breadcrumb = document.getElementById('breadcrumb');
-                breadcrumb.style.display = 'none';
-
-                if (folders.length === 0) {
-                    content.innerHTML = '<div class="card empty">No hay carpetas en la biblioteca</div>';
-                    return;
-                }
-
-                content.innerHTML = '<div class="folder-grid">' + folders.map(folder => {
-                    const name = folder.name || folder; // Handle both object and string for backward compat
-                    const thumb = folder.thumbnail ? (folder.thumbnail.startsWith('http') ? folder.thumbnail : folder.thumbnail) : null;
-
-                    return `
-                    <div class="cassette-folder" onclick="openFolder('${name}')">
-                        <div class="cassette-body" style="${thumb ? `background-image: url('${thumb}')` : ''}">
-                            <div class="cassette-overlay"></div>
-                            <div class="cassette-label">
-                                ${!thumb ? `<div class="cassette-art-placeholder"><span>${name.substring(0, 2).toUpperCase()}</span></div>` : ''}
-                                <div class="cassette-title-strip">
-                                    <span class="cassette-title">${name}</span>
-                                </div>
-                            </div>
-                            <div class="cassette-bottom">
-                                <div class="cassette-holes">
-                                    <div class="hole left"></div>
-                                    <div class="hole right"></div>
-                                </div>
-                                <div class="cassette-trapezoid"></div>
-                            </div>
-                        </div>
-                    </div>
-                `}).join('') + '</div>';
-            } catch (error) {
-                document.getElementById('content').innerHTML =
-                    '<div class="error">Error al cargar carpetas: ' + error.message + '</div>';
+        function triggerPwaInstall() {
+            if (deferredPwaPrompt) {
+                deferredPwaPrompt.prompt();
+                deferredPwaPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showToast('¡App instalada con éxito!');
+                        document.getElementById('pwaInstallBtn').style.display = 'none';
+                    }
+                    deferredPwaPrompt = null;
+                });
+            } else {
+                // Instruction for iOS Safari or Chrome
+                alert("📱 Para instalar Bailando Solo como App en tu teléfono:\n\n• En iPhone/iPad (Safari): Toca el botón Compartir ⎋ (abajo) y luego 'Añadir a pantalla de inicio ➕'\n\n• En Android: Toca los 3 puntos ⋮ del navegador y selecciona 'Instalar aplicación' o 'Añadir a pantalla principal'");
             }
         }
 
-        async function openFolder(folderName) {
-            currentFolder = folderName;
+        /* ═══════════════════════════════════════════════════════════════════════════
+           FAST SERVER PING & NETWORK MONITOR
+           ═══════════════════════════════════════════════════════════════════════════ */
+        let isServerReachable = false;
+
+        async function checkServerPing(timeoutMs = 1200) {
+            if (!navigator.onLine) return false;
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch('/api/ping', {
+                    signal: controller.signal,
+                    cache: 'no-store'
+                });
+                clearTimeout(timer);
+                return res.ok;
+            } catch (e) {
+                clearTimeout(timer);
+                return false;
+            }
+        }
+
+        async function updateNetworkStatus(forcePing = true) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (!statusEl) return;
+
+            if (forcePing) {
+                isServerReachable = await checkServerPing(1000);
+            }
+
+            if (isServerReachable) {
+                statusEl.className = 'status-pill status-online';
+                statusEl.innerHTML = '<span>●</span> SERVIDOR PC';
+                statusEl.title = 'Conectado al servidor de la computadora. Toca para recargar.';
+            } else {
+                statusEl.className = 'status-pill status-offline';
+                statusEl.innerHTML = '<span>●</span> MODO OFFLINE';
+                statusEl.title = 'Servidor de PC desconectado. Toca para reintentar conexión.';
+            }
+        }
+
+        // Tapping the status pill triggers manual server check
+        document.addEventListener('DOMContentLoaded', () => {
+            const statusEl = document.getElementById('connectionStatus');
+            if (statusEl) {
+                statusEl.style.cursor = 'pointer';
+                statusEl.addEventListener('click', async () => {
+                    showToast('Comprobando conexión con PC...');
+                    const ok = await checkServerPing(1200);
+                    isServerReachable = ok;
+                    await updateNetworkStatus(false);
+                    if (ok) {
+                        showToast('✓ Servidor PC conectado');
+                        if (currentView === 'server') await loadServerLibrary();
+                    } else {
+                        showToast('⚠️ PC no detectada (Modo Offline activo)');
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('online', () => updateNetworkStatus(true));
+        window.addEventListener('offline', () => {
+            isServerReachable = false;
+            updateNetworkStatus(false);
+        });
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           VIEW SWITCHER & RENDERING
+           ═══════════════════════════════════════════════════════════════════════════ */
+        async function switchView(view) {
+            currentView = view;
+            currentFolder = null;
+            document.getElementById('tabServerBtn').classList.toggle('active', view === 'server');
+            document.getElementById('tabOfflineBtn').classList.toggle('active', view === 'offline');
+            document.getElementById('breadcrumbBar').style.display = 'none';
+
+            if (view === 'server') {
+                await loadServerLibrary();
+            } else {
+                await loadOfflineLibrary();
+            }
+            await updateOfflineBadge();
+        }
+
+        async function updateOfflineBadge() {
+            try {
+                const songs = await dbGetAllSongs();
+                const badge = document.getElementById('offlineCountBadge');
+                if (badge) badge.textContent = songs.length;
+            } catch (e) {
+                console.warn('Error updating badge:', e);
+            }
+        }
+
+        async function loadServerLibrary() {
+            const content = document.getElementById('mainViewContent');
+            content.innerHTML = '<div class="empty-box"><div class="empty-box-icon">⏳</div><p>Verificando servidor de la PC...</p></div>';
+
+            const serverUp = await checkServerPing(1200);
+            isServerReachable = serverUp;
+            updateNetworkStatus(false);
+
+            if (!serverUp) {
+                content.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-box-icon">⚠️</div>
+                        <p style="font-weight: bold; color: var(--color-warning);">Servidor de la PC no disponible</p>
+                        <p style="font-size: 11px; margin-top: 8px; color: var(--color-text-muted); line-height: 1.5;">
+                            La computadora está apagada o no está en la misma red WiFi.
+                        </p>
+                        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
+                            <button class="btn-retro-action btn-retro-accent" onclick="loadServerLibrary()">
+                                🔄 Reintentar Conexión
+                            </button>
+                            <button class="btn-retro-action btn-retro-pink" onclick="switchView('offline')">
+                                📱 Ver Música Guardada
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
 
             try {
-                const response = await fetch(`/api/library/${encodeURIComponent(folderName)}`);
-                const songs = await response.json();
-                currentSongs = songs; // Store for playlist
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 3000);
+                const res = await fetch('/api/library', { signal: controller.signal });
+                clearTimeout(timer);
 
-                const content = document.getElementById('content');
-                const breadcrumb = document.getElementById('breadcrumb');
-                const currentPath = document.getElementById('currentPath');
+                if (!res.ok) throw new Error('No se pudo conectar al servidor');
+                serverFolders = await res.json();
 
-                breadcrumb.style.display = 'flex';
-                currentPath.textContent = folderName;
-
-                if (songs.length === 0) {
-                    content.innerHTML = '<div class="card empty">No hay canciones en esta carpeta</div>';
+                if (!serverFolders || serverFolders.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-box">
+                            <div class="empty-box-icon">📻</div>
+                            <p>No hay carpetas en el servidor de Bailando Solo.</p>
+                            <small>Descarga canciones en tu computadora para verlas aquí.</small>
+                        </div>
+                    `;
                     return;
                 }
 
-                const headerHtml = `
-                    <div class="folder-actions">
-                        <input type="text" class="search-bar" placeholder="🔍 Buscar canción..." onkeyup="filterSongs(this.value)">
-                        <button class="download-btn folder-download" onclick="downloadFolder('${folderName}')">
-                            📦 Descargar Carpeta Completa (.zip)
+                renderFolders(serverFolders, 'server');
+            } catch (err) {
+                console.warn('Server library fetch error:', err);
+                content.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-box-icon">⚠️</div>
+                        <p>No se pudo obtener la biblioteca del servidor.</p>
+                        <button class="btn-retro-action btn-retro-accent" onclick="switchView('offline')" style="margin: 12px auto 0;">
+                            📂 Abrir Biblioteca Offline
                         </button>
                     </div>
                 `;
-
-                content.innerHTML = headerHtml + '<div id="song-list">' + songs.map((song, index) => {
-                    const thumbnail = song.thumbnail
-                        ? `<img src="${song.thumbnail}" class="song-thumbnail" alt="${song.title}">`
-                        : '<div class="icon">🎵</div>';
-
-                    return `
-                        <div class="card song-item" onclick="playSong(${index})">
-                            ${thumbnail}
-                            <div class="name">${song.title}</div>
-                            <button class="download-btn" onclick="downloadSong('${folderName}', '${song.filename}', event)">
-                                ⬇️ Descargar
-                            </button>
-                        </div>
-                    `;
-                }).join('') + '</div>';
-            } catch (error) {
-                document.getElementById('content').innerHTML =
-                    '<div class="error">Error al cargar canciones: ' + error.message + '</div>';
             }
         }
 
-        // Player Functions
-        function playSong(index) {
-            if (index < 0 || index >= currentSongs.length) return;
+        async function loadOfflineLibrary() {
+            const content = document.getElementById('mainViewContent');
+            const folders = await dbGetAllFolders();
+            const allSongs = await dbGetAllSongs();
 
-            currentIndex = index;
-            const song = currentSongs[index];
-            const streamUrl = `/api/stream/${encodeURIComponent(currentFolder)}/${encodeURIComponent(song.filename)}`;
+            if (allSongs.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-box-icon">📱</div>
+                        <p>No tienes canciones guardadas en el teléfono aún.</p>
+                        <p style="font-size: 11px; margin-top: 8px; color: var(--color-text-muted);">
+                            Usa <strong>"Barrer Archivos"</strong> para importar tus archivos de audio/ZIP o descarga canciones cuando te conectes al servidor de la PC.
+                        </p>
+                        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
+                            <button class="btn-retro-action btn-retro-accent" onclick="startLocalScan()">
+                                🔍 Barrer Archivos Locales
+                            </button>
+                            <button class="btn-retro-action btn-retro-pink" onclick="triggerZipImport()">
+                                📦 Importar ZIP
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
 
-            audio.src = streamUrl;
-            audio.play().then(() => {
+            renderFolders(folders, 'offline');
+        }
+
+        function renderFolders(folders, type) {
+            const content = document.getElementById('mainViewContent');
+            let html = '<div class="cassette-grid">';
+
+            folders.forEach(f => {
+                const name = f.name || f;
+                const count = f.song_count || f.count || '';
+                const thumb = f.thumbnail || '';
+
+                html += `
+                    <div class="cassette-card" onclick="openFolderDetails('${encodeURIComponent(name)}', '${type}')">
+                        <div class="cassette-art-box">
+                            ${thumb ? `<img src="${thumb}" class="cassette-art-img" alt="${name}">` : `<div class="cassette-art-fallback">📼</div>`}
+                            ${count ? `<span class="cassette-badge-count">${count}</span>` : ''}
+                        </div>
+                        <div class="cassette-info">
+                            <div class="cassette-name">${name}</div>
+                            <div class="cassette-meta">${count ? `${count} canciones` : 'Toca para abrir'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        async function openFolderDetails(encodedName, type) {
+            const folderName = decodeURIComponent(encodedName);
+            currentFolder = folderName;
+
+            const breadcrumbBar = document.getElementById('breadcrumbBar');
+            const breadcrumbText = document.getElementById('breadcrumbFolder');
+            const downloadZipBtn = document.getElementById('btnFolderDownloadZip');
+
+            breadcrumbBar.style.display = 'flex';
+            breadcrumbText.textContent = folderName;
+            downloadZipBtn.style.display = type === 'server' ? 'inline-flex' : 'none';
+
+            const content = document.getElementById('mainViewContent');
+            content.innerHTML = '<div class="empty-box"><div class="empty-box-icon">⏳</div><p>Cargando pistas...</p></div>';
+
+            if (type === 'server') {
+                try {
+                    const res = await fetch(`/api/library/${encodeURIComponent(folderName)}`);
+                    const songs = await res.json();
+                    serverSongs = songs;
+                    activePlaylist = songs.map(s => ({
+                        ...s,
+                        folder: folderName,
+                        source: 'server',
+                        url: `/api/stream/${encodeURIComponent(folderName)}/${encodeURIComponent(s.filename)}`
+                    }));
+                    renderSongList(activePlaylist);
+                } catch (e) {
+                    content.innerHTML = '<div class="empty-box"><p>Error al cargar canciones del servidor. ¿La PC está encendida?</p></div>';
+                }
+            } else {
+                const songs = await dbGetSongsByFolder(folderName);
+                offlineSongs = songs;
+                activePlaylist = songs.map(s => ({
+                    ...s,
+                    source: 'offline'
+                }));
+                renderSongList(activePlaylist);
+            }
+        }
+
+        function renderSongList(songs) {
+            const content = document.getElementById('mainViewContent');
+            if (!songs || songs.length === 0) {
+                content.innerHTML = '<div class="empty-box"><p>No hay canciones en este casete.</p></div>';
+                return;
+            }
+
+            let html = '<div class="song-list">';
+            songs.forEach((song, idx) => {
+                const isCurrent = activeIndex === idx;
+                const isOffline = song.source === 'offline' || song.isSavedOffline;
+
+                html += `
+                    <div class="song-row ${isCurrent ? 'playing' : ''}" onclick="playTrackAtIndex(${idx})">
+                        <div class="song-thumb">
+                            ${song.thumbnail ? `<img src="${song.thumbnail}" style="width:100%; height:100%; object-fit:cover;">` : '🎵'}
+                        </div>
+                        <div class="song-info">
+                            <div class="song-title">${song.title || song.filename}</div>
+                            <div class="song-sub">
+                                <span>${song.uploader || song.artist || song.folder || 'Bailando Solo'}</span>
+                                ${isOffline ? '<span class="offline-tag">OFFLINE</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="song-actions" onclick="event.stopPropagation()">
+                            ${song.source === 'server' ? `
+                                <button class="btn-song-action" onclick="downloadSingleSongOffline('${encodeURIComponent(song.folder)}', '${encodeURIComponent(song.filename)}')" title="Guardar offline">
+                                    💾
+                                </button>
+                            ` : `
+                                <button class="btn-song-action" onclick="deleteOfflineTrack('${song.id}')" title="Eliminar del teléfono">
+                                    🗑️
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        function goBackToFolders() {
+            currentFolder = null;
+            document.getElementById('breadcrumbBar').style.display = 'none';
+            if (currentView === 'server') {
+                renderFolders(serverFolders, 'server');
+            } else {
+                loadOfflineLibrary();
+            }
+        }
+
+        function handleSearch(query) {
+            const q = query.trim().toLowerCase();
+            if (!q) {
+                if (currentFolder) {
+                    renderSongList(activePlaylist);
+                } else if (currentView === 'server') {
+                    renderFolders(serverFolders, 'server');
+                } else {
+                    loadOfflineLibrary();
+                }
+                return;
+            }
+
+            if (currentFolder) {
+                const filtered = activePlaylist.filter(s => 
+                    (s.title || s.filename || '').toLowerCase().includes(q) ||
+                    (s.uploader || s.artist || '').toLowerCase().includes(q)
+                );
+                renderSongList(filtered);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           AUTOMATIC ZIP EXTRACTION & LOCAL FILE SCANNER
+           ═══════════════════════════════════════════════════════════════════════════ */
+        function triggerZipImport() {
+            document.getElementById('zipPickerInput').click();
+        }
+
+        async function startLocalScan() {
+            if ('showDirectoryPicker' in window) {
+                try {
+                    const dirHandle = await window.showDirectoryPicker();
+                    showDialog("BARRIDO DE ARCHIVOS", "Escaneando carpeta seleccionada y subcarpetas...", 10);
+                    await scanDirectoryHandle(dirHandle, dirHandle.name);
+                    hideDialog();
+                    showToast("¡Barrido completado!");
+                    await switchView('offline');
+                } catch (e) {
+                    if (e.name !== 'AbortError') {
+                        console.warn("Directory Picker fallback to file input:", e);
+                        document.getElementById('folderPickerInput').click();
+                    }
+                }
+            } else {
+                document.getElementById('folderPickerInput').click();
+            }
+        }
+
+        async function scanDirectoryHandle(dirHandle, currentPath) {
+            for await (const entry of dirHandle.values()) {
+                if (entry.kind === 'file') {
+                    const file = await entry.getFile();
+                    await processScannedFile(file, currentPath);
+                } else if (entry.kind === 'directory') {
+                    await scanDirectoryHandle(entry, `${currentPath}/${entry.name}`);
+                }
+            }
+        }
+
+        async function handleFileInputScan(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            showDialog("IMPORTANDO ARCHIVOS", `Procesando ${files.length} archivo(s)...`, 10);
+            let processed = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const relativePath = file.webkitRelativePath || file.name;
+                const pathParts = relativePath.split('/');
+                const folderName = pathParts.length > 1 ? pathParts[pathParts.length - 2] : 'Descargas';
+
+                updateDialogProgress((i / files.length) * 100, `Procesando: ${file.name}`);
+                await processScannedFile(file, folderName);
+                processed++;
+            }
+
+            hideDialog();
+            showToast(`¡Se importaron ${processed} archivo(s)!`);
+            await switchView('offline');
+            event.target.value = '';
+        }
+
+        async function processScannedFile(file, folderName) {
+            const name = file.name.toLowerCase();
+            const AUDIO_EXTS = ['.mp3', '.m4a', '.flac', '.wav', '.ogg', '.aac', '.opus', '.webm', '.wma'];
+
+            if (name.endsWith('.zip')) {
+                await extractAndSaveZipBlob(file, folderName || file.name.replace('.zip', ''));
+                return;
+            }
+
+            const isAudio = AUDIO_EXTS.some(ext => name.endsWith(ext));
+            if (isAudio) {
+                const songId = `local_${folderName}_${file.name}_${file.size}`;
+                const title = file.name.replace(/\.[^/.]+$/, "").replace(/^[0-9\s._-]+/, '');
+
+                const songObj = {
+                    id: songId,
+                    title: title || file.name,
+                    artist: folderName,
+                    folder: folderName || 'Descargas',
+                    blob: file,
+                    type: file.type || 'audio/mpeg',
+                    size: file.size,
+                    dateAdded: Date.now()
+                };
+
+                await dbSaveSong(songObj);
+            }
+        }
+
+        async function extractAndSaveZipBlob(zipBlob, targetFolder) {
+            try {
+                if (typeof JSZip === 'undefined') {
+                    throw new Error('JSZip no disponible');
+                }
+
+                showDialog("DESCOMPRIMIENDO ZIP", `Extrayendo álbum: ${targetFolder}...`, 15);
+                const zip = await JSZip.loadAsync(zipBlob);
+                const entries = Object.keys(zip.files);
+                let audioEntries = [];
+                let coverBlob = null;
+
+                for (const path of entries) {
+                    const entry = zip.files[path];
+                    if (entry.dir || path.includes('__MACOSX') || path.startsWith('.')) continue;
+
+                    const lower = path.toLowerCase();
+                    if (lower.endsWith('.mp3') || lower.endsWith('.m4a') || lower.endsWith('.flac') || lower.endsWith('.wav') || lower.endsWith('.ogg')) {
+                        audioEntries.push(entry);
+                    } else if (lower.endsWith('.jpg') || lower.endsWith('.png') || lower.endsWith('.jpeg') || lower.endsWith('.webp')) {
+                        coverBlob = await entry.async('blob');
+                    }
+                }
+
+                let coverUrl = '';
+                if (coverBlob) {
+                    coverUrl = await blobToDataUrl(coverBlob);
+                }
+
+                for (let i = 0; i < audioEntries.length; i++) {
+                    const entry = audioEntries[i];
+                    const filename = entry.name.split('/').pop();
+                    const percent = Math.round(((i + 1) / audioEntries.length) * 100);
+                    updateDialogProgress(percent, `Extrayendo (${i + 1}/${audioEntries.length}): ${filename}`);
+
+                    const blob = await entry.async('blob');
+                    const title = filename.replace(/\.[^/.]+$/, "").replace(/^[0-9\s._-]+/, '');
+                    const songId = `zip_${targetFolder}_${filename}_${blob.size}`;
+
+                    await dbSaveSong({
+                        id: songId,
+                        title: title || filename,
+                        artist: targetFolder,
+                        folder: targetFolder,
+                        blob: blob,
+                        type: blob.type || 'audio/mpeg',
+                        size: blob.size,
+                        thumbnail: coverUrl,
+                        dateAdded: Date.now()
+                    });
+                }
+
+                hideDialog();
+                showToast(`¡Álbum "${targetFolder}" descomprimido con éxito!`);
+            } catch (err) {
+                console.error("ZIP extraction error:", err);
+                hideDialog();
+                showToast("Error al descomprimir archivo ZIP");
+            }
+        }
+
+        async function downloadCurrentFolderZip() {
+            if (!currentFolder) return;
+            showDialog("DESCARGANDO ZIP DEL SERVIDOR", `Descargando paquete "${currentFolder}"...`, 20);
+
+            try {
+                const downloadUrl = `/api/mobile/download-folder/${encodeURIComponent(currentFolder)}`;
+                const response = await fetch(downloadUrl);
+                if (!response.ok) throw new Error('Error al descargar ZIP del servidor');
+
+                const zipBlob = await response.blob();
+                await extractAndSaveZipBlob(zipBlob, currentFolder);
+                await updateOfflineBadge();
+            } catch (e) {
+                hideDialog();
+                showToast("Error al descargar paquete ZIP del servidor");
+            }
+        }
+
+        async function downloadSingleSongOffline(encodedFolder, encodedFilename) {
+            const folder = decodeURIComponent(encodedFolder);
+            const filename = decodeURIComponent(encodedFilename);
+            showToast(`Descargando "${filename}"...`);
+
+            try {
+                const downloadUrl = `/api/mobile/download/${encodeURIComponent(`${folder}/${filename}`)}`;
+                const res = await fetch(downloadUrl);
+                if (!res.ok) throw new Error('Error al descargar canción');
+
+                const blob = await res.blob();
+                const title = filename.replace(/\.[^/.]+$/, "").replace(/^[0-9\s._-]+/, '');
+                const songId = `server_saved_${folder}_${filename}`;
+
+                await dbSaveSong({
+                    id: songId,
+                    title: title || filename,
+                    artist: folder,
+                    folder: folder,
+                    blob: blob,
+                    type: blob.type || 'audio/mpeg',
+                    size: blob.size,
+                    dateAdded: Date.now()
+                });
+
+                showToast(`✓ "${filename}" guardada para escuchar offline`);
+                await updateOfflineBadge();
+            } catch (e) {
+                showToast("Error al guardar canción");
+            }
+        }
+
+        async function deleteOfflineTrack(songId) {
+            if (confirm("¿Eliminar esta canción del teléfono?")) {
+                await dbDeleteSong(songId);
+                showToast("Canción eliminada");
+                if (currentFolder) {
+                    await openFolderDetails(currentFolder, 'offline');
+                } else {
+                    await loadOfflineLibrary();
+                }
+                await updateOfflineBadge();
+            }
+        }
+
+        async function saveCurrentTrackToOffline() {
+            if (activeIndex < 0 || activeIndex >= activePlaylist.length) return;
+            const track = activePlaylist[activeIndex];
+
+            if (track.source === 'offline') {
+                showToast("Esta canción ya está guardada en tu teléfono");
+                return;
+            }
+
+            await downloadSingleSongOffline(encodeURIComponent(track.folder), encodeURIComponent(track.filename));
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           AUDIO PLAYER ENGINE — 100% OFFLINE CAPABLE
+           ═══════════════════════════════════════════════════════════════════════════ */
+        async function playTrackAtIndex(idx) {
+            if (idx < 0 || idx >= activePlaylist.length) return;
+            activeIndex = idx;
+            const track = activePlaylist[idx];
+
+            if (currentAudioBlobUrl) {
+                URL.revokeObjectURL(currentAudioBlobUrl);
+                currentAudioBlobUrl = null;
+            }
+
+            let playSrc = '';
+            if (track.source === 'offline' && track.blob) {
+                currentAudioBlobUrl = URL.createObjectURL(track.blob);
+                playSrc = currentAudioBlobUrl;
+            } else {
+                playSrc = track.url || `/api/stream/${encodeURIComponent(track.folder)}/${encodeURIComponent(track.filename)}`;
+            }
+
+            audio.src = playSrc;
+            try {
+                await audio.play();
                 isPlaying = true;
-                updatePlayerUI();
-            }).catch(e => console.error("Playback error:", e));
+                updatePlayerUI(track);
+                savePlaybackState(track);
+            } catch (e) {
+                console.warn("Playback error:", e);
+                isPlaying = false;
+                updatePlayerUI(track);
+            }
 
-            // Show player
-            document.getElementById('playerBar').classList.add('visible');
-            updatePlayerUI();
+            // Lock Screen Controls
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title || track.filename,
+                    artist: track.uploader || track.artist || track.folder || 'Bailando Solo',
+                    album: track.folder || 'Bailando Solo',
+                    artwork: [
+                        { src: track.thumbnail || '/static/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', () => togglePlay());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+                navigator.mediaSession.setActionHandler('seekto', (details) => {
+                    if (details.seekTime) audio.currentTime = details.seekTime;
+                });
+            }
         }
 
         function togglePlay() {
-            if (!audio.src) return;
+            if (!audio.src) {
+                if (activePlaylist.length > 0) playTrackAtIndex(0);
+                return;
+            }
 
             if (isPlaying) {
                 audio.pause();
@@ -778,136 +1868,226 @@
                 audio.play();
                 isPlaying = true;
             }
-            updatePlayerUI();
-        }
-
-        function nextSong() {
-            if (currentIndex < currentSongs.length - 1) {
-                playSong(currentIndex + 1);
-            } else {
-                // Loop to start? Or stop? Let's loop
-                playSong(0);
+            if (activeIndex >= 0 && activeIndex < activePlaylist.length) {
+                updatePlayerUI(activePlaylist[activeIndex]);
             }
         }
 
-        function prevSong() {
+        function nextTrack() {
+            if (activePlaylist.length === 0) return;
+            if (repeatMode === 'one') {
+                audio.currentTime = 0;
+                audio.play();
+                return;
+            }
+
+            let nextIdx = activeIndex + 1;
+            if (isShuffle) {
+                nextIdx = Math.floor(Math.random() * activePlaylist.length);
+            } else if (nextIdx >= activePlaylist.length) {
+                if (repeatMode === 'all') nextIdx = 0;
+                else return;
+            }
+
+            playTrackAtIndex(nextIdx);
+        }
+
+        function prevTrack() {
             if (audio.currentTime > 3) {
                 audio.currentTime = 0;
                 return;
             }
-            if (currentIndex > 0) {
-                playSong(currentIndex - 1);
+            if (activePlaylist.length === 0) return;
+
+            let prevIdx = activeIndex - 1;
+            if (prevIdx < 0) prevIdx = activePlaylist.length - 1;
+            playTrackAtIndex(prevIdx);
+        }
+
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            document.getElementById('btnShuffle').classList.toggle('active', isShuffle);
+            localStorage.setItem('bs_shuffle', isShuffle ? '1' : '0');
+            showToast(isShuffle ? 'Modo Aleatorio: Activado' : 'Modo Aleatorio: Desactivado');
+        }
+
+        function toggleRepeat() {
+            const btn = document.getElementById('btnRepeat');
+            if (repeatMode === 'off') {
+                repeatMode = 'all';
+                btn.classList.add('active');
+                btn.textContent = '🔁';
+                showToast('Repetir: Todo');
+            } else if (repeatMode === 'all') {
+                repeatMode = 'one';
+                btn.classList.add('active');
+                btn.textContent = '🔂';
+                showToast('Repetir: Una Canción');
             } else {
-                playSong(currentSongs.length - 1);
+                repeatMode = 'off';
+                btn.classList.remove('active');
+                btn.textContent = '🔁';
+                showToast('Repetir: Desactivado');
+            }
+            localStorage.setItem('bs_repeat', repeatMode);
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            const percent = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('miniProgressFill').style.width = `${percent}%`;
+            document.getElementById('expandedProgressFill').style.width = `${percent}%`;
+
+            document.getElementById('expandedCurrentTime').textContent = formatSeconds(audio.currentTime);
+            document.getElementById('expandedDuration').textContent = formatSeconds(audio.duration);
+        });
+
+        audio.addEventListener('ended', () => nextTrack());
+
+        function seekMiniPlayer(e) {
+            if (!audio.duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        }
+
+        function seekExpanded(e) {
+            if (!audio.duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        }
+
+        function updatePlayerUI(track) {
+            if (!track) return;
+            const title = track.title || track.filename;
+            const artist = track.uploader || track.artist || track.folder || 'Bailando Solo';
+            const thumb = track.thumbnail || '/static/icons/icon-192.png';
+
+            document.getElementById('miniTitle').textContent = title;
+            document.getElementById('miniArtist').textContent = artist;
+            document.getElementById('miniThumb').src = thumb;
+            document.getElementById('miniPlayBtn').textContent = isPlaying ? '⏸️' : '▶️';
+
+            document.getElementById('expandedTitle').textContent = title;
+            document.getElementById('expandedArtist').textContent = artist;
+            document.getElementById('expandedCassetteLabel').textContent = (track.folder || 'BAILANDO SOLO').toUpperCase();
+            document.getElementById('expandedPlayBtn').textContent = isPlaying ? '⏸️' : '▶️';
+
+            document.getElementById('reelLeft').classList.toggle('spinning', isPlaying);
+            document.getElementById('reelRight').classList.toggle('spinning', isPlaying);
+
+            if (currentFolder) {
+                renderSongList(activePlaylist);
             }
         }
 
-        function seek(event) {
-            const progressBar = event.currentTarget;
-            const clickPosition = (event.pageX - progressBar.offsetLeft) / progressBar.offsetWidth;
-            audio.currentTime = clickPosition * audio.duration;
+        function openExpandedPlayer() {
+            document.getElementById('expandedPlayerModal').classList.add('open');
         }
 
-        function updateProgress() {
-            const { duration, currentTime } = audio;
-            const progressPercent = (currentTime / duration) * 100;
-            document.getElementById('progressFill').style.width = `${progressPercent}%`;
-            document.getElementById('currentTime').textContent = formatTime(currentTime);
+        function closeExpandedPlayer() {
+            document.getElementById('expandedPlayerModal').classList.remove('open');
         }
 
-        function updatePlayerUI() {
-            const song = currentSongs[currentIndex];
-            const playBtn = document.getElementById('playBtn');
-            const titleEl = document.getElementById('playerTitle');
-            const thumbEl = document.getElementById('playerThumb');
-            const statusEl = document.getElementById('playerStatus');
-
-            titleEl.textContent = song.title;
-            statusEl.textContent = isPlaying ? 'Reproduciendo...' : 'Pausado';
-            playBtn.textContent = isPlaying ? '⏸️' : '▶️';
-
-            if (song.thumbnail) {
-                thumbEl.src = song.thumbnail;
-                thumbEl.style.display = 'block';
-            } else {
-                thumbEl.style.display = 'none';
-            }
-        }
-
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return "0:00";
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-
-        function goBack() {
-            currentFolder = null;
-            loadFolders();
-        }
-
-        function downloadSong(folder, filename, event) {
-            event.stopPropagation();
-            const downloadPath = `${folder}/${filename}`;
-            const downloadUrl = `/api/mobile/download/${encodeURIComponent(downloadPath)}`;
-
-            // Create a temporary link and trigger download
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Show feedback
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '✓ Descargando...';
-            btn.style.background = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
-
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.background = '';
-            }, 2000);
-        }
-
-        function downloadFolder(folderName) {
-            const btn = document.querySelector('.folder-download');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '⏳ Preparando ZIP...';
-            btn.disabled = true;
-
-            const downloadUrl = `/api/mobile/download-folder/${encodeURIComponent(folderName)}`;
-
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `${folderName}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }, 3000);
-        }
-
-        function filterSongs(query) {
-            const term = query.toLowerCase();
-            const items = document.querySelectorAll('.song-item');
-
-            items.forEach(item => {
-                const name = item.querySelector('.name').textContent.toLowerCase();
-                if (name.includes(term)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
+        function savePlaybackState(track) {
+            try {
+                if (track) {
+                    localStorage.setItem('bs_last_track', JSON.stringify({
+                        title: track.title || track.filename,
+                        artist: track.uploader || track.artist || track.folder || 'Bailando Solo',
+                        folder: track.folder,
+                        id: track.id,
+                        thumbnail: track.thumbnail
+                    }));
                 }
+            } catch (e) {}
+        }
+
+        function restorePlaybackState() {
+            try {
+                const shuffleSaved = localStorage.getItem('bs_shuffle');
+                if (shuffleSaved === '1') {
+                    isShuffle = true;
+                    document.getElementById('btnShuffle')?.classList.add('active');
+                }
+                const repeatSaved = localStorage.getItem('bs_repeat');
+                if (repeatSaved) {
+                    repeatMode = repeatSaved;
+                    const btn = document.getElementById('btnRepeat');
+                    if (btn) {
+                        btn.classList.toggle('active', repeatMode !== 'off');
+                        btn.textContent = repeatMode === 'one' ? '🔂' : '🔁';
+                    }
+                }
+                const lastTrackJson = localStorage.getItem('bs_last_track');
+                if (lastTrackJson) {
+                    const track = JSON.parse(lastTrackJson);
+                    updatePlayerUI(track);
+                }
+            } catch (e) {}
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           DIALOGS & HELPERS
+           ═══════════════════════════════════════════════════════════════════════════ */
+        function showDialog(title, desc, percent) {
+            document.getElementById('dialogTitle').textContent = title;
+            document.getElementById('dialogDesc').textContent = desc;
+            document.getElementById('dialogProgressFill').style.width = `${percent || 0}%`;
+            document.getElementById('dialogOverlay').classList.add('open');
+        }
+
+        function updateDialogProgress(percent, desc) {
+            if (desc) document.getElementById('dialogDesc').textContent = desc;
+            document.getElementById('dialogProgressFill').style.width = `${percent}%`;
+        }
+
+        function hideDialog() {
+            document.getElementById('dialogOverlay').classList.remove('open');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastBox');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3200);
+        }
+
+        function formatSeconds(sec) {
+            if (isNaN(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function blobToDataUrl(blob) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(blob);
             });
         }
 
-        // Load folders on page load
-        loadFolders();
+        // App Initialization
+        window.addEventListener('DOMContentLoaded', async () => {
+            await openDatabase();
+            await updateOfflineBadge();
+            restorePlaybackState();
+
+            // Check if server is available
+            const serverUp = await checkServerPing(1000);
+            isServerReachable = serverUp;
+            updateNetworkStatus(false);
+
+            if (serverUp) {
+                await switchView('server');
+            } else {
+                // If PC is off, seamlessly switch directly to Offline View!
+                await switchView('offline');
+                showToast('📱 Modo Offline Activo — Música en tu Teléfono');
+            }
+        });
     </script>
 </body>
 

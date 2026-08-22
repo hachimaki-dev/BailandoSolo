@@ -265,6 +265,18 @@ header {
     height: var(--header-height);
 }
 
+header button,
+header a,
+header input,
+header select,
+header [role="button"],
+.header-branding,
+.header-system-rack,
+.btn-system-tool,
+.console-nav-dock {
+    -webkit-app-region: no-drag;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -1017,7 +1029,14 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 
 /* --- RESPONSIVE DESIGN --- */
-@media (max-width: 900px) {
+@media (max-width: 1024px) and (min-width: 769px) {
+    .main-grid {
+        grid-template-columns: 1fr 300px;
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
     :root {
         --header-height: auto;
         --album-art-size: 200px;
@@ -1029,7 +1048,7 @@ input[type=range]::-webkit-slider-runnable-track {
         padding: 0 10px;
     }
 
-    /* Stack the main grid */
+    /* Stack the main grid on small mobile screens */
     .main-grid {
         grid-template-columns: 1fr;
         gap: var(--spacing-md);
@@ -1457,6 +1476,7 @@ input[type=range]::-webkit-slider-runnable-track {
     justify-content: center;
     z-index: 9999;
     animation: fadeIn 0.2s ease;
+    -webkit-app-region: no-drag;
 }
 
 .retro-modal-box {

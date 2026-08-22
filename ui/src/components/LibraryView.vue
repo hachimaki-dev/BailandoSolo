@@ -203,7 +203,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { LibraryService } from '../services/LibraryService'
 import { streamUrl } from '../config'
 
@@ -218,6 +218,12 @@ const emit = defineEmits(['open-folder', 'play-song', 'add-to-queue', 'context-m
 const viewMode = ref('cassettes') // 'cassettes', 'table', 'incomplete'
 const localQuery = ref('')
 const sortBy = ref('name')
+
+watch(viewMode, () => {
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
+})
 
 const defaultThumb = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect fill='%23cccccc' width='48' height='48'/%3E%3C/svg%3E"
 

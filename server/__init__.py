@@ -5,10 +5,12 @@ Bailando Solo — Flask application factory.
 from flask import Flask
 from flask_cors import CORS
 
+from server.config import STATIC_DIR
+
 
 def create_app():
     """Create and configure the Flask application."""
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=STATIC_DIR, static_url_path='/static')
     CORS(app, resources={r"/*": {"origins": "*"}})
 
     @app.after_request

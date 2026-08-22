@@ -40,11 +40,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["arm64", "x64"]
+          "arch": [
+            "arm64",
+            "x64"
+          ]
         }
       ],
       "category": "public.app-category.music"
@@ -87,5 +93,8 @@
     "electron": "^33.4.11",
     "electron-builder": "^25.1.8",
     "wait-on": "^9.0.3"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
   }
 }

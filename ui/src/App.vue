@@ -1,186 +1,188 @@
 <template>
-  <div class="container">
-    <!-- Retro Console Master Header -->
-    <AppHeader 
-      :currentView="currentView" 
-      @navigate="navigateView" 
-      @open-search="showSearchModal = true"
-      @open-stats="showStats = true"
-      @open-profiles="showProfileModal = true"
-      @open-qr="showQRModal = true"
-    />
+  <div class="app-layout">
+    <div class="container">
+      <!-- Retro Console Master Header -->
+      <AppHeader 
+        :currentView="currentView" 
+        @navigate="navigateView" 
+        @open-search="showSearchModal = true"
+        @open-stats="showStats = true"
+        @open-profiles="showProfileModal = true"
+        @open-qr="showQRModal = true"
+      />
 
-    <!-- Main Screen Grid (Console Deck + Permanent Player) -->
-    <div class="main-grid">
-      <!-- Main Workstation View Area -->
-      <div class="main-content-zone">
-        <!-- Downloader View (Primary Experience) -->
-        <DownloaderView 
-          v-show="currentView === 'downloader'" 
-          :allSongs="allSongs"
-          @download-start="refreshLibraryData" 
-          @play-cartridge="handlePlaySong" 
-          @add-to-queue="addToQueue" 
-          @context-menu="openContextMenu"
-        />
+      <!-- Main Screen Grid (Console Deck + Permanent Player) -->
+      <div class="main-grid">
+        <!-- Main Workstation View Area -->
+        <div class="main-content-zone">
+          <!-- Downloader View (Primary Experience) -->
+          <DownloaderView 
+            v-if="currentView === 'downloader'" 
+            :allSongs="allSongs"
+            @download-start="refreshLibraryData" 
+            @play-cartridge="handlePlaySong" 
+            @add-to-queue="addToQueue" 
+            @context-menu="openContextMenu"
+          />
 
-        <!-- Library View / Cassette Collection -->
-        <LibraryView 
-          v-if="currentView === 'library'" 
-          :folders="folders"
-          :allSongs="allSongs"
-          :statsData="rawStatsData"
-          @open-folder="openFolder" 
-          @play-song="handlePlaySong" 
-          @add-to-queue="addToQueue"
-          @context-menu="openContextMenu"
-          @edit-metadata="openMetadataEditor"
-        />
+          <!-- Library View / Cassette Collection -->
+          <LibraryView 
+            v-else-if="currentView === 'library'" 
+            :folders="folders"
+            :allSongs="allSongs"
+            :statsData="rawStatsData"
+            @open-folder="openFolder" 
+            @play-song="handlePlaySong" 
+            @add-to-queue="addToQueue"
+            @context-menu="openContextMenu"
+            @edit-metadata="openMetadataEditor"
+          />
 
-        <!-- Single Folder Detail View -->
-        <FolderView 
-          v-if="currentView === 'folder'" 
-          :folderName="currentFolder" 
-          @back="currentView = 'library'" 
-          @play-song="handlePlaySong" 
-          @add-to-queue="addToQueue" 
-          @context-menu="openContextMenu"
-          @edit-metadata="openMetadataEditor"
-        />
+          <!-- Single Folder Detail View -->
+          <FolderView 
+            v-else-if="currentView === 'folder'" 
+            :folderName="currentFolder" 
+            @back="currentView = 'library'" 
+            @play-song="handlePlaySong" 
+            @add-to-queue="addToQueue" 
+            @context-menu="openContextMenu"
+            @edit-metadata="openMetadataEditor"
+          />
 
-        <!-- Playlists & Smart Crates -->
-        <PlaylistsView
-          v-if="currentView === 'playlists'"
-          :allSongs="allSongs"
-          :statsData="rawStatsData"
-          @play-song="handlePlaySong"
-          @add-to-queue="addToQueue"
-          @context-menu="openContextMenu"
-          @sync-playlist="handleSyncPlaylist"
+          <!-- Playlists & Smart Crates -->
+          <PlaylistsView
+            v-else-if="currentView === 'playlists'"
+            :allSongs="allSongs"
+            :statsData="rawStatsData"
+            @play-song="handlePlaySong"
+            @add-to-queue="addToQueue"
+            @context-menu="openContextMenu"
+            @sync-playlist="handleSyncPlaylist"
+          />
+        </div>
+
+        <!-- Permanent Right Player Dock with Integrated Equalizer -->
+        <AudioPlayer 
+          :currentSong="currentSong"
+          :isPlaying="isPlaying"
+          :isShuffle="isShuffle"
+          :repeatMode="repeatMode"
+          :isQueueOpen="isQueueOpen"
+          :isEqOpen="isEqOpen"
+          @play="handlePlay"
+          @pause="isPlaying = false"
+          @next="nextSong"
+          @prev="prevSong"
+          @seek="seekAudio"
+          @toggle-queue="isQueueOpen = !isQueueOpen"
+          @toggle-eq="isEqOpen = !isEqOpen"
+          @toggle-shuffle="isShuffle = !isShuffle"
+          @toggle-repeat="repeatMode = $event"
+          @toggle-expand="showExpandedPlayer = true"
+          @volume-change="setVolume"
+          @ended="nextSong"
+          @init-audio="initAudio"
+          @time-update="updateSongTime"
+          @change-band="updateEq"
         />
       </div>
 
-      <!-- Permanent Right Player Dock with Integrated Equalizer -->
-      <AudioPlayer 
-        :currentSong="currentSong"
-        :isPlaying="isPlaying"
-        :isShuffle="isShuffle"
-        :repeatMode="repeatMode"
-        :isQueueOpen="isQueueOpen"
-        :isEqOpen="isEqOpen"
-        @play="handlePlay"
-        @pause="isPlaying = false"
-        @next="nextSong"
-        @prev="prevSong"
-        @seek="seekAudio"
-        @toggle-queue="isQueueOpen = !isQueueOpen"
-        @toggle-eq="isEqOpen = !isEqOpen"
-        @toggle-shuffle="isShuffle = !isShuffle"
-        @toggle-repeat="repeatMode = $event"
-        @toggle-expand="showExpandedPlayer = true"
-        @volume-change="setVolume"
-        @ended="nextSong"
-        @init-audio="initAudio"
-        @time-update="updateSongTime"
-        @change-band="updateEq"
-      />
+      <!-- System Footer Dock (Theme Switcher & Hardware Specs) -->
+      <footer class="system-footer-dock">
+        <div class="footer-left">
+          <span class="system-badge">BAILANDO SOLO V2.0</span>
+          <span class="system-meta-text">{{ allSongs.length }} Pistas · {{ folders.length }} Casetes</span>
+        </div>
+
+        <div class="footer-right">
+          <ThemeSelector 
+            :showExperimental="true" 
+            @theme-change="currentTheme = $event" 
+            @open-stats="showStats = true" 
+          />
+        </div>
+      </footer>
     </div>
 
-    <!-- System Footer Dock (Theme Switcher & Hardware Specs) -->
-    <footer class="system-footer-dock">
-      <div class="footer-left">
-        <span class="system-badge">BAILANDO SOLO V2.0</span>
-        <span class="system-meta-text">{{ allSongs.length }} Pistas · {{ folders.length }} Casetes</span>
-      </div>
+    <!-- Global Modals & Overlays -->
+    <ExpandedPlayerView 
+      :isOpen="showExpandedPlayer"
+      :currentSong="currentSong"
+      :isPlaying="isPlaying"
+      :currentTime="currentSongTime"
+      :duration="songDuration"
+      :isShuffle="isShuffle"
+      :repeatMode="repeatMode"
+      :isEqOpen="isEqOpen"
+      :isQueueOpen="isQueueOpen"
+      :queue="queue"
+      :analyserNode="analyserNode"
+      @close="showExpandedPlayer = false"
+      @play="handlePlay"
+      @pause="isPlaying = false"
+      @prev="prevSong"
+      @next="nextSong"
+      @seek="seekAudio"
+      @toggle-shuffle="isShuffle = !isShuffle"
+      @toggle-repeat="repeatMode = $event"
+      @toggle-eq="isEqOpen = !isEqOpen"
+      @toggle-queue="isQueueOpen = !isQueueOpen"
+      @volume-change="setVolume"
+      @play-queue-item="playQueueItem"
+      @remove-queue-item="removeFromQueue"
+    />
 
-      <div class="footer-right">
-        <ThemeSelector 
-          :showExperimental="true" 
-          @theme-change="currentTheme = $event" 
-          @open-stats="showStats = true" 
-        />
-      </div>
-    </footer>
+    <GlobalSearchModal 
+      :isOpen="showSearchModal"
+      :allSongs="allSongs"
+      :folders="folders"
+      :playlists="playlists"
+      @close="showSearchModal = false"
+      @play-song="handlePlaySong"
+      @open-folder="openFolder"
+      @add-to-queue="addToQueue"
+    />
+
+    <MetadataEditorModal 
+      :isOpen="showMetadataModal"
+      :song="editingSong"
+      @close="showMetadataModal = false"
+      @saved="handleMetadataSaved"
+    />
+
+    <ContextMenu 
+      :show="contextMenuState.show"
+      :x="contextMenuState.x"
+      :y="contextMenuState.y"
+      :song="contextMenuState.song"
+      @close="contextMenuState.show = false"
+      @action="handleContextMenuAction"
+    />
+
+    <QueuePanel 
+      :queue="queue" 
+      :isOpen="isQueueOpen" 
+      @close="isQueueOpen = false" 
+      @remove-item="removeFromQueue" 
+      @play-item="playQueueItem" 
+      @move-item="moveQueueItem"
+      @clear-queue="queue = []"
+      @save-as-playlist="saveQueueAsPlaylist"
+    />
+
+    <StatisticsDashboard :isOpen="showStats" @close="showStats = false" />
+    
+    <MobileDownloadQR :isOpen="showQRModal" @close="showQRModal = false" />
+    
+    <ProfileManager :isOpen="showProfileModal" @close="showProfileModal = false" @profile-changed="handleProfileChange" />
+
+    <ParallaxManager 
+      :isPlaying="isPlaying"
+      :currentSongTime="currentSongTime"
+      :songDuration="songDuration"
+      @toggle-experimental="showExperimental = $event"
+    />
   </div>
-
-  <!-- Global Modals & Overlays -->
-  <ExpandedPlayerView 
-    :isOpen="showExpandedPlayer"
-    :currentSong="currentSong"
-    :isPlaying="isPlaying"
-    :currentTime="currentSongTime"
-    :duration="songDuration"
-    :isShuffle="isShuffle"
-    :repeatMode="repeatMode"
-    :isEqOpen="isEqOpen"
-    :isQueueOpen="isQueueOpen"
-    :queue="queue"
-    :analyserNode="analyserNode"
-    @close="showExpandedPlayer = false"
-    @play="handlePlay"
-    @pause="isPlaying = false"
-    @prev="prevSong"
-    @next="nextSong"
-    @seek="seekAudio"
-    @toggle-shuffle="isShuffle = !isShuffle"
-    @toggle-repeat="repeatMode = $event"
-    @toggle-eq="isEqOpen = !isEqOpen"
-    @toggle-queue="isQueueOpen = !isQueueOpen"
-    @volume-change="setVolume"
-    @play-queue-item="playQueueItem"
-    @remove-queue-item="removeFromQueue"
-  />
-
-  <GlobalSearchModal 
-    :isOpen="showSearchModal"
-    :allSongs="allSongs"
-    :folders="folders"
-    :playlists="playlists"
-    @close="showSearchModal = false"
-    @play-song="handlePlaySong"
-    @open-folder="openFolder"
-    @add-to-queue="addToQueue"
-  />
-
-  <MetadataEditorModal 
-    :isOpen="showMetadataModal"
-    :song="editingSong"
-    @close="showMetadataModal = false"
-    @saved="handleMetadataSaved"
-  />
-
-  <ContextMenu 
-    :show="contextMenuState.show"
-    :x="contextMenuState.x"
-    :y="contextMenuState.y"
-    :song="contextMenuState.song"
-    @close="contextMenuState.show = false"
-    @action="handleContextMenuAction"
-  />
-
-  <QueuePanel 
-    :queue="queue" 
-    :isOpen="isQueueOpen" 
-    @close="isQueueOpen = false" 
-    @remove-item="removeFromQueue" 
-    @play-item="playQueueItem" 
-    @move-item="moveQueueItem"
-    @clear-queue="queue = []"
-    @save-as-playlist="saveQueueAsPlaylist"
-  />
-
-  <StatisticsDashboard :isOpen="showStats" @close="showStats = false" />
-  
-  <MobileDownloadQR :isOpen="showQRModal" @close="showQRModal = false" />
-  
-  <ProfileManager :isOpen="showProfileModal" @close="showProfileModal = false" @profile-changed="handleProfileChange" />
-
-  <ParallaxManager 
-    :isPlaying="isPlaying"
-    :currentSongTime="currentSongTime"
-    :songDuration="songDuration"
-    @toggle-experimental="showExperimental = $event"
-  />
 </template>
 
 <script setup>
@@ -512,17 +514,30 @@ const saveQueueAsPlaylist = async () => {
 
 // ─── Navigation & Views ───────────────────────────────────────────────────────
 
+const scrollToTop = () => {
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
+}
+
+watch(currentView, () => {
+  scrollToTop()
+})
+
 const navigateView = (view) => {
   currentView.value = view
+  scrollToTop()
 }
 
 const openFolder = (folder) => {
   currentFolder.value = folder
   currentView.value = 'folder'
+  scrollToTop()
 }
 
 const handleSyncPlaylist = (pl) => {
   currentView.value = 'downloader'
+  scrollToTop()
 }
 
 // ─── Context Menu & Modals ────────────────────────────────────────────────────
@@ -615,6 +630,9 @@ onMounted(() => {
 <style scoped>
 .main-content-zone {
   min-width: 0;
+  overflow-anchor: none;
+  display: flex;
+  flex-direction: column;
 }
 
 .system-footer-dock {

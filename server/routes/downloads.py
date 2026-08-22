@@ -73,6 +73,11 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
 
     ydl_opts = {
         'format': 'bestaudio/best',
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['mweb', 'web', 'android', 'ios']
+            }
+        },
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -82,6 +87,8 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
         'writethumbnail': True,
         'progress_hooks': [_progress_hook],
         'ignoreerrors': True,
+        'quiet': False,
+        'no_warnings': False,
     }
 
     urls_to_download = []
@@ -97,6 +104,12 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
             ydl.download(urls_to_download)
     except Exception as e:
         print(f"Download thread error: {e}")
+        for sid in (selected_ids or []):
+            update_download_status(sid, {
+                'status': 'error',
+                'percent': 0,
+                'error': str(e)
+            })
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
@@ -113,6 +126,11 @@ def analyze_playlist():
     ydl_opts = {
         'extract_flat': True,
         'dump_single_json': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['mweb', 'web', 'android', 'ios']
+            }
+        },
     }
 
     try:

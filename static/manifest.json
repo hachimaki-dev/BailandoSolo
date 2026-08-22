@@ -1,0 +1,47 @@
+{
+  "name": "Bailando Solo Mobile",
+  "short_name": "Bailando Solo",
+  "description": "Reproductor y biblioteca musical offline retro de Bailando Solo",
+  "start_url": "/mobile",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a1a2e",
+  "theme_color": "#5a5aff",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ],
+  "categories": [
+    "music",
+    "audio",
+    "entertainment"
+  ],
+  "shortcuts": [
+    {
+      "name": "Explorar Biblioteca",
+      "url": "/mobile#library",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Offline / Descargas",
+      "url": "/mobile#offline",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

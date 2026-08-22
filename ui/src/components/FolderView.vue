@@ -98,7 +98,14 @@ const defaultThumb = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 const loadFolder = async () => {
   if (!props.folderName) return
   songs.value = await LibraryService.getFolderSongs(props.folderName)
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
 }
+
+watch(() => props.folderName, () => {
+  loadFolder()
+})
 
 const getThumbnail = (song) => {
   if (!song) return defaultThumb
@@ -135,7 +142,6 @@ const playAll = () => {
   }
 }
 
-watch(() => props.folderName, loadFolder)
 onMounted(loadFolder)
 </script>
 

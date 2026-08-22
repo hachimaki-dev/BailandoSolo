@@ -231,7 +231,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { PlaylistService } from '../services/PlaylistService'
 
 const props = defineProps({
@@ -245,6 +245,12 @@ const playlists = ref([])
 const activeTab = ref('all')
 const selectedPlaylist = ref(null)
 const isSyncing = ref(false)
+
+watch([selectedPlaylist, activeTab], () => {
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+  }
+})
 
 // Create Modals
 const showCreateModal = ref(false)

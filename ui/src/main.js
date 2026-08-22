@@ -15,7 +15,6 @@ import { initConfig } from './config'
 
 initCassetteThemeObserver()
 
-// Resolve the dynamic API port before mounting the app
-initConfig().then(() => {
+initConfig().finally(() => {
   createApp(App).mount('#app')
 })

@@ -39,10 +39,38 @@ def get_mobile_info():
         return jsonify({'error': str(e)}), 500
 
 
+@mobile_bp.route('/api/ping', methods=['GET'])
+def ping():
+    """Fast health check endpoint for mobile offline/online detection."""
+    return jsonify({'status': 'ok', 'server': 'BailandoSolo', 'version': '2.1'}), 200
+
+
 @mobile_bp.route('/mobile')
 def mobile_interface():
     """Serve the mobile HTML interface."""
     return send_file(os.path.join(STATIC_DIR, 'mobile.html'))
+
+
+@mobile_bp.route('/manifest.json')
+@mobile_bp.route('/manifest.webmanifest')
+def manifest_file():
+    """Serve the PWA Web App Manifest."""
+    return send_file(
+        os.path.join(STATIC_DIR, 'manifest.json'),
+        mimetype='application/manifest+json'
+    )
+
+
+@mobile_bp.route('/sw.js')
+def service_worker():
+    """Serve the Service Worker with correct headers for PWA registration."""
+    response = send_file(
+        os.path.join(STATIC_DIR, 'sw.js'),
+        mimetype='application/javascript'
+    )
+    response.headers['Service-Worker-Allowed'] = '/'
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
 
 
 @mobile_bp.route('/test-mobile')

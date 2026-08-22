@@ -21,9 +21,9 @@
         <button @click="loadQR" class="btn-retro-secondary btn-sm">Reintentar</button>
       </div>
       
-      <div v-else class="qr-main-section">
+      <div v-show="!loading && !error" class="qr-main-section">
         <div class="qr-code-wrapper">
-          <div id="qrcode" class="qr-code"></div>
+          <div ref="qrContainer" class="qr-code"></div>
         </div>
         
         <div class="url-manual-box">
@@ -45,13 +45,18 @@
         <div class="network-info-pill">
           <span>ℹ️ WiFi local IP: <strong>{{ networkIp }}</strong></span>
         </div>
+
+        <div class="offline-tip-pill" style="margin-top: 10px; font-size: 10px; color: #a0a0b8; background: #161622; border: 1px dashed #444466; padding: 8px; border-radius: 4px; line-height: 1.4;">
+          💡 <strong>Modo 100% Offline:</strong> En tu teléfono puedes tocar <em>"Instalar App"</em> o <em>"Añadir a pantalla de inicio"</em>. Una vez descargadas las canciones, la app funcionará en tu móvil incluso con la computadora apagada y sin internet.
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
+import QRCode from 'qrcode'
 import { apiUrl } from '../config'
 
 const props = defineProps({
@@ -66,29 +71,23 @@ const mobileUrl = ref('')
 const networkIp = ref('')
 const copied = ref(false)
 const urlInput = ref(null)
-
-let QRCode = null
+const qrContainer = ref(null)
 
 const loadQR = async () => {
   loading.value = true
   error.value = null
   
   try {
-    if (!QRCode) {
-      const module = await import('qrcode')
-      QRCode = module.default
-    }
-    
     const response = await fetch(apiUrl('/api/mobile/info'))
     if (!response.ok) throw new Error('No se pudo obtener la información de red')
     
     const data = await response.json()
-    mobileUrl.value = data.url
-    networkIp.value = data.ip
+    mobileUrl.value = data.url || `http://${data.ip || '127.0.0.1'}:${data.port || 5001}/mobile`
+    networkIp.value = data.ip || '127.0.0.1'
     
     loading.value = false
     await nextTick()
-    await generateQRCode(data.url)
+    await generateQRCode(mobileUrl.value)
   } catch (err) {
     console.error('Error loading QR:', err)
     error.value = 'No se pudo conectar con el servidor local'
@@ -98,7 +97,7 @@ const loadQR = async () => {
 
 const generateQRCode = async (url) => {
   try {
-    const container = document.getElementById('qrcode')
+    const container = qrContainer.value
     if (!container) return
     container.innerHTML = ''
     
@@ -132,6 +131,12 @@ const copyUrl = async () => {
 
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
+    loadQR()
+  }
+})
+
+onMounted(() => {
+  if (props.isOpen) {
     loadQR()
   }
 })

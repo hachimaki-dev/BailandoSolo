@@ -111,6 +111,7 @@ defineEmits(['navigate', 'open-search', 'open-stats', 'open-profiles', 'open-qr'
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
+  -webkit-app-region: no-drag;
 }
 
 .logo-badge {
@@ -142,6 +143,7 @@ defineEmits(['navigate', 'open-search', 'open-stats', 'open-profiles', 'open-qr'
   gap: 6px;
   flex-wrap: wrap;
   align-items: center;
+  -webkit-app-region: no-drag;
 }
 
 .nav-tab-btn {
@@ -158,6 +160,7 @@ defineEmits(['navigate', 'open-search', 'open-stats', 'open-profiles', 'open-qr'
   box-shadow: inset 1px 1px 0px #888888, inset -1px -1px 0px #222222, 2px 2px 0px #000000;
   transition: all 0.1s ease;
   white-space: nowrap;
+  -webkit-app-region: no-drag;
 }
 
 .nav-tab-btn:hover {
@@ -182,6 +185,7 @@ defineEmits(['navigate', 'open-search', 'open-stats', 'open-profiles', 'open-qr'
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  -webkit-app-region: no-drag;
 }
 
 .btn-system-tool {
@@ -198,6 +202,7 @@ defineEmits(['navigate', 'open-search', 'open-stats', 'open-profiles', 'open-qr'
   box-shadow: inset 1px 1px 0px #ffffff, inset -1px -1px 0px #777777, 2px 2px 0px #000000;
   height: 34px;
   white-space: nowrap;
+  -webkit-app-region: no-drag;
 }
 
 .btn-system-tool:hover {

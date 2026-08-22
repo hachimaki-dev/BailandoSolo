@@ -93,10 +93,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { ProfileService } from '../services/ProfileService'
 
-defineProps({
+const props = defineProps({
   isOpen: Boolean
 })
 
@@ -112,7 +112,18 @@ const createInput = ref(null)
 const editInput = ref(null)
 
 onMounted(async () => {
-  await loadProfiles()
+  if (props.isOpen) {
+    await loadProfiles()
+  }
+})
+
+watch(() => props.isOpen, async (newVal) => {
+  if (newVal) {
+    errorMessage.value = ''
+    isCreating.value = false
+    editingProfile.value = null
+    await loadProfiles()
+  }
 })
 
 const loadProfiles = async () => {
