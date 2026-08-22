@@ -34,10 +34,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Setup Python 3.12
@@ -74,9 +74,7 @@ jobs:
 
       - name: Package with Electron Builder
         run: |
-          npx electron-builder ${{ matrix.builder_flag }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          npx electron-builder ${{ matrix.builder_flag }} --publish never
 
       - name: Upload Release Assets to GitHub Release
         uses: softprops/action-gh-release@v2

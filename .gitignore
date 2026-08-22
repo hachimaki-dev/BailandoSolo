@@ -8,7 +8,8 @@ downloads
 profiles.json
 stats.json
 
-# Build artifacts
-build/
+# Pyinstaller & packaging build caches
+build/bailandosolo-server/
 dist/
 release/
+*.spec
