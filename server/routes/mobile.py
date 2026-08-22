@@ -102,7 +102,7 @@ def download_file(filepath):
     return send_file(safe_path, as_attachment=True, download_name=filename)
 
 
-@mobile_bp.route('/api/mobile/download-folder/<folder>', methods=['GET'])
+@mobile_bp.route('/api/mobile/download-folder/<path:folder>', methods=['GET'])
 def download_folder(folder):
     """Download an entire folder as a ZIP file."""
     config = load_profiles()
@@ -120,22 +120,31 @@ def download_folder(folder):
 
     try:
         temp_dir = tempfile.mkdtemp()
-        zip_base_name = os.path.join(temp_dir, folder)
+        folder_clean_name = os.path.basename(safe_path) or 'Album'
+        zip_base_path = os.path.join(temp_dir, 'archive')
 
-        parent_dir = os.path.dirname(folder_path)
-        base_name = os.path.basename(folder_path)
-        shutil.make_archive(zip_base_name, 'zip', root_dir=parent_dir, base_dir=base_name)
-        zip_path = zip_base_name + '.zip'
+        # Create zip containing all files inside folder_path
+        shutil.make_archive(zip_base_path, 'zip', root_dir=safe_path)
+        zip_path = zip_base_path + '.zip'
+
+        if not os.path.exists(zip_path):
+            return jsonify({'error': 'Failed to create ZIP'}), 500
 
         @after_this_request
         def remove_temp(response):
             try:
-                shutil.rmtree(temp_dir)
+                shutil.rmtree(temp_dir, ignore_errors=True)
             except Exception as e:
                 print(f"Error removing temp dir: {e}")
             return response
 
-        return send_file(zip_path, as_attachment=True, download_name=f"{folder}.zip")
+        return send_file(
+            zip_path,
+            as_attachment=True,
+            download_name=f"{folder_clean_name}.zip",
+            mimetype='application/zip'
+        )
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
