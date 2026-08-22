@@ -5,7 +5,7 @@ a = Analysis(
     ['server.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('static', 'static')],
     hiddenimports=['flask_cors', 'yt_dlp'],
     hookspath=[],
     hooksconfig={},

@@ -28,7 +28,7 @@ rm -rf build/bailandosolo-server dist/bailandosolo-server server.spec bailandoso
 
 # 5. Ejecutar PyInstaller
 echo -e "${BLUE}🔨 Ejecutando PyInstaller...${NC}"
-pyinstaller --name bailandosolo-server --onefile --hidden-import flask_cors --hidden-import yt_dlp server.py
+pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
 
 # Verificar si fue exitoso
 if [ -f "dist/bailandosolo-server" ]; then

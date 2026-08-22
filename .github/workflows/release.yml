@@ -11,18 +11,24 @@ permissions:
 
 jobs:
   build-and-release:
-    name: Build (${{ matrix.os }})
+    name: Build (${{ matrix.target_name }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: macos-latest
-            target_name: mac
+            target_name: mac-arm64
+            builder_flag: --mac --arm64
+          - os: macos-13
+            target_name: mac-intel
+            builder_flag: --mac --x64
           - os: windows-latest
-            target_name: win
+            target_name: windows-x64
+            builder_flag: --win --x64
           - os: ubuntu-latest
-            target_name: linux
+            target_name: linux-x64
+            builder_flag: --linux
 
     steps:
       - name: Checkout Repository
@@ -46,10 +52,16 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build Python Backend Binary (PyInstaller)
-        shell: bash
+      - name: Build Python Backend Binary (PyInstaller - Unix)
+        if: runner.os != 'Windows'
         run: |
-          pyinstaller --name bailandosolo-server --onefile --hidden-import flask_cors --hidden-import yt_dlp server.py
+          pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+          chmod +x dist/bailandosolo-server
+
+      - name: Build Python Backend Binary (PyInstaller - Windows)
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller --name bailandosolo-server --onefile --add-data "static;static" --hidden-import flask_cors --hidden-import yt_dlp server.py
 
       - name: Install Frontend & Electron Dependencies
         run: |
@@ -60,24 +72,9 @@ jobs:
         run: |
           npm --prefix ui run build
 
-      - name: Package with Electron Builder (Mac)
-        if: matrix.target_name == 'mac'
+      - name: Package with Electron Builder
         run: |
-          npx electron-builder --mac
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Package with Electron Builder (Windows)
-        if: matrix.target_name == 'win'
-        run: |
-          npx electron-builder --win
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Package with Electron Builder (Linux)
-        if: matrix.target_name == 'linux'
-        run: |
-          npx electron-builder --linux
+          npx electron-builder ${{ matrix.builder_flag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
