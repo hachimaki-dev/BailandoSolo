@@ -20,22 +20,18 @@ jobs:
           - os: macos-latest
             target_name: mac-arm64
             python_arch: arm64
-            pyinstaller_arch: --target-arch arm64
             builder_flag: --mac --arm64
           - os: macos-latest
             target_name: mac-intel
             python_arch: x64
-            pyinstaller_arch: --target-arch x86_64
             builder_flag: --mac --x64
           - os: windows-latest
             target_name: windows-x64
             python_arch: x64
-            pyinstaller_arch: ""
             builder_flag: --win --x64
           - os: ubuntu-latest
             target_name: linux-x64
             python_arch: x64
-            pyinstaller_arch: ""
             builder_flag: --linux
 
     steps:
@@ -57,14 +53,24 @@ jobs:
 
       - name: Install Python Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+          if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
+            arch -x86_64 python -m pip install --upgrade pip
+            arch -x86_64 pip install -r requirements.txt
+            arch -x86_64 pip install pyinstaller
+          else
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install pyinstaller
+          fi
 
       - name: Build Python Backend Binary (PyInstaller - Unix)
         if: runner.os != 'Windows'
         run: |
-          pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp ${{ matrix.pyinstaller_arch }} server.py
+          if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
+            arch -x86_64 pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+          else
+            pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+          fi
           chmod +x dist/bailandosolo-server
 
       - name: Build Python Backend Binary (PyInstaller - Windows)
