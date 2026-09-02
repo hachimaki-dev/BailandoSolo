@@ -19,6 +19,8 @@
           <DownloaderView 
             v-if="currentView === 'downloader'" 
             :allSongs="allSongs"
+            :initialUrl="plazaInitialData.url"
+            :initialPlaylistData="plazaInitialData.playlist"
             @download-start="refreshLibraryData" 
             @play-cartridge="handlePlaySong" 
             @add-to-queue="addToQueue" 
@@ -58,6 +60,13 @@
             @add-to-queue="addToQueue"
             @context-menu="openContextMenu"
             @sync-playlist="handleSyncPlaylist"
+          />
+
+          <!-- Plaza View (P2P Community Hub) -->
+          <PlazaView
+            v-else-if="currentView === 'plaza'"
+            @download-playlist="handlePlazaDownload"
+            @navigate="navigateView"
           />
         </div>
 
@@ -192,6 +201,7 @@ import DownloaderView from './components/DownloaderView.vue'
 import LibraryView from './components/LibraryView.vue'
 import FolderView from './components/FolderView.vue'
 import PlaylistsView from './components/PlaylistsView.vue'
+import PlazaView from './components/PlazaView.vue'
 import AudioPlayer from './components/AudioPlayer.vue'
 import ExpandedPlayerView from './components/ExpandedPlayerView.vue'
 import GlobalSearchModal from './components/GlobalSearchModal.vue'
@@ -207,10 +217,12 @@ import ParallaxManager from './components/ParallaxManager.vue'
 import { LibraryService } from './services/LibraryService'
 import { PlaylistService } from './services/PlaylistService'
 import { StatsService } from './services/StatsService'
+import { PlazaService } from './services/PlazaService'
 
 // Navigation & View State (Default to downloader as primary console experience)
 const currentView = ref('downloader')
 const currentFolder = ref('')
+const plazaInitialData = ref({ url: '', playlist: null })
 
 // Library & Playlists Data
 const folders = ref([])
@@ -270,6 +282,23 @@ watch(currentSong, (newSong) => {
   }
 })
 
+// Broadcast real-time presence and "Now Playing" to decentralized Nostr network
+watch([currentSong, isPlaying], ([newSong, playing]) => {
+  if (newSong && playing) {
+    PlazaService.publishNowPlaying({
+      title: newSong.title,
+      artist: newSong.artist || newSong.uploader || '',
+      isPlaying: true
+    })
+  } else if (newSong && !playing) {
+    PlazaService.publishNowPlaying({
+      title: newSong.title,
+      artist: newSong.artist || newSong.uploader || '',
+      isPlaying: false
+    })
+  }
+})
+
 watch(currentSongTime, (newTime) => {
   if (!currentSong.value || !isPlaying.value) return
   if (newTime - lastTrackedTime >= TRACK_INTERVAL) {
@@ -277,6 +306,24 @@ watch(currentSongTime, (newTime) => {
     lastTrackedTime = newTime
   }
 })
+
+const handlePlazaDownload = (pl) => {
+  if (!pl) return
+  PlazaService.recordDownload(pl.id, pl.url)
+  plazaInitialData.value = {
+    url: pl.url,
+    playlist: {
+      title: pl.title,
+      songs: (pl.songs || []).map(s => ({
+        ...s,
+        status: 'idle',
+        percent: 0,
+        speed: 0
+      }))
+    }
+  }
+  currentView.value = 'downloader'
+}
 
 const updateSongTime = ({ currentTime, duration }) => {
   currentSongTime.value = currentTime
@@ -624,6 +671,7 @@ const handleGlobalShortcuts = (e) => {
 
 onMounted(() => {
   window.addEventListener('keydown', handleGlobalShortcuts)
+  PlazaService.init()
 })
 </script>
 

@@ -15,7 +15,7 @@
 | Mobile web | Standalone HTML | `static/mobile.html` |
 | CI/CD | GitHub Actions | `.github/workflows/release.yml` |
 
-**Current version:** 1.0.0  
+**Current version:** 1.1.0  
 **Architecture doc:** [`docs/architecture.md`](docs/architecture.md)
 
 ---

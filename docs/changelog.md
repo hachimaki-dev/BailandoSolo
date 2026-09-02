@@ -5,6 +5,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ---
 
+## [1.1.0] — 2026-09-02
+
+### Novedades y Resiliencia de Red
+- **La Plaza P2P (Nostr)**:
+  - Red comunitaria descentralizada sin servidor central para compartir y descubrir playlists de YouTube con metadatos completos.
+  - Ribbon social en vivo *"EN SINTONÍA"* con presencia en tiempo real y visualizador de lo que escucha cada usuario.
+  - Modo lista densa con acordeón de pistas desplegable y modo de fichas retro.
+  - Cero listas ni usuarios hardcodeados: 100% impulsado por la comunidad.
+- **Smart Fallback Search (Rescate Inteligente de Descargas)**:
+  - Detección automática de enlaces caídos, videos eliminados o pistas geobloqueadas de YouTube Music (Topic).
+  - Búsqueda en segundo plano de versiones alternativas disponibles en la región, descargando el audio de alta calidad con carátula y nombre original.
+- **UX de Descargas en Tiempo Real**:
+  - Eliminado el salto brusco de 0% a 100%. Progreso continuo y ascendente con sondeo reactivo a 350ms.
+  - Barra de progreso general para descargas en lote (`PROGRESO GENERAL: X/Y`).
+  - Indicadores de fase en vivo: *Iniciando*, *Buscando alternativa*, *Descargando audio (KB/s)*, *Extrayendo MP3*.
+- **Resiliencia de Red en Redes Universitarias (Eduroam / Campus)**:
+  - Bypass de cortafuegos con inspección SSL profunda (`nocheckcertificate`).
+  - Bypass de caídas de enrutamiento IPv6 forzando IPv4 (`source_address: 0.0.0.0`).
+  - Solucionador de desafíos JavaScript y firmas de YouTube integrado con Node.js (`ejs:github`).
+  - Cabeceras emuladas de navegador y persistencia de cookies de sesión para saltar bloqueos 429 en IPs compartidas.
+
+---
+
 ## [1.0.0] — 2026-09-02
 
 ### Lanzamiento Oficial

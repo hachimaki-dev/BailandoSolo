@@ -1,6 +1,6 @@
 {
   "name": "bailandosolo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Reproductor y Descargador de Música Retro",
   "main": "main.js",
   "scripts": {

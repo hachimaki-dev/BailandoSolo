@@ -42,6 +42,15 @@
 
         <button 
           class="nav-tab-btn" 
+          :class="{ active: currentView === 'plaza' }"
+          @click="$emit('navigate', 'plaza')"
+        >
+          <span class="nav-ico">🌐</span>
+          <span class="tab-label">La Plaza</span>
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
           @click="$emit('open-stats')"
         >
           <span class="nav-ico">📊</span>

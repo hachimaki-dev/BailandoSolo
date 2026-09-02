@@ -141,7 +141,46 @@
           @click="startBatchDownload" 
           :disabled="selectedSongs.length === 0 || isStartingDownload"
         >
-          ⬇ DESCARGAR TODO ({{ selectedSongs.length }})
+          {{ isDownloadingBatch ? '⬇ DESCARGANDO...' : `⬇ DESCARGAR TODO (${selectedSongs.length})` }}
+        </button>
+      </div>
+
+      <!-- Batch Download Live Progress Bar -->
+      <div v-if="isDownloadingBatch || (batchProgress.finished > 0 && batchProgress.finished < batchProgress.total)" class="batch-progress-strip">
+        <div class="batch-info-row">
+          <div class="batch-status-label">
+            <span class="spinner-led-mini" v-if="isDownloadingBatch"></span>
+            <strong>PROGRESO GENERAL:</strong> 
+            {{ batchProgress.finished }}/{{ batchProgress.total }} canciones
+            <span v-if="batchProgress.errors > 0" class="err-sub">({{ batchProgress.errors }} con error)</span>
+          </div>
+          <div class="batch-percent-label">{{ batchProgress.percent }}%</div>
+        </div>
+        <div class="progress-bar-retro batch-bar">
+          <div class="progress-fill-retro" :style="{ width: batchProgress.percent + '%' }"></div>
+        </div>
+      </div>
+
+      <!-- Plaza Community Sharing Opt-In Bar -->
+      <div class="plaza-share-banner">
+        <label class="plaza-optin-label">
+          <input 
+            type="checkbox" 
+            v-model="shareToPlaza" 
+          />
+          <span class="plaza-optin-text">
+            <strong>🌐 Compartir en La Plaza</strong>
+            <small>Publica esta URL y lista de canciones para que la comunidad de Bailando Solo pueda descubrirla en la red P2P.</small>
+          </span>
+        </label>
+        <button 
+          type="button" 
+          class="btn-retro-secondary btn-sm btn-publish-now" 
+          @click="manualShareToPlaza"
+          :disabled="isSharingToPlaza"
+          title="Publicar en La Plaza inmediatamente"
+        >
+          {{ isSharingToPlaza ? 'Publicando...' : (hasSharedToPlaza ? '✓ Publicada' : '🚀 Publicar Ahora') }}
         </button>
       </div>
 
@@ -172,7 +211,7 @@
           v-for="song in playlist.songs" 
           :key="song.id" 
           class="ripper-song-slot"
-          :class="{ 'is-selected': isSelected(song.id), 'is-duplicate': isDuplicate(song.id), 'is-downloading': song.status === 'downloading', 'is-finished': song.status === 'finished' }"
+          :class="{ 'is-selected': isSelected(song.id), 'is-duplicate': isDuplicate(song.id), 'is-downloading': ['downloading', 'processing', 'searching'].includes(song.status), 'is-finished': song.status === 'finished' }"
           @click="toggleSongSelection(song.id)"
         >
           <div class="slot-check" @click.stop>
@@ -191,11 +230,17 @@
 
           <!-- Progress / LED Status -->
           <div class="slot-status-box">
-            <div v-if="song.status === 'downloading'" class="slot-progress-wrapper">
+            <div v-if="['downloading', 'processing', 'searching'].includes(song.status)" class="slot-progress-wrapper">
               <div class="progress-bar-retro mini">
-                <div class="progress-fill-retro" :style="{ width: song.percent + '%' }"></div>
+                <div class="progress-fill-retro" :style="{ width: (song.percent || 0) + '%' }"></div>
               </div>
-              <span class="speed-text">{{ Math.round(song.percent) }}% ({{ formatSpeed(song.speed) }})</span>
+              <div class="slot-status-sub">
+                <span class="slot-stage-text">{{ song.stage || 'Descargando...' }}</span>
+                <span class="speed-text">
+                  {{ Math.round(song.percent || 0) }}% 
+                  <span v-if="song.speed">({{ formatSpeed(song.speed) }})</span>
+                </span>
+              </div>
             </div>
             <div v-else-if="song.status === 'finished'" class="slot-badge-finish">
               <span class="badge-retro success pixel">✓ DESCARGADO</span>
@@ -204,7 +249,7 @@
               <span class="badge-retro info pixel">⏳ EN COLA</span>
             </div>
             <div v-else-if="song.status === 'error'" class="slot-badge-finish">
-              <span class="badge-retro danger pixel">⚠️ ERROR</span>
+              <span class="badge-retro danger pixel" :title="song.error || 'Error en descarga'">⚠️ ERROR</span>
             </div>
             <div v-else class="slot-badge-finish">
               <span class="badge-retro neutral pixel">LISTA</span>
@@ -272,10 +317,13 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { LibraryService } from '../services/LibraryService'
+import { PlazaService } from '../services/PlazaService'
 import { apiUrl, streamUrl } from '../config'
 
 const props = defineProps({
-  allSongs: { type: Array, default: () => [] }
+  allSongs: { type: Array, default: () => [] },
+  initialUrl: { type: String, default: '' },
+  initialPlaylistData: { type: Object, default: null }
 })
 
 const emit = defineEmits(['download-start', 'play-cartridge', 'add-to-queue', 'context-menu'])
@@ -292,6 +340,80 @@ const selectedSongIds = ref(new Set())
 const duplicatesList = ref([])
 const omitDuplicates = ref(true)
 const isStartingDownload = ref(false)
+
+// Plaza Community Sharing State
+const shareToPlaza = ref(PlazaService.isAutoShareEnabled())
+const isSharingToPlaza = ref(false)
+const hasSharedToPlaza = ref(false)
+
+async function checkDuplicatesInLibrary(songs) {
+  if (!songs || !Array.isArray(songs) || songs.length === 0) return
+  try {
+    const items = songs.map(s => ({ id: s.id, title: s.title, uploader: s.uploader }))
+    const data = await LibraryService.checkDuplicates(items)
+    duplicatesList.value = data.duplicates || []
+
+    // If auto-omit is true, uncheck duplicates
+    if (omitDuplicates.value && duplicatesList.value.length > 0) {
+      duplicatesList.value.forEach(d => {
+        selectedSongIds.value.delete(d.id)
+      })
+    }
+  } catch (e) {
+    console.error('Error checking duplicates:', e)
+  }
+}
+
+const applyInitialProps = () => {
+  if (props.initialUrl) {
+    url.value = props.initialUrl
+  }
+  if (props.initialPlaylistData && props.initialPlaylistData.songs && props.initialPlaylistData.songs.length > 0) {
+    const hasValidIds = props.initialPlaylistData.songs.every(s => s.id && /^[a-zA-Z0-9_-]{6,}$/.test(s.id))
+    if (hasValidIds) {
+      const cloned = JSON.parse(JSON.stringify(props.initialPlaylistData))
+      cloned.songs = (cloned.songs || []).map(s => ({
+        ...s,
+        status: 'idle',
+        percent: 0,
+        speed: 0
+      }))
+      playlist.value = cloned
+      selectedSongIds.value = new Set(cloned.songs.map(s => s.id))
+      if (!folder.value && cloned.title) {
+        folder.value = cloned.title.replace(/[\\/*?:"<>|]/g, '').trim()
+      }
+      checkDuplicatesInLibrary(cloned.songs)
+      return
+    }
+  }
+
+  // If URL was provided without pre-analyzed songs, auto-analyze via yt-dlp
+  if (url.value && url.value.trim() && !playlist.value && !isAnalyzing.value) {
+    analyze()
+  }
+}
+
+watch(() => props.initialUrl, () => applyInitialProps(), { immediate: true })
+watch(() => props.initialPlaylistData, () => applyInitialProps(), { immediate: true })
+
+const manualShareToPlaza = async () => {
+  if (!playlist.value || !playlist.value.songs || isSharingToPlaza.value) return
+  isSharingToPlaza.value = true
+  try {
+    await PlazaService.publishPlaylist({
+      title: playlist.value.title || 'Playlist YouTube',
+      url: url.value,
+      songs: playlist.value.songs
+    })
+    hasSharedToPlaza.value = true
+    setTimeout(() => { hasSharedToPlaza.value = false }, 3500)
+  } catch (err) {
+    alert('Error al compartir en La Plaza: ' + err.message)
+  } finally {
+    isSharingToPlaza.value = false
+  }
+}
 
 // Network & Resilience State
 const showResilienceOptions = ref(false)
@@ -412,31 +534,45 @@ const analyze = async () => {
   }
 }
 
-const checkDuplicatesInLibrary = async (songs) => {
-  try {
-    const items = songs.map(s => ({ id: s.id, title: s.title, uploader: s.uploader }))
-    const data = await LibraryService.checkDuplicates(items)
-    duplicatesList.value = data.duplicates || []
+const isDownloadingBatch = ref(false)
 
-    // If auto-omit is true, uncheck duplicates
-    if (omitDuplicates.value && duplicatesList.value.length > 0) {
-      duplicatesList.value.forEach(d => {
-        selectedSongIds.value.delete(d.id)
-      })
-    }
-  } catch (e) {
-    console.error('Error checking duplicates:', e)
+const batchProgress = computed(() => {
+  if (!playlist.value || !playlist.value.songs) {
+    return { total: 0, finished: 0, errors: 0, percent: 0 }
   }
-}
+  const relevant = playlist.value.songs.filter(s => selectedSongIds.value.has(s.id))
+  const total = relevant.length
+  if (total === 0) return { total: 0, finished: 0, errors: 0, percent: 0 }
+
+  const finished = relevant.filter(s => s.status === 'finished').length
+  const errors = relevant.filter(s => s.status === 'error').length
+  const sumPercent = relevant.reduce((acc, s) => {
+    if (s.status === 'finished' || s.status === 'error') return acc + 100
+    return acc + (s.percent || 0)
+  }, 0)
+  const percent = Math.min(100, Math.round(sumPercent / total))
+
+  return { total, finished, errors, percent }
+})
 
 const startBatchDownload = async () => {
   if (!playlist.value || selectedSongIds.value.size === 0) return
   isStartingDownload.value = true
 
   const idsToDownload = Array.from(selectedSongIds.value)
+  const songsMetadata = (playlist.value.songs || [])
+    .filter(s => selectedSongIds.value.has(s.id))
+    .map(s => ({
+      id: s.id,
+      title: s.title,
+      uploader: s.uploader
+    }))
+
   playlist.value.songs.forEach(s => {
     if (selectedSongIds.value.has(s.id)) {
       s.status = 'waiting'
+      s.stage = 'En cola...'
+      s.percent = 0
     }
   })
 
@@ -448,6 +584,7 @@ const startBatchDownload = async () => {
         url: url.value,
         folder_name: folder.value || 'Music',
         selected_ids: idsToDownload,
+        songs_info: songsMetadata,
         quality: quality.value,
         naming_template: namingTemplate.value,
         cookies_browser: cookiesBrowser.value,
@@ -455,8 +592,18 @@ const startBatchDownload = async () => {
       })
     })
 
+    // If opted into La Plaza, broadcast playlist and tracklist to Nostr
+    if (shareToPlaza.value && playlist.value && playlist.value.songs) {
+      PlazaService.publishPlaylist({
+        title: playlist.value.title || 'Playlist YouTube',
+        url: url.value,
+        songs: playlist.value.songs
+      }).catch(err => console.warn('[Plaza] Auto-share notice:', err))
+    }
+
+    isDownloadingBatch.value = true
     if (pollInterval) clearInterval(pollInterval)
-    pollInterval = setInterval(updateDownloadProgress, 1000)
+    pollInterval = setInterval(updateDownloadProgress, 350)
     emit('download-start')
   } catch (e) {
     alert('Error al iniciar descarga: ' + e.message)
@@ -472,14 +619,31 @@ const updateDownloadProgress = async () => {
     const statusMap = await res.json()
 
     if (playlist.value && playlist.value.songs) {
+      let activeCount = 0
       playlist.value.songs.forEach(song => {
         const itemStatus = statusMap[song.id]
         if (itemStatus) {
           song.status = itemStatus.status
-          song.percent = itemStatus.percent || 0
+          song.percent = itemStatus.percent !== undefined ? itemStatus.percent : 0
           song.speed = itemStatus.speed || 0
+          song.stage = itemStatus.stage || ''
+          song.downloaded_bytes = itemStatus.downloaded_bytes || 0
+          song.total_bytes = itemStatus.total_bytes || 0
+          song.error = itemStatus.error || ''
+
+          if (['downloading', 'processing', 'searching', 'waiting'].includes(song.status)) {
+            activeCount++
+          }
         }
       })
+
+      if (activeCount === 0 && isDownloadingBatch.value) {
+        isDownloadingBatch.value = false
+        if (pollInterval) {
+          clearInterval(pollInterval)
+          pollInterval = null
+        }
+      }
     }
   } catch (e) {
     console.error('Error polling status:', e)
@@ -605,6 +769,47 @@ onUnmounted(() => {
   margin-bottom: 14px;
   padding-bottom: 8px;
   border-bottom: 3px solid #000000;
+}
+
+/* Plaza Community Sharing Bar */
+.plaza-share-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px dashed rgba(0, 240, 255, 0.5);
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.plaza-optin-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.plaza-optin-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.plaza-optin-text strong {
+  font-size: 0.8rem;
+  color: var(--accent-primary, #00f0ff);
+}
+
+.plaza-optin-text small {
+  font-size: 0.7rem;
+  color: var(--text-secondary, #666);
+}
+
+.btn-publish-now {
+  flex-shrink: 0;
 }
 
 .deck-title-group {
@@ -939,14 +1144,116 @@ onUnmounted(() => {
 }
 
 .slot-progress-wrapper {
-  width: 120px;
+  min-width: 170px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-status-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  gap: 6px;
+}
+
+.slot-stage-text {
+  color: var(--accent-primary, #0077b6);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
 }
 
 .speed-text {
   font-family: var(--font-mono);
-  font-size: 9px;
-  color: #0077b6;
+  font-size: 8.5px;
+  color: var(--accent-secondary, #b45309);
   font-weight: bold;
+  white-space: nowrap;
+}
+
+.progress-bar-retro.mini {
+  height: 8px;
+  background: #2a2a2a;
+  border: 1px solid #000000;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill-retro {
+  height: 100%;
+  background: linear-gradient(90deg, #00f0ff, #39ff14);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Batch Download Live Progress Bar */
+.batch-progress-strip {
+  background: #1e1e28;
+  border: 2px solid var(--accent-primary, #00f0ff);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.batch-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-family: var(--font-pixel);
+  font-size: 9.5px;
+}
+
+.batch-status-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+}
+
+.batch-status-label strong {
+  color: var(--accent-primary, #00f0ff);
+}
+
+.batch-status-label .err-sub {
+  color: #ff3366;
+  font-size: 8.5px;
+}
+
+.batch-percent-label {
+  color: #39ff14;
+  font-weight: bold;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.batch-bar {
+  height: 10px;
+  background: #0d0d12;
+  border: 1px solid #444;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.spinner-led-mini {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #39ff14;
+  box-shadow: 0 0 8px #39ff14;
+  animation: pulse-led 0.8s infinite alternate;
+  display: inline-block;
+}
+
+@keyframes pulse-led {
+  from { opacity: 0.3; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1.15); }
 }
 
 /* Quick Play Shelf */
