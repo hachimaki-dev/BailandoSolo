@@ -2,700 +2,891 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Bailando Solo | El Reproductor & Descargador de Música Soberano</title>
-  <meta name="description" content="Reproductor de audio Hi-Fi, descargador de playlists en FLAC/MP3 y sincronización móvil PWA en red local. Cero suscripciones, cero publicidad, 100% libre.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bailando Solo — Reproductor y Descargador de Música</title>
+  <meta name="description" content="Reproductor de música de escritorio y descargador de playlists de YouTube en MP3/FLAC. 100% local, sin cuentas ni suscripciones.">
   
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://hachimaki-dev.github.io/BailandoSolo/">
-  <meta property="og:title" content="Bailando Solo — Tu música. Tus archivos. Sin suscripciones.">
-  <meta property="og:description" content="Reproductor de música soberano con descargador integrado y servidor PWA móvil en red local. Libre, rápido y sin anuncios.">
+  <meta property="og:title" content="Bailando Solo — Reproductor y Descargador de Música">
+  <meta property="og:description" content="Descarga canciones y playlists en MP3/FLAC directamente a tu PC. Reproductor retro, ecualizador y compañero móvil por Wi-Fi local.">
   <meta property="og:image" content="./build/icon.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="./build/icons/32x32.png">
   <link rel="apple-touch-icon" href="./build/icons/256x256.png">
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
-
   <style>
     :root {
-      --bg-dark: #07090e;
-      --bg-card: rgba(15, 20, 32, 0.65);
-      --bg-card-hover: rgba(23, 30, 48, 0.9);
-      --border-card: rgba(255, 255, 255, 0.08);
-      --border-highlight: rgba(0, 242, 254, 0.4);
+      --bg: #ffffff;
+      --body-bg: #f5f6f8;
+      --text: #111111;
+      --text-muted: #4b5563;
+      --text-dim: #6b7280;
+      --border: #18181b;
+      --border-light: #e5e7eb;
       
-      --accent-cyan: #00f2fe;
-      --accent-blue: #4facfe;
-      --accent-purple: #9d4edd;
-      --accent-green: #10b981;
+      /* Colores pasteles */
+      --pastel-green: #d1fae5;
+      --pastel-green-hover: #bbf7d0;
+      --pastel-green-text: #065f46;
       
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-faint: #64748b;
+      --pastel-yellow: #fef3c7;
+      --pastel-yellow-hover: #fde68a;
+      --pastel-yellow-text: #92400e;
       
-      --glow-cyan: 0 0 35px rgba(0, 242, 254, 0.25);
-      --glow-btn: 0 4px 25px rgba(0, 242, 254, 0.4);
+      --pastel-purple: #ede9fe;
+      --pastel-purple-text: #5b21b6;
       
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 20px;
-      --radius-pill: 9999px;
+      --pastel-blue: #e0f2fe;
+      --pastel-blue-hover: #bae6fd;
+      --pastel-blue-text: #075985;
       
-      --transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --pastel-peach: #ffedd5;
+      --pastel-peach-text: #9a3412;
+
+      --pastel-pink: #ffe4e6;
+      --pastel-pink-text: #9f1239;
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+    }
+
+    body {
+      background-color: var(--body-bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.55;
+      padding: 24px 12px;
       -webkit-font-smoothing: antialiased;
     }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      min-height: 100vh;
-      min-height: 100dvh;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      overflow: hidden; /* Sin scroll en desktop */
-      position: relative;
-    }
-
-    /* Ambient Lighting & Background Grid */
-    .bg-grid {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .ambient-glow-top {
-      position: fixed;
-      top: -20%;
-      left: 30%;
-      width: 45vw;
-      height: 45vw;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(79, 172, 254, 0.03) 55%, transparent 70%);
-      filter: blur(90px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .ambient-glow-bottom {
-      position: fixed;
-      bottom: -20%;
-      right: 25%;
-      width: 45vw;
-      height: 45vw;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(157, 78, 221, 0.1) 0%, transparent 65%);
-      filter: blur(90px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Main Viewport Shell (Fits 100vh cleanly) */
-    .app-shell {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      max-width: 1200px;
+    /* Contenedor central acotado (estilo webs de los 2000) */
+    .container {
+      max-width: 760px;
       margin: 0 auto;
-      padding: 24px 32px 20px 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      box-shadow: 4px 4px 0px var(--border);
+      border-radius: 6px;
+      overflow: hidden;
     }
 
-    /* Top Nav */
-    .header-nav {
-      width: 100%;
+    /* Barra superior de navegación / título */
+    .top-bar {
+      background: var(--pastel-yellow);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       text-decoration: none;
+      color: var(--text);
     }
 
     .brand-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(157, 78, 221, 0.3));
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--glow-cyan);
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border);
+      display: block;
+      background: #fff;
     }
 
-    .brand-icon img {
-      width: 26px;
-      height: 26px;
-      object-fit: contain;
-    }
-
-    .brand-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .version-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: var(--radius-pill);
-      background: rgba(0, 242, 254, 0.12);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(0, 242, 254, 0.3);
-    }
-
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn-github {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      color: #ffd166;
-      text-decoration: none;
-      padding: 7px 14px;
-      border-radius: var(--radius-pill);
-      background: linear-gradient(135deg, rgba(255, 183, 3, 0.12), rgba(247, 37, 133, 0.08));
-      border: 1px solid rgba(255, 183, 3, 0.35);
-      backdrop-filter: blur(10px);
-      transition: var(--transition);
-    }
-
-    .btn-github:hover {
-      background: linear-gradient(135deg, rgba(255, 183, 3, 0.22), rgba(247, 37, 133, 0.18));
-      border-color: rgba(255, 183, 3, 0.65);
-      color: #ffffff;
-      box-shadow: 0 0 16px rgba(255, 183, 3, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .btn-github svg {
-      width: 14px;
-      height: 14px;
-      fill: currentColor;
-    }
-
-    /* Hero Center Container */
-    .hero-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 16px;
-      max-width: 860px;
-      margin: auto 0;
-    }
-
-    .pill-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 14px;
-      border-radius: var(--radius-pill);
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34d399;
-      font-size: 0.78rem;
-      font-weight: 600;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
-      animation: pulseDot 2s infinite ease-in-out;
-    }
-
-    @keyframes pulseDot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.85); }
-    }
-
-    .hero-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(2.3rem, 4.4vw, 3.6rem);
+    .brand-title {
+      font-size: 1.15rem;
       font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.035em;
-      color: #ffffff;
+      letter-spacing: -0.02em;
     }
 
-    .gradient-text {
-      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #9d4edd 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: inline-block;
+    .tag-version {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #ffffff;
+      border: 1.5px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--text);
     }
 
-    .hero-description {
-      font-size: clamp(0.95rem, 1.25vw, 1.1rem);
-      line-height: 1.55;
-      color: var(--text-muted);
-      max-width: 680px;
-    }
-
-    .hero-description strong {
-      color: #f1f5f9;
-      font-weight: 600;
-    }
-
-    /* Primary Auto-Detect CTA */
-    .primary-cta-group {
+    .top-links {
       display: flex;
-      flex-direction: column;
       align-items: center;
       gap: 10px;
-      margin-top: 6px;
-      width: 100%;
-      max-width: 440px;
     }
 
-    .btn-main {
-      width: 100%;
-      display: flex;
+    .link-btn {
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 15px 28px;
-      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-      color: #040914;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.05rem;
-      font-weight: 700;
+      gap: 6px;
+      background: #ffffff;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      box-shadow: 2px 2px 0px var(--border);
+      padding: 4px 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
       text-decoration: none;
-      border-radius: var(--radius-md);
-      box-shadow: var(--glow-btn);
-      transition: var(--transition);
-      position: relative;
+      border-radius: 4px;
+      transition: transform 0.05s ease, box-shadow 0.05s ease;
+    }
+
+    .link-btn:hover {
+      background: var(--pastel-blue);
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0px var(--border);
+    }
+
+    .link-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0px var(--border);
+    }
+
+    /* Sub-barra de navegación estilo directorio web */
+    .nav-bar {
+      background: #ffffff;
+      border-bottom: 1.5px solid var(--border);
+      padding: 8px 16px;
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .nav-bar a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nav-bar a:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
+    /* Contenido principal */
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Hero / Propósito directo */
+    .hero-intro {
+      border: 1.5px solid var(--border);
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 20px;
+    }
+
+    .hero-intro h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.25;
+    }
+
+    .hero-intro p {
+      color: var(--text-muted);
+      font-size: 0.98rem;
+      line-height: 1.55;
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .badge-green { background: var(--pastel-green); color: var(--pastel-green-text); }
+    .badge-purple { background: var(--pastel-purple); color: var(--pastel-purple-text); }
+    .badge-blue { background: var(--pastel-blue); color: var(--pastel-blue-text); }
+    .badge-peach { background: var(--pastel-peach); color: var(--pastel-peach-text); }
+
+    /* Caja de Descarga Principal por SO */
+    .download-hero-box {
+      border: 2px solid var(--border);
+      background: #ffffff;
+      border-radius: 6px;
+      box-shadow: 3px 3px 0px var(--border);
       overflow: hidden;
     }
 
-    .btn-main::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-      transform: skewX(-20deg);
-      transition: 0.6s;
-    }
-
-    .btn-main:hover::after {
-      left: 140%;
-    }
-
-    .btn-main:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 32px rgba(0, 242, 254, 0.55);
-      filter: brightness(1.05);
-    }
-
-    .btn-main svg {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
-
-    .detected-os-label {
+    .box-header {
+      background: var(--pastel-green);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 16px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      color: var(--text-faint);
+      font-weight: 700;
+      font-size: 0.9rem;
     }
 
-    .detected-os-label strong {
-      color: var(--accent-cyan);
-      font-weight: 600;
-    }
-
-    /* Direct Platforms Grid (No modal required, instant access) */
-    .platforms-container {
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .platforms-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      width: 100%;
-    }
-
-    .platform-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      text-decoration: none;
-      color: var(--text-main);
+    .box-body {
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      text-align: left;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      transition: var(--transition);
-      position: relative;
+      gap: 14px;
     }
 
-    .platform-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-highlight);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    .detected-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
     }
 
-    .platform-card.recommended {
-      border-color: rgba(0, 242, 254, 0.35);
-      background: rgba(0, 242, 254, 0.04);
+    .detected-os {
+      font-weight: 700;
+      color: var(--text);
     }
 
-    .platform-card-header {
+    .btn-main-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: var(--pastel-green);
+      color: var(--text);
+      text-decoration: none;
+      border: 2px solid var(--border);
+      box-shadow: 3px 3px 0px var(--border);
+      padding: 14px 20px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 1.08rem;
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background-color 0.1s ease;
+      text-align: center;
+    }
+
+    .btn-main-download:hover {
+      background: var(--pastel-green-hover);
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px var(--border);
+    }
+
+    .btn-main-download:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px var(--border);
+    }
+
+    .btn-meta {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Alerta Móvil */
+    .mobile-notice {
+      display: none;
+      background: var(--pastel-yellow);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Tabla de todas las descargas */
+    .section-box {
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .section-titlebar {
+      background: var(--pastel-blue);
+      border-bottom: 1.5px solid var(--border);
+      padding: 9px 16px;
+      font-weight: 700;
+      font-size: 0.92rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .os-title {
+    .section-titlebar.purple { background: var(--pastel-purple); }
+    .section-titlebar.peach { background: var(--pastel-peach); }
+    .section-titlebar.yellow { background: var(--pastel-yellow); }
+
+    .downloads-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    .downloads-table th {
+      background: #fafafa;
+      padding: 8px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-muted);
+    }
+
+    .downloads-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+
+    .downloads-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .downloads-table tr:hover {
+      background: #fdfdfd;
+    }
+
+    .downloads-table tr.highlight-os {
+      background: #f0fdf4;
+    }
+
+    .platform-name {
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 700;
-      font-size: 0.92rem;
-    }
-
-    .os-title svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
     }
 
     .ext-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.68rem;
-      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    .filesize {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .btn-download-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #ffffff;
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      box-shadow: 2px 2px 0px var(--border);
+      padding: 4px 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
       border-radius: 4px;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-muted);
     }
 
-    .os-subtitle {
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .btn-download-row:hover {
+      background: var(--pastel-green);
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0px var(--border);
     }
 
-    .os-download-action {
+    .btn-download-row:active {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0px var(--border);
+    }
+
+    /* Grilla de Funcionalidades */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      padding: 18px;
+      background: #ffffff;
+    }
+
+    .feature-card {
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      padding: 14px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .feature-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .feature-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Notas de Instalación */
+    .notes-list {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 0.88rem;
+    }
+
+    .note-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      line-height: 1.45;
+    }
+
+    .note-tag {
+      font-family: var(--font-mono);
       font-size: 0.72rem;
-      color: var(--accent-cyan);
-      font-weight: 600;
-      margin-top: 4px;
-    }
-
-    /* Highlights Bar at bottom */
-    .features-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      width: 100%;
-      margin-top: 4px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .feature-item svg {
-      width: 15px;
-      height: 15px;
-      color: var(--accent-cyan);
+      font-weight: 700;
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: var(--pastel-yellow);
+      flex-shrink: 0;
+      margin-top: 1px;
     }
 
     /* Footer */
-    .footer {
-      width: 100%;
+    .site-footer {
+      background: #fafafa;
+      border-top: 2px solid var(--border);
+      padding: 14px 20px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--text-faint);
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      padding-top: 12px;
-      flex-shrink: 0;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
     }
 
-    .footer a {
-      color: var(--text-muted);
-      text-decoration: none;
-    }
-    .footer a:hover {
-      color: var(--accent-cyan);
+    .site-footer a {
+      color: var(--text);
+      font-weight: 600;
+      text-decoration: underline;
     }
 
-    /* Responsive */
-    @media (max-width: 960px) {
-      .platforms-grid {
-        grid-template-columns: repeat(2, 1fr);
+    /* Responsividad */
+    @media (max-width: 680px) {
+      body {
+        padding: 10px 8px;
       }
-    }
 
-    @media (max-width: 768px) {
-      html, body {
-        overflow-y: auto;
-        height: auto;
+      .container {
+        box-shadow: 2px 2px 0px var(--border);
       }
-      .app-shell {
-        height: auto;
-        min-height: 100vh;
-        padding: 20px 16px;
-        gap: 24px;
-      }
-      .hero-center {
-        margin: 10px 0;
-      }
-      .platforms-grid {
-        grid-template-columns: 1fr;
-      }
-      .features-row {
+
+      .top-bar {
+        padding: 10px 12px;
         flex-direction: column;
-        gap: 8px;
-      }
-      .footer {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
-      }
-    }
-
-    @media (max-height: 720px) and (min-width: 769px) {
-      .app-shell {
-        padding: 14px 28px;
-      }
-      .hero-title {
-        font-size: 2.2rem;
-      }
-      .hero-description {
-        font-size: 0.9rem;
-      }
-      .hero-center {
+        align-items: stretch;
         gap: 10px;
       }
-      .platform-card {
-        padding: 10px 12px;
+
+      .brand-group {
+        justify-content: space-between;
+      }
+
+      .top-links {
+        justify-content: flex-start;
+      }
+
+      .nav-bar {
+        padding: 8px 12px;
+        gap: 14px;
+      }
+
+      .content {
+        padding: 14px 12px;
+        gap: 16px;
+      }
+
+      .hero-intro {
+        padding: 16px 14px;
+      }
+
+      .hero-intro h1 {
+        font-size: 1.3rem;
+      }
+
+      .box-body {
+        padding: 14px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .btn-main-download {
+        font-size: 0.98rem;
+        padding: 12px 14px;
+      }
+
+      /* Tabla responsive en mobile: tarjeta flexbox */
+      .downloads-table {
+        border-collapse: separate;
+      }
+
+      .downloads-table thead {
+        display: none;
+      }
+
+      .downloads-table, 
+      .downloads-table tbody {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .downloads-table tr {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        border-bottom: 1.5px solid var(--border-light);
+        box-sizing: border-box;
+      }
+
+      .downloads-table tr td {
+        border: none;
+        box-sizing: border-box;
+      }
+
+      .downloads-table tr td:nth-child(1) {
+        order: 1;
+        padding: 0;
+        width: auto;
+      }
+
+      .downloads-table tr td:nth-child(2) {
+        order: 2;
+        padding: 0;
+        width: auto;
+        text-align: right;
+      }
+
+      .downloads-table tr td:nth-child(3) {
+        order: 3;
+        width: 60%;
+        padding: 4px 0 0 0;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+      }
+
+      .downloads-table tr td:nth-child(4) {
+        order: 4;
+        width: 40%;
+        text-align: right;
+        padding: 4px 0 0 0;
+      }
+
+      .downloads-table tr td:nth-child(5) {
+        order: 5;
+        width: 100%;
+        padding: 0;
+        margin-top: 10px;
+      }
+
+      .downloads-table tr td:nth-child(5) .btn-download-row {
+        width: 100%;
+        justify-content: center;
+        padding: 8px 12px;
+        box-sizing: border-box;
+      }
+
+      .notes-list {
+        padding: 14px;
+      }
+
+      .site-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 14px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Ambient Grid & Glows -->
-  <div class="bg-grid"></div>
-  <div class="ambient-glow-top"></div>
-  <div class="ambient-glow-bottom"></div>
+  <div class="container">
 
-  <main class="app-shell">
-
-    <!-- Top Nav -->
-    <header class="header-nav">
-      <a href="https://github.com/hachimaki-dev/BailandoSolo" class="brand" target="_blank" rel="noopener noreferrer">
-        <div class="brand-icon">
-          <img src="./build/icon.png" alt="Bailando Solo Icon" onerror="this.src='./static/icons/128x128.png'">
-        </div>
-        <div class="brand-name">
-          Bailando Solo
-          <span class="version-tag" id="version-tag">v2.1.0</span>
-        </div>
+    <!-- Barra superior -->
+    <header class="top-bar">
+      <a href="https://github.com/hachimaki-dev/BailandoSolo" class="brand-group" target="_blank" rel="noopener noreferrer">
+        <img src="./build/icon.png" alt="Bailando Solo Icon" class="brand-icon" onerror="this.src='./static/icons/128x128.png'">
+        <span class="brand-title">Bailando Solo</span>
+        <span class="tag-version" id="header-version">v1.0.0</span>
       </a>
 
-      <nav class="nav-actions">
-        <a href="https://github.com/hachimaki-dev/BailandoSolo" target="_blank" rel="noopener noreferrer" class="btn-github">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <div class="top-links">
+        <a href="https://github.com/hachimaki-dev/BailandoSolo" target="_blank" rel="noopener noreferrer" class="link-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           <span id="star-count">GitHub ⭐</span>
         </a>
-      </nav>
+        <a href="https://github.com/hachimaki-dev/BailandoSolo/releases" target="_blank" rel="noopener noreferrer" class="link-btn">
+          Releases
+        </a>
+      </div>
     </header>
 
-    <!-- Center Hero -->
-    <section class="hero-center">
-      
-      <div class="pill-badge">
-        <div class="status-dot"></div>
-        <span>100% Libre & Soberano · Sin Publicidad</span>
-      </div>
+    <!-- Sub-barra de navegación estilo clásico -->
+    <nav class="nav-bar">
+      <a href="#descargas">Descargas</a>
+      <a href="#proposito">Propósito</a>
+      <a href="#caracteristicas">Características</a>
+      <a href="#instalacion">Instalación</a>
+      <a href="https://github.com/hachimaki-dev/BailandoSolo/blob/main/docs/architecture.md" target="_blank" rel="noopener noreferrer">Docs</a>
+    </nav>
 
-      <h1 class="hero-title">
-        Tu música. Tus archivos.<br>
-        <span class="gradient-text">Sin suscripciones.</span>
-      </h1>
+    <main class="content">
 
-      <p class="hero-description">
-        <strong>Bailando Solo</strong> es un reproductor de audio de alta fidelidad y descargador integrado de playlists (FLAC/MP3) con servidor webapp móvil por WiFi local. Recupera la propiedad de tu biblioteca musical.
-      </p>
-
-      <!-- Primary Auto-Detect Download CTA -->
-      <div class="primary-cta-group">
-        <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" id="btn-primary" class="btn-main">
-          <span id="primary-icon">
-            <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-.94 2.74 1 .08 2.03-.49 2.65-1.24z"/></svg>
-          </span>
-          <span id="primary-label">Descargar para macOS</span>
-        </a>
-
-        <div class="detected-os-label">
-          <span>Sistema detectado:</span>
-          <strong id="detected-os-text">macOS (Apple Silicon / Intel)</strong>
+      <!-- Resumen / Propósito -->
+      <section class="hero-intro" id="proposito">
+        <h1>Tu música en tus archivos, sin suscripciones.</h1>
+        <p>
+          <strong>Bailando Solo</strong> es una aplicación de escritorio para descargar canciones y playlists de YouTube directamente a tu disco duro, organizarlas en tu biblioteca local y escucharlas en un reproductor con temas retro, ecualizador y compañero web para móviles vía red local.
+        </p>
+        <div class="hero-badges">
+          <span class="badge badge-green">✓ 100% Local & Privado</span>
+          <span class="badge badge-purple">✓ MP3 (320kbps) & FLAC</span>
+          <span class="badge badge-blue">✓ Sin publicidad ni cuentas</span>
+          <span class="badge badge-peach">✓ Compañero móvil por Wi-Fi</span>
         </div>
-      </div>
+      </section>
 
-      <!-- Direct Platforms Grid -->
-      <div class="platforms-container">
-        <div class="platforms-grid">
-          
-          <!-- macOS Apple Silicon -->
-          <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" class="platform-card" id="card-mac-arm" target="_blank" rel="noopener noreferrer">
-            <div class="platform-card-header">
-              <div class="os-title">
-                <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-.94 2.74 1 .08 2.03-.49 2.65-1.24z"/></svg>
-                <span>macOS ARM</span>
-              </div>
-              <span class="ext-tag">.dmg</span>
-            </div>
-            <span class="os-subtitle">Apple Silicon (M1/M2/M3/M4)</span>
-            <div class="os-download-action">
-              <span>Descarga directa</span>
-              <span id="size-mac-arm">→</span>
-            </div>
+      <!-- Caja de Descarga Automática por SO -->
+      <section class="download-hero-box" id="descargas">
+        <div class="box-header">
+          <span>Descarga Rápida</span>
+          <span id="os-badge-text">Detección automática de SO</span>
+        </div>
+
+        <div class="box-body">
+          <div class="detected-info">
+            <span>Sistema detectado: <strong class="detected-os" id="detected-os-name">Detectando...</strong></span>
+            <span class="btn-meta" id="primary-meta">Última versión disponible</span>
+          </div>
+
+          <!-- Botón principal según el SO del usuario -->
+          <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" id="primary-download-btn" class="btn-main-download">
+            <svg id="primary-btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+            </svg>
+            <span id="primary-btn-label">Descargar Bailando Solo</span>
           </a>
 
-          <!-- macOS Intel -->
-          <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" class="platform-card" id="card-mac-intel" target="_blank" rel="noopener noreferrer">
-            <div class="platform-card-header">
-              <div class="os-title">
-                <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-.94 2.74 1 .08 2.03-.49 2.65-1.24z"/></svg>
-                <span>macOS Intel</span>
-              </div>
-              <span class="ext-tag">.dmg</span>
-            </div>
-            <span class="os-subtitle">Procesadores x64 Intel</span>
-            <div class="os-download-action">
-              <span>Descarga directa</span>
-              <span id="size-mac-intel">→</span>
-            </div>
-          </a>
-
-          <!-- Windows 10 / 11 -->
-          <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" class="platform-card" id="card-win" target="_blank" rel="noopener noreferrer">
-            <div class="platform-card-header">
-              <div class="os-title">
-                <svg viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
-                <span>Windows</span>
-              </div>
-              <span class="ext-tag">.exe</span>
-            </div>
-            <span class="os-subtitle">Windows 10 / 11 (64-bit)</span>
-            <div class="os-download-action">
-              <span>Instalador</span>
-              <span id="size-win">→</span>
-            </div>
-          </a>
-
-          <!-- Linux -->
-          <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" class="platform-card" id="card-linux" target="_blank" rel="noopener noreferrer">
-            <div class="platform-card-header">
-              <div class="os-title">
-                <svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 1.2.4 2.2 1.1 3-.3.8-.6 1.7-.6 2.5 0 2 1.5 4 4 4s4-2 4-4c0-.8-.3-1.7-.6-2.5.7-.8 1.1-1.8 1.1-3C16.5 4 14.5 2 12 2zm-4.5 14c-1.5 0-3.5 1-3.5 3 0 1.5 2 2.5 4 2.5 1.2 0 2-.4 2.5-.9-.8-1.2-1.5-2.8-3-4.6zm9 0c-1.5 1.8-2.2 3.4-3 4.6.5.5 1.3.9 2.5.9 2 0 4-1 4-2.5 0-2-2-3-3.5-3z"/></svg>
-                <span>Linux</span>
-              </div>
-              <span class="ext-tag">.AppImage</span>
-            </div>
-            <span class="os-subtitle">Universal Linux x64 / .deb</span>
-            <div class="os-download-action">
-              <span>Descarga directa</span>
-              <span id="size-linux">→</span>
-            </div>
-          </a>
-
+          <!-- Aviso específico si visita desde teléfono móvil -->
+          <div class="mobile-notice" id="mobile-notice-box">
+            <strong>¿Estás en tu celular?</strong> Bailando Solo es una aplicación que corre en tu computadora (Windows, macOS o Linux). Para usarla en tu teléfono, ejecútala en tu PC y escanea el <em>código QR</em> que genera la app para abrir el reproductor en tu móvil por Wi-Fi, sin necesidad de instalar nada en el teléfono.
+          </div>
         </div>
+      </section>
+
+      <!-- Tabla con todas las plataformas -->
+      <section class="section-box">
+        <div class="section-titlebar">
+          <span>Todas las Plataformas & Formatos</span>
+          <span style="font-size: 0.8rem; font-weight: normal;">Arquitecturas 64-bit</span>
+        </div>
+
+        <table class="downloads-table">
+          <thead>
+            <tr>
+              <th>Sistema Operativo</th>
+              <th>Formato</th>
+              <th>Detalle</th>
+              <th>Tamaño</th>
+              <th style="text-align: right;">Descarga</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Windows -->
+            <tr id="row-win">
+              <td>
+                <span class="platform-name">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+                  Windows
+                </span>
+              </td>
+              <td><span class="ext-tag">.exe</span></td>
+              <td>Instalador 64-bit (Windows 10 / 11)</td>
+              <td><span class="filesize" id="size-win">~114 MB</span></td>
+              <td style="text-align: right;">
+                <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" id="link-win" class="btn-download-row">Descargar ↓</a>
+              </td>
+            </tr>
+
+            <!-- macOS Apple Silicon -->
+            <tr id="row-mac-arm">
+              <td>
+                <span class="platform-name">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-.94 2.74 1 .08 2.03-.49 2.65-1.24z"/></svg>
+                  macOS (Apple Silicon)
+                </span>
+              </td>
+              <td><span class="ext-tag">.dmg</span></td>
+              <td>M1 / M2 / M3 / M4 (arm64)</td>
+              <td><span class="filesize" id="size-mac-arm">~136 MB</span></td>
+              <td style="text-align: right;">
+                <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" id="link-mac-arm" class="btn-download-row">Descargar ↓</a>
+              </td>
+            </tr>
+
+            <!-- macOS Intel -->
+            <tr id="row-mac-intel">
+              <td>
+                <span class="platform-name">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-.94 2.74 1 .08 2.03-.49 2.65-1.24z"/></svg>
+                  macOS (Intel)
+                </span>
+              </td>
+              <td><span class="ext-tag">.dmg</span></td>
+              <td>Procesadores x86_64</td>
+              <td><span class="filesize" id="size-mac-intel">~141 MB</span></td>
+              <td style="text-align: right;">
+                <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" id="link-mac-intel" class="btn-download-row">Descargar ↓</a>
+              </td>
+            </tr>
+
+            <!-- Linux AppImage -->
+            <tr id="row-linux">
+              <td>
+                <span class="platform-name">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 1.2.4 2.2 1.1 3-.3.8-.6 1.7-.6 2.5 0 2 1.5 4 4 4s4-2 4-4c0-.8-.3-1.7-.6-2.5.7-.8 1.1-1.8 1.1-3C16.5 4 14.5 2 12 2zm-4.5 14c-1.5 0-3.5 1-3.5 3 0 1.5 2 2.5 4 2.5 1.2 0 2-.4 2.5-.9-.8-1.2-1.5-2.8-3-4.6zm9 0c-1.5 1.8-2.2 3.4-3 4.6.5.5 1.3.9 2.5.9 2 0 4-1 4-2.5 0-2-2-3-3.5-3z"/></svg>
+                  Linux (Universal)
+                </span>
+              </td>
+              <td><span class="ext-tag">.AppImage</span></td>
+              <td>Portátil universal 64-bit / .deb</td>
+              <td><span class="filesize" id="size-linux">~153 MB</span></td>
+              <td style="text-align: right;">
+                <a href="https://github.com/hachimaki-dev/BailandoSolo/releases/latest" id="link-linux" class="btn-download-row">Descargar ↓</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Características principales / Qué hace -->
+      <section class="section-box" id="caracteristicas">
+        <div class="section-titlebar purple">
+          <span>¿Qué hace Bailando Solo?</span>
+          <span style="font-size: 0.8rem; font-weight: normal;">Sin funciones innecesarias</span>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>📥 Descargas directas</h3>
+            <p>Pega un enlace de video o una playlist completa de YouTube. La app extrae el audio a tu disco local automáticamente con <code>yt-dlp</code>.</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>🎵 Formatos a tu gusto</h3>
+            <p>Convierte a <strong>MP3 (320 kbps)</strong> para reproducir en cualquier equipo o guárdalo en <strong>FLAC</strong> para conservar la máxima fidelidad de audio.</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>👾 Reproductor retro</h3>
+            <p>Interfaz de escritorio inspirada en consolas clásicas y Winamp. Temas visuales intercambiables, ecualizador paramétrico y listas de reproducción locales.</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>📱 Web móvil por Wi-Fi</h3>
+            <p>Escanea un código QR en tu red local para abrir el reproductor en el navegador de tu celular. Escucha tu biblioteca o envía canciones a descargar sin apps extras.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Instrucciones prácticas de instalación -->
+      <section class="section-box" id="instalacion">
+        <div class="section-titlebar peach">
+          <span>Notas de Instalación Rápida</span>
+          <span style="font-size: 0.8rem; font-weight: normal;">Permisos iniciales</span>
+        </div>
+
+        <div class="notes-list">
+          <div class="note-item">
+            <span class="note-tag">Windows</span>
+            <span>Si Windows SmartScreen muestra un aviso de editor no verificado, haz clic en <strong>"Más información"</strong> y luego en <strong>"Ejecutar de todas formas"</strong>.</span>
+          </div>
+
+          <div class="note-item">
+            <span class="note-tag">macOS</span>
+            <span>Abre el archivo <code>.dmg</code> y arrastra Bailando Solo a tu carpeta de Aplicaciones. Si macOS avisa que no puede verificar al desarrollador, haz <strong>clic derecho sobre la app</strong> y selecciona <strong>"Abrir"</strong>.</span>
+          </div>
+
+          <div class="note-item">
+            <span class="note-tag">Linux</span>
+            <span>Para el <code>.AppImage</code>, dale permisos de ejecución en la terminal con <code>chmod +x Bailando.Solo*.AppImage</code> y ejecútalo directamente. Si prefieres paquete Debian, instala con <code>sudo dpkg -i bailandosolo*.deb</code>.</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="site-footer">
+      <div>
+        <strong>Bailando Solo</strong> — Creado por <a href="https://github.com/hachimaki-dev" target="_blank" rel="noopener noreferrer">hachimaki-dev</a>
       </div>
-
-      <!-- Key Value Props -->
-      <div class="features-row">
-        <div class="feature-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          <span>Descarga URLs directas en FLAC/MP3</span>
-        </div>
-        <div class="feature-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-          <span>Compañero Móvil PWA vía QR en red local</span>
-        </div>
-        <div class="feature-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Cero telemetría · Cero rastreo</span>
-        </div>
+      <div>
+        Código abierto bajo licencia MIT · <a href="https://github.com/hachimaki-dev/BailandoSolo" target="_blank" rel="noopener noreferrer">Ver repositorio en GitHub</a>
       </div>
-
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <span>Desarrollado para la resistencia digital por <a href="https://github.com/hachimaki-dev" target="_blank" rel="noopener noreferrer">hachimaki-dev</a></span>
-      <span>Código abierto bajo licencia MIT / GPL</span>
     </footer>
 
-  </main>
+  </div>
 
   <script>
     (function() {
@@ -703,26 +894,31 @@
       const REPO_NAME = 'BailandoSolo';
       const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`;
 
-      const primaryBtn = document.getElementById('btn-primary');
-      const primaryIcon = document.getElementById('primary-icon');
-      const primaryLabel = document.getElementById('primary-label');
-      const detectedOsText = document.getElementById('detected-os-text');
-      const versionTag = document.getElementById('version-tag');
+      const primaryBtn = document.getElementById('primary-download-btn');
+      const primaryBtnLabel = document.getElementById('primary-btn-label');
+      const primaryMeta = document.getElementById('primary-meta');
+      const detectedOsName = document.getElementById('detected-os-name');
+      const osBadgeText = document.getElementById('os-badge-text');
+      const headerVersion = document.getElementById('header-version');
       const starCount = document.getElementById('star-count');
+      const mobileNoticeBox = document.getElementById('mobile-notice-box');
 
-      const cardMacArm = document.getElementById('card-mac-arm');
-      const cardMacIntel = document.getElementById('card-mac-intel');
-      const cardWin = document.getElementById('card-win');
-      const cardLinux = document.getElementById('card-linux');
+      const rowWin = document.getElementById('row-win');
+      const rowMacArm = document.getElementById('row-mac-arm');
+      const rowMacIntel = document.getElementById('row-mac-intel');
+      const rowLinux = document.getElementById('row-linux');
 
-      const ICONS = {
-        mac: `<svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-1.99.6-2.63 1.35-.57.65-1.07 1.72-.94 2.74 1 .08 2.03-.49 2.65-1.24z"/></svg>`,
-        windows: `<svg viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>`,
-        linux: `<svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 1.2.4 2.2 1.1 3-.3.8-.6 1.7-.6 2.5 0 2 1.5 4 4 4s4-2 4-4c0-.8-.3-1.7-.6-2.5.7-.8 1.1-1.8 1.1-3C16.5 4 14.5 2 12 2zm-4.5 14c-1.5 0-3.5 1-3.5 3 0 1.5 2 2.5 4 2.5 1.2 0 2-.4 2.5-.9-.8-1.2-1.5-2.8-3-4.6zm9 0c-1.5 1.8-2.2 3.4-3 4.6.5.5 1.3.9 2.5.9 2 0 4-1 4-2.5 0-2-2-3-3.5-3z"/></svg>`,
-        mobile: `<svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`
-      };
+      const linkWin = document.getElementById('link-win');
+      const linkMacArm = document.getElementById('link-mac-arm');
+      const linkMacIntel = document.getElementById('link-mac-intel');
+      const linkLinux = document.getElementById('link-linux');
 
-      // OS Detection
+      const sizeWin = document.getElementById('size-win');
+      const sizeMacArm = document.getElementById('size-mac-arm');
+      const sizeMacIntel = document.getElementById('size-mac-intel');
+      const sizeLinux = document.getElementById('size-linux');
+
+      // 1. Detección de Sistema Operativo
       const ua = navigator.userAgent || '';
       const plat = navigator.platform || '';
       const isMac = /Mac|Macintosh/i.test(ua) || /Mac/i.test(plat);
@@ -731,37 +927,43 @@
       const isIOS = /iPhone|iPad|iPod/i.test(ua) || (isMac && navigator.maxTouchPoints > 1);
       const isLinux = (/Linux/i.test(ua) || /Linux/i.test(plat)) && !isAndroid;
 
-      let detected = 'mac';
-      let isArm = false;
+      let detectedOS = 'unknown';
+      let isArmMac = false;
 
       if (isMac && !isIOS) {
-        detected = 'mac';
-        isArm = /ARM|Apple/i.test(plat) || (navigator.userAgentData && navigator.userAgentData.architecture === 'arm');
-        primaryIcon.innerHTML = ICONS.mac;
-        primaryLabel.textContent = `Descargar para macOS (${isArm ? 'Apple Silicon' : '.dmg'})`;
-        detectedOsText.textContent = `macOS (${isArm ? 'Apple Silicon M1/M2/M3/M4' : 'Intel x64'})`;
-        if (isArm) cardMacArm.classList.add('recommended');
-        else cardMacIntel.classList.add('recommended');
+        detectedOS = 'mac';
+        isArmMac = /ARM|Apple/i.test(plat) || (navigator.userAgentData && navigator.userAgentData.architecture === 'arm');
+        if (isArmMac) {
+          detectedOsName.textContent = 'macOS (Apple Silicon M1/M2/M3/M4)';
+          primaryBtnLabel.textContent = 'Descargar para macOS (Apple Silicon .dmg)';
+          rowMacArm.classList.add('highlight-os');
+        } else {
+          detectedOsName.textContent = 'macOS (Intel x64)';
+          primaryBtnLabel.textContent = 'Descargar para macOS (Intel .dmg)';
+          rowMacIntel.classList.add('highlight-os');
+        }
       } else if (isWin) {
-        detected = 'windows';
-        primaryIcon.innerHTML = ICONS.windows;
-        primaryLabel.textContent = 'Descargar para Windows (.exe)';
-        detectedOsText.textContent = 'Windows 10 / 11 (64-bit)';
-        cardWin.classList.add('recommended');
+        detectedOS = 'win';
+        detectedOsName.textContent = 'Windows (64-bit)';
+        primaryBtnLabel.textContent = 'Descargar para Windows (.exe)';
+        rowWin.classList.add('highlight-os');
       } else if (isLinux) {
-        detected = 'linux';
-        primaryIcon.innerHTML = ICONS.linux;
-        primaryLabel.textContent = 'Descargar para Linux (.AppImage)';
-        detectedOsText.textContent = 'Linux GNU (64-bit)';
-        cardLinux.classList.add('recommended');
+        detectedOS = 'linux';
+        detectedOsName.textContent = 'Linux (Universal 64-bit)';
+        primaryBtnLabel.textContent = 'Descargar para Linux (.AppImage)';
+        rowLinux.classList.add('highlight-os');
       } else if (isAndroid || isIOS) {
-        detected = 'mobile';
-        primaryIcon.innerHTML = ICONS.mobile;
-        primaryLabel.textContent = 'Ver Repositorio & WebApp Móvil';
-        detectedOsText.textContent = `Móvil (${isAndroid ? 'Android' : 'iOS'}) — WebApp local`;
+        detectedOS = 'mobile';
+        detectedOsName.textContent = isAndroid ? 'Móvil (Android)' : 'Móvil (iOS)';
+        primaryBtnLabel.textContent = 'Ver Repositorio & Instrucciones Móviles';
+        primaryBtn.href = 'https://github.com/hachimaki-dev/BailandoSolo#readme';
+        mobileNoticeBox.style.display = 'block';
+      } else {
+        detectedOsName.textContent = 'Sistema no identificado';
+        primaryBtnLabel.textContent = 'Ver descargas en GitHub Releases';
       }
 
-      // Fetch Latest Assets from GitHub API
+      // 2. Consulta de Releases a la API de GitHub
       async function loadReleaseData() {
         try {
           const res = await fetch(API_URL);
@@ -769,65 +971,86 @@
           const data = await res.json();
 
           if (data.tag_name) {
-            versionTag.textContent = data.tag_name;
+            headerVersion.textContent = data.tag_name;
+            osBadgeText.textContent = `Versión ${data.tag_name}`;
           }
 
-          let armUrl = null, intelUrl = null, winUrl = null, linuxUrl = null;
+          let urlMacArm = null, urlMacIntel = null, urlWin = null, urlLinux = null;
+          let sizeMacArmText = '', sizeMacIntelText = '', sizeWinText = '', sizeLinuxText = '';
 
           if (data.assets && data.assets.length > 0) {
             data.assets.forEach(asset => {
               const name = asset.name.toLowerCase();
               const url = asset.browser_download_url;
-              const size = (asset.size / (1024 * 1024)).toFixed(1) + ' MB';
+              const mb = (asset.size / (1024 * 1024)).toFixed(1) + ' MB';
 
               if (name.endsWith('.dmg')) {
                 if (name.includes('arm64') || name.includes('aarch64')) {
-                  armUrl = url;
-                  cardMacArm.href = url;
-                  document.getElementById('size-mac-arm').textContent = `${size} ↓`;
+                  urlMacArm = url;
+                  sizeMacArmText = mb;
+                  linkMacArm.href = url;
+                  sizeMacArm.textContent = mb;
                 } else {
-                  intelUrl = url;
-                  cardMacIntel.href = url;
-                  document.getElementById('size-mac-intel').textContent = `${size} ↓`;
+                  urlMacIntel = url;
+                  sizeMacIntelText = mb;
+                  linkMacIntel.href = url;
+                  sizeMacIntel.textContent = mb;
                 }
               } else if (name.endsWith('.exe')) {
-                winUrl = url;
-                cardWin.href = url;
-                document.getElementById('size-win').textContent = `${size} ↓`;
-              } else if (name.endsWith('.appimage') || name.endsWith('.deb')) {
-                linuxUrl = url;
-                cardLinux.href = url;
-                document.getElementById('size-linux').textContent = `${size} ↓`;
+                if (name.includes('setup') || !urlWin) {
+                  urlWin = url;
+                  sizeWinText = mb;
+                  linkWin.href = url;
+                  sizeWin.textContent = mb;
+                }
+              } else if (name.endsWith('.appimage')) {
+                urlLinux = url;
+                sizeLinuxText = mb;
+                linkLinux.href = url;
+                sizeLinux.textContent = mb;
               }
             });
 
-            // Update Primary Button Link
-            if (detected === 'mac') {
-              const target = (isArm && armUrl) ? armUrl : (intelUrl || armUrl);
-              if (target) primaryBtn.href = target;
-            } else if (detected === 'windows' && winUrl) {
-              primaryBtn.href = winUrl;
-            } else if (detected === 'linux' && linuxUrl) {
-              primaryBtn.href = linuxUrl;
+            // Asignar enlace y peso al botón principal
+            if (detectedOS === 'mac') {
+              if (isArmMac && urlMacArm) {
+                primaryBtn.href = urlMacArm;
+                primaryMeta.textContent = `Archivo .dmg · ${sizeMacArmText}`;
+              } else if (urlMacIntel) {
+                primaryBtn.href = urlMacIntel;
+                primaryMeta.textContent = `Archivo .dmg · ${sizeMacIntelText}`;
+              } else if (urlMacArm) {
+                primaryBtn.href = urlMacArm;
+                primaryMeta.textContent = `Archivo .dmg · ${sizeMacArmText}`;
+              }
+            } else if (detectedOS === 'win' && urlWin) {
+              primaryBtn.href = urlWin;
+              primaryMeta.textContent = `Instalador .exe · ${sizeWinText}`;
+            } else if (detectedOS === 'linux' && urlLinux) {
+              primaryBtn.href = urlLinux;
+              primaryMeta.textContent = `Archivo .AppImage · ${sizeLinuxText}`;
             }
           }
-        } catch(e) {}
+        } catch (e) {
+          console.warn('No se pudieron obtener los releases dinámicos de GitHub', e);
+        }
       }
       loadReleaseData();
 
-      // Fetch Stars
-      async function loadStars() {
+      // 3. Estrellas de GitHub
+      async function loadStarCount() {
         try {
           const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`);
           if (res.ok) {
             const data = await res.json();
             if (data.stargazers_count !== undefined) {
-              starCount.textContent = `★ ${data.stargazers_count} en GitHub`;
+              starCount.textContent = `★ ${data.stargazers_count} estrellas`;
             }
           }
         } catch(e) {}
       }
-      loadStars();
+      loadStarCount();
+
     })();
   </script>
 </body>
