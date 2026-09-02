@@ -12,6 +12,7 @@ from flask import Blueprint, jsonify, send_file, after_this_request
 
 from server.config import PORT, DOWNLOADS_DIR, STATIC_DIR
 from server.routes.profiles import load_profiles
+from server.tunnel import start_tunnel, stop_tunnel, get_tunnel_status
 
 mobile_bp = Blueprint('mobile', __name__)
 
@@ -34,7 +35,13 @@ def get_mobile_info():
                 pass
 
         mobile_url = f"http://{local_ip}:{PORT}/mobile"
-        return jsonify({'ip': local_ip, 'port': PORT, 'url': mobile_url})
+        tunnel_info = get_tunnel_status()
+        return jsonify({
+            'ip': local_ip,
+            'port': PORT,
+            'url': mobile_url,
+            'tunnel': tunnel_info
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -47,8 +54,11 @@ def ping():
 
 @mobile_bp.route('/mobile')
 def mobile_interface():
-    """Serve the mobile HTML interface."""
-    return send_file(os.path.join(STATIC_DIR, 'mobile.html'))
+    """Serve the mobile HTML interface with cache-friendly headers for PWA."""
+    response = send_file(os.path.join(STATIC_DIR, 'mobile.html'))
+    # Allow SW to cache this response, but always revalidate with server when online
+    response.headers['Cache-Control'] = 'public, max-age=0, must-revalidate'
+    return response
 
 
 @mobile_bp.route('/manifest.json')
@@ -147,4 +157,27 @@ def download_folder(folder):
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@mobile_bp.route('/api/tunnel/status', methods=['GET'])
+def tunnel_status():
+    """Get current status and URL of the remote/university tunnel."""
+    return jsonify(get_tunnel_status())
+
+
+@mobile_bp.route('/api/tunnel/start', methods=['POST'])
+def tunnel_start():
+    """Start the HTTPS tunnel to allow remote and AP-isolated mobile devices to connect."""
+    result = start_tunnel()
+    if result.get('status') == 'error':
+        return jsonify(result), 500
+    return jsonify(result), 200
+
+
+@mobile_bp.route('/api/tunnel/stop', methods=['POST'])
+def tunnel_stop():
+    """Stop the running HTTPS tunnel."""
+    result = stop_tunnel()
+    return jsonify(result), 200
+
 

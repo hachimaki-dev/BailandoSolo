@@ -1,8 +1,19 @@
 # Contributing to Bailando Solo
 
-## For AI Agents and Humans
+Thanks for your interest in contributing! 🎶
 
-### Where things go
+## Quick Reference
+
+| What you need | Where to find it |
+|---|---|
+| **Full project rules & conventions** | [`GEMINI.md`](GEMINI.md) |
+| **Architecture & API reference** | [`docs/architecture.md`](docs/architecture.md) |
+| **Development setup guide** | [`docs/guides/development.md`](docs/guides/development.md) |
+| **Testing checklist** | [`docs/guides/testing.md`](docs/guides/testing.md) |
+| **Theme creation rules** | [`ui/src/assets/styles/THEME_GUIDE.md`](ui/src/assets/styles/THEME_GUIDE.md) |
+| **Roadmap & backlog** | [`docs/roadmap.md`](docs/roadmap.md) |
+
+## Where Things Go
 
 | What you're adding | Where it goes |
 |---|---|
@@ -14,25 +25,20 @@
 | New standalone page | `static/<page>.html` + route in `server/routes/mobile.py` |
 | Configuration constant | `server/config.py` |
 
-### Naming conventions
+## Commit Convention
 
-- **Python files**: `snake_case.py`
-- **Vue components**: `PascalCase.vue`
-- **CSS themes**: `theme-<name>.css`
-- **API endpoints**: `/api/<domain>/<action>`
-- **Blueprint variables**: `<domain>_bp`
+```
+<type>(<scope>): <description>
+```
 
-### Adding a new route domain
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `build`, `ci`  
+**Scopes:** `backend`, `frontend`, `electron`, `mobile`, `build`, `ci`, `docs`
 
-1. Create `server/routes/<domain>.py`
-2. Define a Blueprint: `<domain>_bp = Blueprint('<domain>', __name__)`
-3. Add routes using `@<domain>_bp.route()`
-4. Register in `server/__init__.py`: `app.register_blueprint(<domain>_bp)`
-
-### Rules
+## Rules
 
 - **No bare `except:`** — always catch specific exceptions
 - **No hardcoded port** — use `server.config.PORT`
 - **No hardcoded paths** — use `server.config.*_DIR` constants
 - **Frontend API calls** — use relative URLs (`/api/...`), never `http://localhost:5001`
 - **Thread safety** — use `server.state` functions for shared mutable state
+- **CSS Themes** — ONLY override CSS variables, never write class selectors

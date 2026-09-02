@@ -70,6 +70,47 @@
           </select>
         </div>
       </div>
+
+      <!-- Network Resilience Toggle Bar -->
+      <div class="resilience-toggle-row">
+        <button 
+          type="button" 
+          class="btn-resilience-toggle" 
+          :class="{ active: showResilienceOptions }"
+          @click="showResilienceOptions = !showResilienceOptions"
+        >
+          <span>🛡️ RED Y RESILIENCIA (UNIVERSIDAD / FIREWALL / ERROR 429)</span>
+          <span class="toggle-indicator">{{ showResilienceOptions ? '▲ OCULTAR' : '▼ CONFIGURAR' }}</span>
+        </button>
+      </div>
+
+      <!-- Network Resilience Options Panel -->
+      <div v-if="showResilienceOptions" class="resilience-panel">
+        <div class="resilience-grid">
+          <div class="setting-item">
+            <label>🍪 SESIÓN DE NAVEGADOR (BYPASS BOT / ERROR 429)</label>
+            <select v-model="cookiesBrowser" class="retro-select-compact">
+              <option value="none">Desactivado (Descarga Anónima)</option>
+              <option value="chrome">Google Chrome (Recomendado)</option>
+              <option value="brave">Brave Browser</option>
+              <option value="firefox">Mozilla Firefox</option>
+              <option value="safari">Apple Safari</option>
+            </select>
+            <small class="setting-hint">Extrae cookies de tu sesión de YouTube para saltar bloqueos en IPs universitarias compartidas.</small>
+          </div>
+
+          <div class="setting-item">
+            <label>🛡️ PROXY HTTP / SOCKS5 (OPCIONAL)</label>
+            <input 
+              type="text" 
+              v-model="proxyUrl" 
+              class="retro-input-compact" 
+              placeholder="http://127.0.0.1:8080 o socks5://..." 
+            />
+            <small class="setting-hint">Si tu universidad bloquea completamente el dominio de YouTube o CDN googlevideo.</small>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Phased Loading Feedback -->
@@ -229,7 +270,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { LibraryService } from '../services/LibraryService'
 import { apiUrl, streamUrl } from '../config'
 
@@ -251,6 +292,14 @@ const selectedSongIds = ref(new Set())
 const duplicatesList = ref([])
 const omitDuplicates = ref(true)
 const isStartingDownload = ref(false)
+
+// Network & Resilience State
+const showResilienceOptions = ref(false)
+const cookiesBrowser = ref(localStorage.getItem('bs_cookies_browser') || 'none')
+const proxyUrl = ref(localStorage.getItem('bs_proxy_url') || '')
+
+watch(cookiesBrowser, (val) => localStorage.setItem('bs_cookies_browser', val))
+watch(proxyUrl, (val) => localStorage.setItem('bs_proxy_url', val))
 
 // Quick Play State
 const quickPlaySongs = ref([])
@@ -325,7 +374,11 @@ const analyze = async () => {
     const response = await fetch(apiUrl('/api/analyze'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: url.value })
+      body: JSON.stringify({ 
+        url: url.value,
+        cookies_browser: cookiesBrowser.value,
+        proxy: proxyUrl.value
+      })
     })
 
     if (!response.ok) {
@@ -396,7 +449,9 @@ const startBatchDownload = async () => {
         folder_name: folder.value || 'Music',
         selected_ids: idsToDownload,
         quality: quality.value,
-        naming_template: namingTemplate.value
+        naming_template: namingTemplate.value,
+        cookies_browser: cookiesBrowser.value,
+        proxy: proxyUrl.value
       })
     })
 
@@ -654,6 +709,63 @@ onUnmounted(() => {
   border: 2px solid #000000;
   font-family: var(--font-mono);
   font-size: 11px;
+}
+
+.resilience-toggle-row {
+  margin-top: 10px;
+}
+
+.btn-resilience-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #252538;
+  border: 2px solid #000000;
+  color: #00f0ff;
+  font-family: var(--font-pixel);
+  font-size: 7.5px;
+  padding: 7px 10px;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 0 #444466;
+  transition: all 0.15s ease;
+}
+
+.btn-resilience-toggle:hover, .btn-resilience-toggle.active {
+  background: #33334d;
+  color: #ffffff;
+  border-color: #00f0ff;
+}
+
+.toggle-indicator {
+  color: #ffb703;
+}
+
+.resilience-panel {
+  background: #181826;
+  border: 2px solid #000000;
+  border-top: none;
+  padding: 12px;
+  box-shadow: inset 1px 1px 0 #333348, 2px 2px 0 #000000;
+  margin-bottom: 6px;
+}
+
+.resilience-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.resilience-panel .setting-item label {
+  color: #00f0ff;
+}
+
+.setting-hint {
+  display: block;
+  font-size: 9.5px;
+  color: #a0a0b8;
+  margin-top: 4px;
+  line-height: 1.3;
 }
 
 /* Analysis Feedback */

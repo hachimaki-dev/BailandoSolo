@@ -1,9 +1,11 @@
 """
 Bailando Solo — Download routes.
-Handles YouTube analysis, download initiation, progress tracking and duplicate handling.
+Handles YouTube analysis, download initiation, progress tracking and duplicate handling,
+with resilient networking options for restrictive environments (university networks/AP isolation/firewalls).
 """
 
 import os
+import shutil
 import threading
 
 from flask import Blueprint, request, jsonify
@@ -14,6 +16,50 @@ from server.state import get_download_status, update_download_status
 from server.routes.profiles import load_profiles
 
 downloads_bp = Blueprint('downloads', __name__)
+
+
+# ─── Resilient Options Builder ────────────────────────────────────────────────
+
+def _build_ydl_options(base_opts=None, cookies_browser=None, proxy=None):
+    """
+    Construct yt-dlp configuration with maximum resilience against
+    restrictive networks (IPv4 forcing, Node JS runtime, aggressive retries).
+    """
+    opts = {
+        # Force IPv4 (essential for avoiding broken IPv6 drops on campus/Eduroam networks)
+        'source_address': '0.0.0.0',
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['web', 'mweb', 'android', 'ios']
+            }
+        },
+        'socket_timeout': 30,
+        'retries': 10,
+        'fragment_retries': 10,
+        'file_access_retries': 5,
+        'buffersize': 1024 * 16,
+        'http_chunk_size': 10485760,  # 10 MB chunks
+        'quiet': False,
+        'no_warnings': False,
+    }
+
+    # Pass Node JS runtime if available on the system (solves n-challenge and signature deciphering)
+    node_path = shutil.which('node') or '/opt/homebrew/bin/node' or '/usr/local/bin/node'
+    if node_path and os.path.exists(node_path):
+        opts['js_runtimes'] = {'node': {'path': node_path}}
+
+    # Browser session cookies (bypasses bot detection & HTTP 429 on shared campus IPs)
+    if cookies_browser and cookies_browser.lower() not in ('none', 'false', '', 'null', 'desactivado'):
+        opts['cookiesfrombrowser'] = (cookies_browser.lower(),)
+
+    # Optional HTTP/SOCKS5 proxy
+    if proxy and proxy.strip():
+        opts['proxy'] = proxy.strip()
+
+    if base_opts:
+        opts.update(base_opts)
+
+    return opts
 
 
 # ─── Download helpers ─────────────────────────────────────────────────────────
@@ -57,8 +103,8 @@ def _progress_hook(d):
         })
 
 
-def _download_thread(url, folder_name, selected_ids, quality='192', naming_template='default'):
-    """Background thread to handle the download process with custom options."""
+def _download_thread(url, folder_name, selected_ids, quality='192', naming_template='default', cookies_browser=None, proxy=None):
+    """Background thread to handle the download process with custom options and item-level error handling."""
     config = load_profiles()
     active_profile = config.get('active', 'Default')
 
@@ -71,13 +117,8 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
     else:
         outtmpl = os.path.join(base_dir, '%(title)s.%(ext)s')
 
-    ydl_opts = {
+    base_ydl_opts = {
         'format': 'bestaudio/best',
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['mweb', 'web', 'android', 'ios']
-            }
-        },
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -86,29 +127,53 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
         'outtmpl': outtmpl,
         'writethumbnail': True,
         'progress_hooks': [_progress_hook],
-        'ignoreerrors': True,
-        'quiet': False,
-        'no_warnings': False,
+        'ignoreerrors': False,
     }
 
-    urls_to_download = []
-    if 'list=' in url and not selected_ids:
-        urls_to_download = [url]
-    elif selected_ids:
-        urls_to_download = [f"https://www.youtube.com/watch?v={vid}" for vid in selected_ids]
-    else:
-        urls_to_download = [url]
+    ydl_opts = _build_ydl_options(base_ydl_opts, cookies_browser=cookies_browser, proxy=proxy)
 
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download(urls_to_download)
-    except Exception as e:
-        print(f"Download thread error: {e}")
-        for sid in (selected_ids or []):
+    # Prepare item list: download one by one so progress and errors are clearly tracked
+    targets = []
+    if selected_ids:
+        for sid in selected_ids:
+            targets.append((sid, f"https://www.youtube.com/watch?v={sid}"))
+    elif 'list=' in url:
+        targets.append(('playlist_batch', url))
+    else:
+        targets.append(('single_url', url))
+
+    for sid, target_url in targets:
+        update_download_status(sid, {
+            'status': 'downloading',
+            'percent': 0,
+            'speed': 0,
+            'eta': 0
+        })
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([target_url])
+
+            current_status = get_download_status().get(sid, {})
+            if current_status.get('status') != 'error':
+                update_download_status(sid, {
+                    'status': 'finished',
+                    'percent': 100,
+                    'speed': 0,
+                    'eta': 0
+                })
+        except Exception as e:
+            err_msg = str(e)
+            print(f"Error downloading {sid} from {target_url}: {err_msg}")
+            
+            # Surface helpful suggestions if rate limit or bot check detected
+            if any(k in err_msg.lower() for k in ['bot', 'sign in', 'confirm', '429']):
+                err_msg = "Bloqueado por YouTube (detección de bot en IP compartida). Activa 'Sesión de Navegador' en opciones de Red para continuar."
+            
             update_download_status(sid, {
                 'status': 'error',
                 'percent': 0,
-                'error': str(e)
+                'error': err_msg
             })
 
 
@@ -116,22 +181,20 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
 
 @downloads_bp.route('/api/analyze', methods=['POST'])
 def analyze_playlist():
-    """Analyze a YouTube URL and return song/playlist metadata."""
+    """Analyze a YouTube URL and return song/playlist metadata with resilience options."""
     data = request.json or {}
     url = data.get('url')
+    cookies_browser = data.get('cookies_browser')
+    proxy = data.get('proxy')
 
     if not url:
         return jsonify({'error': 'URL is required'}), 400
 
-    ydl_opts = {
+    base_ydl_opts = {
         'extract_flat': True,
         'dump_single_json': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['mweb', 'web', 'android', 'ios']
-            }
-        },
     }
+    ydl_opts = _build_ydl_options(base_ydl_opts, cookies_browser=cookies_browser, proxy=proxy)
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -147,7 +210,6 @@ def analyze_playlist():
             songs = []
             for entry in entries:
                 if entry:
-                    # Clean artist & title heuristic
                     raw_title = entry.get('title') or 'Sin título'
                     uploader = entry.get('uploader') or 'Desconocido'
                     
@@ -169,18 +231,23 @@ def analyze_playlist():
                 'count': len(songs)
             })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        err_msg = str(e)
+        if any(k in err_msg.lower() for k in ['bot', 'sign in', 'confirm', '429']):
+            err_msg = "YouTube detectó tráfico inusual en esta red WiFi (error 429). Activa 'Sesión de Navegador' en las opciones de Red para saltar el bloqueo."
+        return jsonify({'error': err_msg}), 500
 
 
 @downloads_bp.route('/api/download', methods=['POST'])
 def start_download():
-    """Start downloading songs in a background thread with quality and template options."""
+    """Start downloading songs in a background thread with quality, template, and network options."""
     data = request.json or {}
     url = data.get('url')
     folder_name = data.get('folder_name', 'Music')
     selected_ids = data.get('selected_ids', [])
     quality = data.get('quality', '192')
     naming_template = data.get('naming_template', 'default')
+    cookies_browser = data.get('cookies_browser')
+    proxy = data.get('proxy')
 
     if not url:
         return jsonify({'error': 'URL is required'}), 400
@@ -197,7 +264,7 @@ def start_download():
     # Start download in background thread
     thread = threading.Thread(
         target=_download_thread,
-        args=(url, folder_name, selected_ids, quality, naming_template)
+        args=(url, folder_name, selected_ids, quality, naming_template, cookies_browser, proxy)
     )
     thread.daemon = True
     thread.start()

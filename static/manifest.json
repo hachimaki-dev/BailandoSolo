@@ -1,4 +1,5 @@
 {
+  "id": "/mobile",
   "name": "Bailando Solo Mobile",
   "short_name": "Bailando Solo",
   "description": "Reproductor y biblioteca musical offline retro de Bailando Solo",
@@ -8,6 +9,7 @@
   "orientation": "portrait-primary",
   "background_color": "#1a1a2e",
   "theme_color": "#5a5aff",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/static/icons/icon-192.png",

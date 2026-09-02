@@ -1,6 +1,6 @@
 {
   "name": "bailandosolo",
-  "version": "2.1.0",
+  "version": "1.0.0",
   "description": "Reproductor y Descargador de Música Retro",
   "main": "main.js",
   "scripts": {
@@ -52,6 +52,7 @@
       }
     },
     "linux": {
+      "maintainer": "Bailando Solo <dev@bailandosolo.app>",
       "icon": "build/icon.png",
       "target": [
         "AppImage",
@@ -74,7 +75,7 @@
     }
   },
   "keywords": [],
-  "author": "",
+  "author": "Bailando Solo <dev@bailandosolo.app>",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^9.2.1",

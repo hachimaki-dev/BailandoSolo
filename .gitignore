@@ -13,3 +13,6 @@ build/bailandosolo-server/
 dist/
 release/
 *.spec
+
+# Lock file standardization (project uses npm, not pnpm)
+pnpm-lock.yaml

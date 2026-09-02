@@ -16,10 +16,37 @@
     <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" href="/static/icons/favicon.png">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts (local for offline support) -->
+    <style>
+        @font-face {
+            font-family: 'Press Start 2P';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/press-start-2p.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'JetBrains Mono';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url('/static/fonts/jetbrains-mono-400.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'JetBrains Mono';
+            font-style: normal;
+            font-weight: 600;
+            font-display: swap;
+            src: url('/static/fonts/jetbrains-mono-600.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'JetBrains Mono';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url('/static/fonts/jetbrains-mono-700.ttf') format('truetype');
+        }
+    </style>
 
     <!-- JSZip for Offline Backup & Extraction -->
     <script src="/static/js/jszip.min.js"></script>
@@ -190,8 +217,8 @@
         /* Navigation Tabs */
         .nav-dock {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
             background: #11111a;
             padding: 4px;
             border: 2px solid #000;
@@ -199,8 +226,8 @@
 
         .nav-btn {
             font-family: var(--font-pixel);
-            font-size: 8px;
-            padding: 9px 6px;
+            font-size: 7px;
+            padding: 9px 4px;
             border: 2px solid #000;
             background: #333344;
             color: #cccccc;
@@ -208,9 +235,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             box-shadow: inset 1px 1px 0 #555566, 1px 1px 0 #000;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
         .nav-btn.active {
@@ -223,15 +251,15 @@
         /* Action Toolbar */
         .action-toolbar {
             display: grid;
-            grid-template-columns: 1fr 1fr 44px;
-            gap: 6px;
+            grid-template-columns: 1fr 1fr 1fr 38px;
+            gap: 5px;
             margin-bottom: 12px;
         }
 
         .btn-retro-action {
             font-family: var(--font-pixel);
-            font-size: 7px;
-            padding: 10px 6px;
+            font-size: 6.5px;
+            padding: 9px 4px;
             border: 2px solid #000;
             background: linear-gradient(180deg, #3a3a55 0%, #252538 100%);
             color: #ffffff;
@@ -239,11 +267,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 3px;
             box-shadow: inset 1px 1px 0 #666688, inset -1px -1px 0 #111122, 3px 3px 0 #000;
             text-transform: uppercase;
             text-align: center;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .btn-retro-action:active {
@@ -256,6 +284,13 @@
             border-color: #00f0ff;
         }
 
+        .btn-retro-gold {
+            background: linear-gradient(180deg, #ffb703 0%, #d48b00 100%);
+            border-color: #ffe066;
+            color: #000000;
+            font-weight: bold;
+        }
+
         .btn-retro-pink {
             background: linear-gradient(180deg, #ff007f 0%, #a60053 100%);
             border-color: #ff80bf;
@@ -263,7 +298,35 @@
 
         .btn-retro-icon-only {
             padding: 0;
-            font-size: 16px;
+            font-size: 15px;
+        }
+
+        /* Shuffle Mode Badge & States */
+        .shuffle-mode-indicator {
+            font-family: var(--font-pixel);
+            font-size: 7px;
+            color: var(--color-primary);
+            text-align: center;
+            margin-top: 4px;
+            cursor: pointer;
+            padding: 3px 6px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px dashed var(--color-primary);
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        .btn-shuffle-artist {
+            background: linear-gradient(180deg, #9d4edd 0%, #5a189a 100%) !important;
+            border-color: #c77dff !important;
+            color: #ffffff !important;
+        }
+
+        .btn-shuffle-global {
+            background: linear-gradient(180deg, #ffb703 0%, #d48b00 100%) !important;
+            border-color: #ffe066 !important;
+            color: #000000 !important;
+            box-shadow: 0 0 10px rgba(255, 183, 3, 0.5) !important;
         }
 
         /* Search Strip */
@@ -1020,6 +1083,9 @@
                     <div id="connectionStatus" class="status-pill status-online" onclick="toggleServerCheck()">
                         <span>●</span> PC ONLINE
                     </div>
+                    <button id="serverConfigBtn" class="status-pill" style="background:#333348; border-color:#555577; color:#fff;" onclick="openServerConfigModal()" title="Configurar Servidor / Túnel">
+                        ⚙️
+                    </button>
                 </div>
             </div>
 
@@ -1029,18 +1095,24 @@
                     📡 Servidor PC
                 </button>
                 <button class="nav-btn" id="tabOfflineBtn" onclick="switchView('offline')">
-                    💾 Teléfono (<span id="offlineCountBadge">0</span>)
+                    💾 Casetes (<span id="offlineCountBadge">0</span>)
+                </button>
+                <button class="nav-btn" id="tabPlaylistsBtn" onclick="switchView('playlists')">
+                    📜 Playlists (<span id="playlistsCountBadge">0</span>)
                 </button>
             </nav>
         </header>
 
-        <!-- Actions Toolbar (Scanner, Importer, Settings) -->
+        <!-- Actions Toolbar (Scanner, Importer, Playlists, Settings) -->
         <div class="action-toolbar">
-            <button class="btn-retro-action btn-retro-accent" onclick="triggerNativeAudioImport()" title="Importar música desde cualquier carpeta de tu teléfono sin bloqueos">
-                🎵 Importar Música
+            <button class="btn-retro-action btn-retro-accent" onclick="triggerNativeAudioImport()" title="Importar música desde cualquier carpeta de tu teléfono">
+                🎵 Importar
             </button>
-            <button class="btn-retro-action btn-retro-pink" onclick="openAndroidStorageHelp()" title="Escanear carpetas o ver cómo funciona el almacenamiento en Android">
-                📁 Escanear / Ayuda
+            <button class="btn-retro-action btn-retro-gold" onclick="startGlobalShufflePlay()" title="Mix Global: Reproduce toda la biblioteca en modo aleatorio">
+                🔀 Mix Global
+            </button>
+            <button class="btn-retro-action btn-retro-pink" onclick="openCreatePlaylistModal()" title="Crear nueva playlist personalizada">
+                ➕ Playlist
             </button>
             <button class="btn-retro-action btn-retro-icon-only" onclick="openStorageSettingsModal()" title="Gestor de Almacenamiento & Opciones">
                 ⚙️
@@ -1077,8 +1149,23 @@
                 <button class="folder-action-btn btn-download-zip" onclick="exportCurrentOfflineFolderToZip()">
                     📦 Exportar Álbum a ZIP
                 </button>
-                <button class="folder-action-btn btn-download-files" onclick="deleteCurrentOfflineFolder()">
-                    🗑️ Borrar Álbum del Teléfono
+                <button class="folder-action-btn btn-download-files" onclick="exportCurrentFolderAsMp3Files()">
+                    📥 Descargar .mp3 al Teléfono
+                </button>
+                <button class="folder-action-btn" style="background: #6a040f;" onclick="deleteCurrentOfflineFolder()">
+                    🗑️ Borrar Álbum
+                </button>
+            </div>
+
+            <div class="folder-actions-strip" id="playlistOfflineActions" style="display: none;">
+                <button class="folder-action-btn btn-download-seq" onclick="playCurrentPlaylist()">
+                    ▶️ Reproducir Playlist
+                </button>
+                <button class="folder-action-btn btn-download-zip" onclick="exportCurrentPlaylistToZip()">
+                    📦 Exportar a ZIP
+                </button>
+                <button class="folder-action-btn" style="background: #6a040f;" onclick="deleteCurrentPlaylist()">
+                    🗑️ Eliminar Playlist
                 </button>
             </div>
         </div>
@@ -1104,7 +1191,7 @@
             <div class="mini-progress-fill" id="miniProgressFill"></div>
         </div>
         <div class="mini-player-row">
-            <img src="/static/icons/icon-192.png" id="miniThumb" class="mini-art" onclick="openExpandedPlayer()">
+            <img src="/static/icons/icon-192.png" id="miniThumb" class="mini-art" onclick="openExpandedPlayer()" onerror="this.src='/static/icons/icon-192.png'">
             <div class="mini-info" onclick="openExpandedPlayer()">
                 <div class="mini-title" id="miniTitle">Selecciona una pista</div>
                 <div class="mini-artist" id="miniArtist">Bailando Solo Mobile</div>
@@ -1145,6 +1232,11 @@
         <div class="expanded-info">
             <div class="expanded-title" id="expandedTitle">Sin Canción</div>
             <div class="expanded-artist" id="expandedArtist">Artista Desconocido</div>
+            <div style="margin-top: 5px;">
+                <div id="shuffleModeBadge" class="shuffle-mode-indicator" onclick="cycleShuffleMode()">
+                    🔀 Aleatorio: Desactivado
+                </div>
+            </div>
         </div>
 
         <!-- Scrubber -->
@@ -1160,7 +1252,7 @@
 
         <!-- Controls -->
         <div class="expanded-controls-row">
-            <button class="expanded-ctrl-btn" id="btnShuffle" onclick="toggleShuffle()" title="Aleatorio">🔀</button>
+            <button class="expanded-ctrl-btn" id="btnShuffle" onclick="cycleShuffleMode()" title="Modo Aleatorio">🔀</button>
             <button class="expanded-ctrl-btn" onclick="prevTrack()" title="Anterior">⏮️</button>
             <button class="expanded-ctrl-btn main-play" id="expandedPlayBtn" onclick="togglePlay()" title="Play / Pause">▶️</button>
             <button class="expanded-ctrl-btn" onclick="nextTrack()" title="Siguiente">⏭️</button>
@@ -1192,6 +1284,53 @@
                 </button>
                 <button class="btn-retro-action btn-retro-accent" id="btnDialogClose" onclick="hideDialog()" style="display: none;">
                     Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Playlist Modal -->
+    <div class="dialog-overlay" id="createPlaylistModal">
+        <div class="dialog-box">
+            <div class="dialog-title">➕ NUEVA PLAYLIST PERSONALIZADA</div>
+            <div class="dialog-desc">
+                <p style="margin-bottom: 10px;">Ingresa el nombre de tu nueva playlist:</p>
+                <div class="search-strip" style="background:#222; border-color:#00f0ff; margin-bottom: 12px;">
+                    <input type="text" id="newPlaylistNameInput" placeholder="Ej: Favoritos, Gym, Chill..." style="color:#fff;">
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-retro-action btn-retro-accent" onclick="confirmCreatePlaylist()">
+                    ✓ Crear Playlist
+                </button>
+                <button class="btn-retro-action btn-retro-pink" onclick="closeCreatePlaylistModal()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Song to Playlist Modal -->
+    <div class="dialog-overlay" id="addToPlaylistModal">
+        <div class="dialog-box">
+            <div class="dialog-title">➕ AÑADIR A PLAYLIST</div>
+            <div class="dialog-desc">
+                <p style="margin-bottom: 10px;">Selecciona una playlist para guardar esta canción:</p>
+                <div id="playlistSelectionList" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+                    <!-- Dynamically populated -->
+                </div>
+                <div style="border-top: 1px solid #444; padding-top: 10px; margin-top: 8px;">
+                    <div class="search-strip" style="background:#222; border-color:#ff80bf; margin-bottom: 8px;">
+                        <input type="text" id="quickNewPlaylistInput" placeholder="O crea una nueva playlist..." style="color:#fff;">
+                    </div>
+                    <button class="btn-retro-action btn-retro-pink" style="width: 100%;" onclick="confirmQuickCreateAndAddSong()">
+                        ➕ Crear y Añadir
+                    </button>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-retro-action" onclick="closeAddToPlaylistModal()">
+                    Cerrar
                 </button>
             </div>
         </div>
@@ -1233,6 +1372,36 @@
         </div>
     </div>
 
+    <!-- Server Config Modal -->
+    <div class="dialog-overlay" id="serverConfigModal">
+        <div class="dialog-box" style="border-color: var(--color-primary);">
+            <div class="dialog-title" style="color: var(--color-primary);">⚙️ CONFIGURACIÓN DEL SERVIDOR</div>
+            <div class="dialog-desc">
+                <p style="margin-bottom: 10px; line-height: 1.5;">
+                    Si estás en una <strong>red universitaria o remota</strong> (con AP Isolation), ingresa aquí la URL del <strong>Túnel Cloudflare HTTPS</strong> o la IP de tu PC:
+                </p>
+                <div class="search-strip" style="background:#111; border-color:var(--color-primary); margin-bottom: 10px;">
+                    <input type="text" id="customServerUrlInput" placeholder="https://xxx.trycloudflare.com" style="color:#00f0ff; width:100%;">
+                </div>
+                <small style="color: var(--color-text-muted); display: block; margin-bottom: 12px; line-height: 1.4;">
+                    • Deja en blanco para conectar automáticamente por la misma dirección del navegador.<br>
+                    • Si activaste el <em>Modo Túnel Universitario</em> en tu PC, escribe o pega aquí esa URL.
+                </small>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-retro-action btn-retro-accent" onclick="saveServerConfigModal()">
+                    💾 Guardar
+                </button>
+                <button class="btn-retro-action btn-retro-pink" onclick="resetServerConfigModal()">
+                    🔄 Restablecer
+                </button>
+                <button class="btn-retro-action" onclick="closeServerConfigModal()">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Storage Manager & Options Modal -->
     <div class="dialog-overlay" id="storageSettingsOverlay">
         <div class="dialog-box">
@@ -1244,11 +1413,14 @@
                     <strong>Casetes / Álbumes:</strong> 0
                 </div>
                 <p style="font-size: 11px; margin-top: 8px; color: var(--color-text-muted);">
-                    Tus canciones están guardadas de forma segura y persistente en la memoria de la aplicación para reproducirse sin internet.
+                    Tus canciones están guardadas de forma persistente en la app. También puedes descargarlas a tu carpeta de archivos reales del teléfono.
                 </p>
             </div>
             <div class="dialog-buttons">
-                <button class="btn-retro-action btn-retro-accent" onclick="exportEntireOfflineLibraryToZip()">
+                <button class="btn-retro-action btn-retro-accent" onclick="exportAllSongsAsIndividualMp3s()">
+                    📥 Guardar Todos los .mp3 al Teléfono
+                </button>
+                <button class="btn-retro-action btn-retro-gold" onclick="exportEntireOfflineLibraryToZip()">
                     📦 Exportar Toda la Música a ZIP
                 </button>
                 <button class="btn-retro-action btn-retro-pink" onclick="clearEntireOfflineDatabase()">
@@ -1270,7 +1442,7 @@
            INDEXEDDB ENGINE & STORAGE PERSISTENCE
            ═══════════════════════════════════════════════════════════════════════════ */
         const DB_NAME = 'BailandoSoloDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
         let db = null;
 
         function openDatabase() {
@@ -1288,6 +1460,9 @@
                     if (!database.objectStoreNames.contains('folders')) {
                         database.createObjectStore('folders', { keyPath: 'name' });
                     }
+                    if (!database.objectStoreNames.contains('playlists')) {
+                        database.createObjectStore('playlists', { keyPath: 'id' });
+                    }
                 };
 
                 req.onsuccess = (e) => {
@@ -1299,7 +1474,7 @@
             });
         }
 
-        // Request storage persistence so Android OS never clears offline songs
+        // Request storage persistence so Android OS / Safari never clears offline songs
         async function requestStoragePersistence() {
             try {
                 if (navigator.storage && navigator.storage.persist) {
@@ -1372,8 +1547,22 @@
         async function dbDeleteSong(songId) {
             const database = await openDatabase();
             return new Promise((resolve, reject) => {
-                const tx = database.transaction(['songs', 'folders'], 'readwrite');
+                const tx = database.transaction(['songs', 'folders', 'playlists'], 'readwrite');
                 tx.objectStore('songs').delete(songId);
+
+                // Also remove from any playlist containing this song
+                const plStore = tx.objectStore('playlists');
+                const plReq = plStore.getAll();
+                plReq.onsuccess = () => {
+                    const playlists = plReq.result || [];
+                    playlists.forEach(pl => {
+                        if (pl.songIds && pl.songIds.includes(songId)) {
+                            pl.songIds = pl.songIds.filter(id => id !== songId);
+                            plStore.put(pl);
+                        }
+                    });
+                };
+
                 tx.oncomplete = async () => {
                     await recalculateFolderCounts();
                     resolve();
@@ -1426,23 +1615,92 @@
             });
         }
 
+        /* ─── PLAYLISTS DATABASE CRUD ────────────────────────────────────────── */
+        async function dbGetAllPlaylists() {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('playlists', 'readonly');
+                const store = tx.objectStore('playlists');
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result || []);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbGetPlaylist(playlistId) {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('playlists', 'readonly');
+                const store = tx.objectStore('playlists');
+                const req = store.get(playlistId);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbSavePlaylist(playlistObj) {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('playlists', 'readwrite');
+                const store = tx.objectStore('playlists');
+                store.put(playlistObj);
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbDeletePlaylist(playlistId) {
+            const database = await openDatabase();
+            return new Promise((resolve, reject) => {
+                const tx = database.transaction('playlists', 'readwrite');
+                const store = tx.objectStore('playlists');
+                store.delete(playlistId);
+                tx.oncomplete = () => resolve();
+                tx.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        async function dbAddSongToPlaylist(playlistId, songId) {
+            const pl = await dbGetPlaylist(playlistId);
+            if (!pl) throw new Error('Playlist no encontrada');
+            pl.songIds = pl.songIds || [];
+            if (!pl.songIds.includes(songId)) {
+                pl.songIds.push(songId);
+                pl.dateModified = Date.now();
+                await dbSavePlaylist(pl);
+            }
+            return pl;
+        }
+
+        async function dbRemoveSongFromPlaylist(playlistId, songId) {
+            const pl = await dbGetPlaylist(playlistId);
+            if (!pl) throw new Error('Playlist no encontrada');
+            pl.songIds = (pl.songIds || []).filter(id => id !== songId);
+            pl.dateModified = Date.now();
+            await dbSavePlaylist(pl);
+            return pl;
+        }
+
         /* ═══════════════════════════════════════════════════════════════════════════
            STATE & VARIABLES
            ═══════════════════════════════════════════════════════════════════════════ */
-        let currentView = 'server'; // 'server' | 'offline'
+        let currentView = 'server'; // 'server' | 'offline' | 'playlists'
         let currentFolder = null;
+        let currentPlaylist = null;
         let serverFolders = [];
         let serverSongs = [];
         let offlineSongs = [];
         let activePlaylist = [];
         let activeIndex = -1;
         let currentAudioBlobUrl = null;
+        let pendingSongToAddToPlaylist = null;
 
         // Player & Tools state
         const audio = new Audio();
         let isPlaying = false;
-        let isShuffle = false;
-        let repeatMode = 'off'; // 'off' | 'all' | 'one'
+        // Shuffle modes: 'off' | 'folder' | 'artist' | 'global'
+        let shuffleMode = localStorage.getItem('bs_shuffle_mode') || 'off';
+        let repeatMode = localStorage.getItem('bs_repeat') || 'off'; // 'off' | 'all' | 'one'
         let playbackSpeed = 1.0;
         let sleepTimerId = null;
         let sleepTimerEndTime = null;
@@ -1467,7 +1725,7 @@
                             const installingWorker = reg.installing;
                             installingWorker.onstatechange = () => {
                                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showToast('Nueva versión disponible');
+                                    showToast('Nueva versión de la app lista');
                                 }
                             };
                         };
@@ -1494,19 +1752,73 @@
                     deferredPwaPrompt = null;
                 });
             } else {
-                alert("📱 Para instalar Bailando Solo como App en tu teléfono:\n\n• En Android (Chrome): Toca los 3 puntos ⋮ del navegador y selecciona 'Instalar aplicación' o 'Añadir a pantalla principal'\n\n• En iPhone (Safari): Toca el botón Compartir ⎋ y luego 'Añadir a pantalla de inicio ➕'");
+                alert("📱 Para instalar Bailando Solo en tu teléfono:\n\n• En Android (Chrome): Toca los 3 puntos ⋮ del navegador y selecciona 'Instalar aplicación' o 'Añadir a pantalla principal'\n\n• En iPhone (Safari): Toca el botón Compartir ⎋ y luego 'Añadir a pantalla de inicio ➕'");
             }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           SERVER BASE URL & PROXY CONFIGURATION
+           ═══════════════════════════════════════════════════════════════════════════ */
+        function getServerBaseUrl() {
+            return (localStorage.getItem('bailando_custom_server_url') || '').trim();
+        }
+
+        function setServerBaseUrl(url) {
+            if (!url) {
+                localStorage.removeItem('bailando_custom_server_url');
+            } else {
+                localStorage.setItem('bailando_custom_server_url', url.replace(/\/+$/, ''));
+            }
+        }
+
+        function getApiUrl(path) {
+            if (!path) return '';
+            if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:')) {
+                return path;
+            }
+            const base = getServerBaseUrl();
+            const cleanPath = path.startsWith('/') ? path : '/' + path;
+            return base ? `${base}${cleanPath}` : cleanPath;
+        }
+
+        function openServerConfigModal() {
+            const modal = document.getElementById('serverConfigModal');
+            const input = document.getElementById('customServerUrlInput');
+            if (input) input.value = getServerBaseUrl();
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeServerConfigModal() {
+            const modal = document.getElementById('serverConfigModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function saveServerConfigModal() {
+            const input = document.getElementById('customServerUrlInput');
+            const val = input ? input.value.trim() : '';
+            setServerBaseUrl(val);
+            closeServerConfigModal();
+            showToast(val ? 'Servidor configurado. Probando conexión...' : 'Restablecido a conexión local');
+            await toggleServerCheck();
+        }
+
+        async function resetServerConfigModal() {
+            setServerBaseUrl('');
+            const input = document.getElementById('customServerUrlInput');
+            if (input) input.value = '';
+            closeServerConfigModal();
+            showToast('Dirección del servidor restablecida');
+            await toggleServerCheck();
         }
 
         /* ═══════════════════════════════════════════════════════════════════════════
            NETWORK & PING MONITOR
            ═══════════════════════════════════════════════════════════════════════════ */
-        async function checkServerPing(timeoutMs = 1200) {
-            if (!navigator.onLine) return false;
+        async function checkServerPing(timeoutMs = 3500) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const res = await fetch('/api/ping', {
+                const res = await fetch(getApiUrl('/api/ping'), {
                     signal: controller.signal,
                     cache: 'no-store'
                 });
@@ -1523,7 +1835,7 @@
             if (!statusEl) return;
 
             if (forcePing) {
-                isServerReachable = await checkServerPing(1000);
+                isServerReachable = await checkServerPing(3000);
             }
 
             if (isServerReachable) {
@@ -1533,13 +1845,13 @@
             } else {
                 statusEl.className = 'status-pill status-offline';
                 statusEl.innerHTML = '<span>●</span> OFFLINE';
-                statusEl.title = 'Servidor PC desconectado. Toca para reintentar.';
+                statusEl.title = 'Servidor PC desconectado. Modo Offline activo.';
             }
         }
 
         async function toggleServerCheck() {
             showToast('Comprobando conexión con PC...');
-            const ok = await checkServerPing(1500);
+            const ok = await checkServerPing(3500);
             isServerReachable = ok;
             await updateNetworkStatus(false);
             if (ok) {
@@ -1562,12 +1874,17 @@
         async function switchView(view) {
             currentView = view;
             currentFolder = null;
+            currentPlaylist = null;
+
             document.getElementById('tabServerBtn').classList.toggle('active', view === 'server');
             document.getElementById('tabOfflineBtn').classList.toggle('active', view === 'offline');
+            document.getElementById('tabPlaylistsBtn').classList.toggle('active', view === 'playlists');
             document.getElementById('breadcrumbContainer').style.display = 'none';
 
             if (view === 'server') {
                 await loadServerLibrary();
+            } else if (view === 'playlists') {
+                await loadPlaylistsView();
             } else {
                 await loadOfflineLibrary();
             }
@@ -1579,6 +1896,10 @@
                 const songs = await dbGetAllSongs();
                 const badge = document.getElementById('offlineCountBadge');
                 if (badge) badge.textContent = songs.length;
+
+                const playlists = await dbGetAllPlaylists();
+                const plBadge = document.getElementById('playlistsCountBadge');
+                if (plBadge) plBadge.textContent = playlists.length;
             } catch (e) {
                 console.warn('Error updating badge:', e);
             }
@@ -1588,7 +1909,7 @@
             const content = document.getElementById('mainViewContent');
             content.innerHTML = '<div class="empty-box"><div class="empty-box-icon">⏳</div><p>Verificando servidor de la PC...</p></div>';
 
-            const serverUp = await checkServerPing(1200);
+            const serverUp = await checkServerPing(3500);
             isServerReachable = serverUp;
             updateNetworkStatus(false);
 
@@ -1598,11 +1919,14 @@
                         <div class="empty-box-icon">⚠️</div>
                         <p style="font-weight: bold; color: var(--color-warning);">Servidor de la PC no disponible</p>
                         <p style="font-size: 11px; margin-top: 8px; color: var(--color-text-muted); line-height: 1.5;">
-                            La computadora está apagada o el celular no está en la misma red WiFi.
+                            La computadora está apagada, en otra red o el firewall / AP Isolation de la universidad bloquea la conexión local.
                         </p>
                         <div style="display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
                             <button class="btn-retro-action btn-retro-accent" onclick="loadServerLibrary()">
                                 🔄 Reintentar
+                            </button>
+                            <button class="btn-retro-action" style="background:#3a3a55; border-color:#00f0ff;" onclick="openServerConfigModal()">
+                                ⚙️ Configurar Túnel / IP
                             </button>
                             <button class="btn-retro-action btn-retro-pink" onclick="switchView('offline')">
                                 📱 Ver Música en el Teléfono
@@ -1615,8 +1939,8 @@
 
             try {
                 const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 3500);
-                const res = await fetch('/api/library', { signal: controller.signal });
+                const timer = setTimeout(() => controller.abort(), 8000);
+                const res = await fetch(getApiUrl('/api/library'), { signal: controller.signal });
                 clearTimeout(timer);
 
                 if (!res.ok) throw new Error('No se pudo conectar al servidor');
@@ -1639,9 +1963,17 @@
                     <div class="empty-box">
                         <div class="empty-box-icon">⚠️</div>
                         <p>No se pudo obtener la biblioteca del servidor.</p>
-                        <button class="btn-retro-action btn-retro-accent" onclick="switchView('offline')" style="margin: 12px auto 0;">
-                            📂 Abrir Biblioteca Offline
-                        </button>
+                        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap;">
+                            <button class="btn-retro-action btn-retro-accent" onclick="loadServerLibrary()">
+                                🔄 Reintentar
+                            </button>
+                            <button class="btn-retro-action" style="background:#3a3a55; border-color:#00f0ff;" onclick="openServerConfigModal()">
+                                ⚙️ Configurar Túnel
+                            </button>
+                            <button class="btn-retro-action btn-retro-pink" onclick="switchView('offline')">
+                                📂 Biblioteca Offline
+                            </button>
+                        </div>
                     </div>
                 `;
             }
@@ -1683,12 +2015,13 @@
             folders.forEach(f => {
                 const name = f.name || f;
                 const count = f.song_count || f.count || '';
-                const thumb = f.thumbnail || '';
+                const thumb = f.thumbnail ? getApiUrl(f.thumbnail) : '';
 
                 html += `
                     <div class="cassette-card" onclick="openFolderDetails('${encodeURIComponent(name)}', '${type}')">
                         <div class="cassette-art-box">
-                            ${thumb ? `<img src="${thumb}" class="cassette-art-img" alt="${name}">` : `<div class="cassette-art-fallback">📼</div>`}
+                            ${thumb ? `<img src="${thumb}" class="cassette-art-img" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">` : ''}
+                            <div class="cassette-art-fallback" style="${thumb ? 'display:none;' : ''}">📼</div>
                             ${count ? `<span class="cassette-badge-count">${count}</span>` : ''}
                         </div>
                         <div class="cassette-info">
@@ -1706,28 +2039,46 @@
         async function openFolderDetails(encodedName, type) {
             const folderName = decodeURIComponent(encodedName);
             currentFolder = folderName;
+            currentPlaylist = null;
 
             const breadcrumbContainer = document.getElementById('breadcrumbContainer');
             const breadcrumbText = document.getElementById('breadcrumbFolder');
             const serverActions = document.getElementById('folderServerActions');
             const offlineActions = document.getElementById('folderOfflineActions');
+            const playlistActions = document.getElementById('playlistOfflineActions');
 
             breadcrumbContainer.style.display = 'flex';
             breadcrumbText.textContent = folderName;
 
             serverActions.style.display = type === 'server' ? 'flex' : 'none';
             offlineActions.style.display = type === 'offline' ? 'flex' : 'none';
+            playlistActions.style.display = 'none';
 
             const content = document.getElementById('mainViewContent');
             content.innerHTML = '<div class="empty-box"><div class="empty-box-icon">⏳</div><p>Cargando pistas...</p></div>';
 
             if (type === 'server') {
                 try {
-                    const res = await fetch(`/api/library/${encodeURIComponent(folderName)}`);
+                    const res = await fetch(getApiUrl(`/api/library/${encodeURIComponent(folderName)}`));
                     const songs = await res.json();
-                    serverSongs = songs;
+                    serverSongs = songs || [];
 
-                    // Match with offline DB to see which are already saved!
+                    if (!songs || songs.length === 0) {
+                        content.innerHTML = `
+                            <div class="empty-box">
+                                <div class="empty-box-icon">📂</div>
+                                <p>Esta carpeta no contiene canciones de audio compatibles.</p>
+                                <small style="color:var(--color-text-muted); margin-top:6px; display:block;">
+                                    Si una descarga previa falló, vuelve a descargar el álbum desde la PC.
+                                </small>
+                                <button class="btn-retro-action btn-retro-accent" style="margin:14px auto 0;" onclick="goBackToFolders()">
+                                    ⬅ Volver a Casetes
+                                </button>
+                            </div>
+                        `;
+                        return;
+                    }
+
                     const savedOfflineSongs = await dbGetSongsByFolder(folderName);
                     const savedMap = new Set(savedOfflineSongs.map(s => s.title || s.filename));
 
@@ -1735,10 +2086,11 @@
                         ...s,
                         folder: folderName,
                         source: 'server',
+                        thumbnail: s.thumbnail ? getApiUrl(s.thumbnail) : null,
                         isSavedOffline: savedMap.has(s.title || s.filename),
-                        url: `/api/stream/${encodeURIComponent(folderName)}/${encodeURIComponent(s.filename)}`
+                        url: getApiUrl(`/api/stream/${encodeURIComponent(folderName)}/${encodeURIComponent(s.filename)}`)
                     }));
-                    renderSongList(activePlaylist);
+                    renderSongList(activePlaylist, 'server');
                 } catch (e) {
                     content.innerHTML = '<div class="empty-box"><p>Error al cargar canciones del servidor. ¿La PC está encendida?</p></div>';
                 }
@@ -1750,14 +2102,141 @@
                     source: 'offline',
                     isSavedOffline: true
                 }));
-                renderSongList(activePlaylist);
+                renderSongList(activePlaylist, 'offline');
             }
         }
 
-        function renderSongList(songs) {
+        /* ─── PLAYLISTS VIEW & DETAILS ───────────────────────────────────────── */
+        async function loadPlaylistsView() {
+            const content = document.getElementById('mainViewContent');
+            const playlists = await dbGetAllPlaylists();
+
+            if (playlists.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-box-icon">📜</div>
+                        <p>No has creado playlists aún.</p>
+                        <p style="font-size: 11px; margin-top: 8px; color: var(--color-text-muted); line-height: 1.5;">
+                            Crea tus propias listas personalizadas para agrupar tus canciones favoritas y escucharlas offline.
+                        </p>
+                        <div style="display: flex; gap: 8px; justify-content: center; margin-top: 14px;">
+                            <button class="btn-retro-action btn-retro-pink" onclick="openCreatePlaylistModal()">
+                                ➕ Crear Primera Playlist
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="cassette-grid">';
+            for (const pl of playlists) {
+                const count = (pl.songIds || []).length;
+                html += `
+                    <div class="cassette-card" onclick="openPlaylistDetails('${pl.id}')">
+                        <div class="cassette-art-box" style="background: #1c102a; border-color: #ff007f;">
+                            <div class="cassette-art-fallback" style="color: #ff80bf;">📜</div>
+                            <span class="cassette-badge-count" style="color: #ff80bf; border-color: #ff80bf;">${count}</span>
+                        </div>
+                        <div class="cassette-info">
+                            <div class="cassette-name">${pl.name}</div>
+                            <div class="cassette-meta">${count} canciones</div>
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        async function openPlaylistDetails(playlistId) {
+            const pl = await dbGetPlaylist(playlistId);
+            if (!pl) return;
+            currentPlaylist = pl;
+            currentFolder = null;
+
+            const breadcrumbContainer = document.getElementById('breadcrumbContainer');
+            const breadcrumbText = document.getElementById('breadcrumbFolder');
+            const serverActions = document.getElementById('folderServerActions');
+            const offlineActions = document.getElementById('folderOfflineActions');
+            const playlistActions = document.getElementById('playlistOfflineActions');
+
+            breadcrumbContainer.style.display = 'flex';
+            breadcrumbText.textContent = `📜 ${pl.name}`;
+
+            serverActions.style.display = 'none';
+            offlineActions.style.display = 'none';
+            playlistActions.style.display = 'flex';
+
+            const allSongs = await dbGetAllSongs();
+            const songMap = new Map(allSongs.map(s => [s.id, s]));
+            const plSongs = (pl.songIds || []).map(id => songMap.get(id)).filter(Boolean);
+
+            activePlaylist = plSongs.map(s => ({
+                ...s,
+                source: 'offline',
+                isSavedOffline: true
+            }));
+
+            renderSongList(activePlaylist, 'playlist');
+        }
+
+        function playCurrentPlaylist() {
+            if (activePlaylist.length === 0) {
+                showToast("Esta playlist no tiene canciones");
+                return;
+            }
+            playTrackAtIndex(0);
+        }
+
+        async function exportCurrentPlaylistToZip() {
+            if (!currentPlaylist || activePlaylist.length === 0) {
+                showToast("No hay canciones en la playlist para exportar");
+                return;
+            }
+            try {
+                if (typeof JSZip === 'undefined') throw new Error('JSZip no disponible');
+                showDialog("GENERANDO ZIP", `Comprimiendo playlist "${currentPlaylist.name}"...`, 25);
+                const zip = new JSZip();
+
+                for (let i = 0; i < activePlaylist.length; i++) {
+                    const s = activePlaylist[i];
+                    updateDialogProgress(Math.round((i / activePlaylist.length) * 100), `Agregando: ${s.title || s.filename}`);
+                    if (s.blob) {
+                        zip.file(`${s.title || s.filename}.mp3`, s.blob);
+                    }
+                }
+
+                const zipBlob = await zip.generateAsync({ type: "blob" });
+                hideDialog();
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(zipBlob);
+                a.download = `${currentPlaylist.name}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast(`✓ Playlist "${currentPlaylist.name}.zip" generada`);
+            } catch (e) {
+                hideDialog();
+                showToast("Error al exportar playlist");
+            }
+        }
+
+        async function deleteCurrentPlaylist() {
+            if (!currentPlaylist) return;
+            if (confirm(`¿Eliminar la playlist "${currentPlaylist.name}"? (No se borrarán tus canciones)`)) {
+                await dbDeletePlaylist(currentPlaylist.id);
+                showToast(`Playlist "${currentPlaylist.name}" eliminada`);
+                goBackToFolders();
+                await updateOfflineBadge();
+            }
+        }
+
+        function renderSongList(songs, context = 'offline') {
             const content = document.getElementById('mainViewContent');
             if (!songs || songs.length === 0) {
-                content.innerHTML = '<div class="empty-box"><p>No hay canciones en este casete.</p></div>';
+                content.innerHTML = '<div class="empty-box"><p>No hay canciones en esta lista.</p></div>';
                 return;
             }
 
@@ -1769,7 +2248,8 @@
                 html += `
                     <div class="song-row ${isCurrent ? 'playing' : ''}" onclick="playTrackAtIndex(${idx})">
                         <div class="song-thumb">
-                            ${song.thumbnail ? `<img src="${song.thumbnail}" style="width:100%; height:100%; object-fit:cover;">` : '🎵'}
+                            ${song.thumbnail ? `<img src="${song.thumbnail}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width:100%; height:100%; object-fit:cover;">` : ''}
+                            <div class="cassette-art-fallback" style="${song.thumbnail ? 'display:none;' : ''} font-size:16px;">🎵</div>
                         </div>
                         <div class="song-info">
                             <div class="song-title">${song.title || song.filename}</div>
@@ -1780,13 +2260,25 @@
                         </div>
                         <div class="song-actions" onclick="event.stopPropagation()">
                             ${song.source === 'server' ? `
-                                <button class="btn-song-action" onclick="downloadSingleSongOffline('${encodeURIComponent(song.folder)}', '${encodeURIComponent(song.filename)}')" title="Guardar offline en el teléfono">
+                                <button class="btn-song-action" onclick="downloadSingleSongOffline('${encodeURIComponent(song.folder)}', '${encodeURIComponent(song.filename)}')" title="Guardar offline">
                                     💾
                                 </button>
                             ` : `
-                                <button class="btn-song-action" onclick="deleteOfflineTrack('${song.id}')" title="Eliminar del teléfono">
-                                    🗑️
+                                <button class="btn-song-action" onclick="openAddToPlaylistDialog('${song.id}')" title="Añadir a Playlist">
+                                    ➕
                                 </button>
+                                <button class="btn-song-action" onclick="exportSingleSongToPhone('${song.id}')" title="Descargar .mp3 al teléfono">
+                                    📥
+                                </button>
+                                ${context === 'playlist' ? `
+                                    <button class="btn-song-action" style="color: #ff80bf;" onclick="removeSongFromCurrentPlaylist('${song.id}')" title="Quitar de playlist">
+                                        ➖
+                                    </button>
+                                ` : `
+                                    <button class="btn-song-action" onclick="deleteOfflineTrack('${song.id}')" title="Eliminar del teléfono">
+                                        🗑️
+                                    </button>
+                                `}
                             `}
                         </div>
                     </div>
@@ -1799,38 +2291,682 @@
 
         function goBackToFolders() {
             currentFolder = null;
+            currentPlaylist = null;
             document.getElementById('breadcrumbContainer').style.display = 'none';
             if (currentView === 'server') {
                 renderFolders(serverFolders, 'server');
+            } else if (currentView === 'playlists') {
+                loadPlaylistsView();
             } else {
                 loadOfflineLibrary();
             }
         }
 
-        function handleSearch(query) {
+        /* ─── GLOBAL OFFLINE SEARCH ─────────────────────────────────────────── */
+        async function handleSearch(query) {
             const q = query.trim().toLowerCase();
+            const content = document.getElementById('mainViewContent');
+            const breadcrumbContainer = document.getElementById('breadcrumbContainer');
+
             if (!q) {
                 if (currentFolder) {
-                    renderSongList(activePlaylist);
+                    renderSongList(activePlaylist, currentView === 'server' ? 'server' : 'offline');
+                } else if (currentPlaylist) {
+                    renderSongList(activePlaylist, 'playlist');
                 } else if (currentView === 'server') {
                     renderFolders(serverFolders, 'server');
+                } else if (currentView === 'playlists') {
+                    loadPlaylistsView();
                 } else {
                     loadOfflineLibrary();
                 }
                 return;
             }
 
-            if (currentFolder) {
+            // If inside a server folder and online
+            if (currentView === 'server' && currentFolder && isServerReachable) {
                 const filtered = activePlaylist.filter(s => 
                     (s.title || s.filename || '').toLowerCase().includes(q) ||
                     (s.uploader || s.artist || '').toLowerCase().includes(q)
                 );
-                renderSongList(filtered);
+                renderSongList(filtered, 'server');
+                return;
+            }
+
+            // GLOBAL SEARCH across ALL offline songs in IndexedDB!
+            const allSongs = await dbGetAllSongs();
+            const matchingSongs = allSongs.filter(s => 
+                (s.title || s.filename || '').toLowerCase().includes(q) ||
+                (s.artist || s.uploader || '').toLowerCase().includes(q) ||
+                (s.folder || '').toLowerCase().includes(q)
+            );
+
+            breadcrumbContainer.style.display = 'flex';
+            document.getElementById('breadcrumbFolder').textContent = `🔍 "${query}" (${matchingSongs.length})`;
+            document.getElementById('folderServerActions').style.display = 'none';
+            document.getElementById('folderOfflineActions').style.display = 'none';
+            document.getElementById('playlistOfflineActions').style.display = 'none';
+
+            if (matchingSongs.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-box">
+                        <div class="empty-box-icon">🔍</div>
+                        <p>No se encontraron canciones para "<strong>${query}</strong>"</p>
+                        <small>Intenta buscar por título, artista o nombre de casete</small>
+                    </div>
+                `;
+                return;
+            }
+
+            activePlaylist = matchingSongs.map(s => ({
+                ...s,
+                source: 'offline',
+                isSavedOffline: true
+            }));
+
+            renderSongList(activePlaylist, 'offline');
+        }
+
+        /* ─── REAL .MP3 FILE EXPORTS TO PHONE STORAGE ───────────────────────── */
+        async function exportSingleSongToPhone(songId) {
+            const allSongs = await dbGetAllSongs();
+            const song = allSongs.find(s => s.id === songId);
+            if (!song || !song.blob) {
+                showToast("No se encontró el archivo de audio");
+                return;
+            }
+            const cleanTitle = (song.title || song.filename || 'Cancion').replace(/[/\\?%*:|"<>]/g, '_');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(song.blob);
+            a.download = cleanTitle.endsWith('.mp3') ? cleanTitle : `${cleanTitle}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast(`✓ Descargando "${song.title || song.filename}" a tu teléfono`);
+        }
+
+        async function exportCurrentFolderAsMp3Files() {
+            if (!currentFolder) return;
+            const songs = await dbGetSongsByFolder(currentFolder);
+            if (!songs || songs.length === 0) {
+                showToast("No hay canciones en este casete");
+                return;
+            }
+            if (!confirm(`¿Descargar los ${songs.length} archivos .mp3 directamente al almacenamiento de tu teléfono?`)) return;
+
+            showToast(`Descargando ${songs.length} archivos .mp3 a tu teléfono...`);
+            for (let i = 0; i < songs.length; i++) {
+                const song = songs[i];
+                if (song.blob) {
+                    const cleanTitle = (song.title || song.filename || `Track_${i+1}`).replace(/[/\\?%*:|"<>]/g, '_');
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(song.blob);
+                    a.download = cleanTitle.endsWith('.mp3') ? cleanTitle : `${cleanTitle}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    await new Promise(r => setTimeout(r, 300));
+                }
+            }
+            showToast("✓ Archivos .mp3 guardados en Descargas de tu teléfono");
+        }
+
+        async function exportAllSongsAsIndividualMp3s() {
+            const songs = await dbGetAllSongs();
+            if (songs.length === 0) {
+                showToast("No hay canciones guardadas para exportar");
+                return;
+            }
+            if (!confirm(`¿Descargar TODAS las ${songs.length} canciones como archivos .mp3 a tu teléfono?`)) return;
+
+            showToast("Iniciando descarga masiva al teléfono...");
+            closeStorageSettingsModal();
+
+            for (let i = 0; i < songs.length; i++) {
+                const song = songs[i];
+                if (song.blob) {
+                    const cleanTitle = (song.title || song.filename || `Track_${i+1}`).replace(/[/\\?%*:|"<>]/g, '_');
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(song.blob);
+                    a.download = cleanTitle.endsWith('.mp3') ? cleanTitle : `${cleanTitle}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    await new Promise(r => setTimeout(r, 250));
+                }
+            }
+            showToast("✓ ¡Todas las canciones .mp3 fueron enviadas a tu teléfono!");
+        }
+
+        /* ─── PLAYLIST MODALS & ACTIONS ─────────────────────────────────────── */
+        function openCreatePlaylistModal() {
+            document.getElementById('newPlaylistNameInput').value = '';
+            document.getElementById('createPlaylistModal').classList.add('open');
+        }
+
+        function closeCreatePlaylistModal() {
+            document.getElementById('createPlaylistModal').classList.remove('open');
+        }
+
+        async function confirmCreatePlaylist() {
+            const name = document.getElementById('newPlaylistNameInput').value.trim();
+            if (!name) {
+                showToast("Ingresa un nombre para la playlist");
+                return;
+            }
+            const playlistId = `pl_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            const newPl = {
+                id: playlistId,
+                name: name,
+                songIds: [],
+                dateCreated: Date.now(),
+                dateModified: Date.now()
+            };
+            await dbSavePlaylist(newPl);
+            closeCreatePlaylistModal();
+            showToast(`✓ Playlist "${name}" creada`);
+            await updateOfflineBadge();
+            if (currentView === 'playlists') await loadPlaylistsView();
+        }
+
+        async function openAddToPlaylistDialog(songId) {
+            pendingSongToAddToPlaylist = songId;
+            const playlists = await dbGetAllPlaylists();
+            const listEl = document.getElementById('playlistSelectionList');
+            document.getElementById('quickNewPlaylistInput').value = '';
+
+            if (playlists.length === 0) {
+                listEl.innerHTML = '<p style="font-size:11px; color:#888;">No tienes playlists. Escribe un nombre abajo para crear una:</p>';
+            } else {
+                listEl.innerHTML = playlists.map(pl => {
+                    const count = (pl.songIds || []).length;
+                    const alreadyIn = (pl.songIds || []).includes(songId);
+                    return `
+                        <button class="btn-retro-action" style="justify-content:space-between; padding:8px 10px; width:100%; text-align:left;" onclick="confirmAddSongToExistingPlaylist('${pl.id}')">
+                            <span>📜 ${pl.name} (${count})</span>
+                            <span style="color:${alreadyIn ? '#39ff14' : '#00f0ff'};">${alreadyIn ? '✓ Ya añadida' : '➕ Añadir'}</span>
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('addToPlaylistModal').classList.add('open');
+        }
+
+        function closeAddToPlaylistModal() {
+            document.getElementById('addToPlaylistModal').classList.remove('open');
+            pendingSongToAddToPlaylist = null;
+        }
+
+        async function confirmAddSongToExistingPlaylist(playlistId) {
+            if (!pendingSongToAddToPlaylist) return;
+            const pl = await dbAddSongToPlaylist(playlistId, pendingSongToAddToPlaylist);
+            showToast(`✓ Añadida a "${pl.name}"`);
+            closeAddToPlaylistModal();
+            await updateOfflineBadge();
+            if (currentView === 'playlists' && currentPlaylist && currentPlaylist.id === playlistId) {
+                await openPlaylistDetails(playlistId);
             }
         }
 
+        async function confirmQuickCreateAndAddSong() {
+            const name = document.getElementById('quickNewPlaylistInput').value.trim();
+            if (!name) {
+                showToast("Ingresa un nombre para la playlist");
+                return;
+            }
+            const playlistId = `pl_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+            const newPl = {
+                id: playlistId,
+                name: name,
+                songIds: pendingSongToAddToPlaylist ? [pendingSongToAddToPlaylist] : [],
+                dateCreated: Date.now(),
+                dateModified: Date.now()
+            };
+            await dbSavePlaylist(newPl);
+            showToast(`✓ Playlist "${name}" creada y canción añadida`);
+            closeAddToPlaylistModal();
+            await updateOfflineBadge();
+            if (currentView === 'playlists') await loadPlaylistsView();
+        }
+
+        async function removeSongFromCurrentPlaylist(songId) {
+            if (!currentPlaylist) return;
+            await dbRemoveSongFromPlaylist(currentPlaylist.id, songId);
+            showToast("Canción quitada de la playlist");
+            await openPlaylistDetails(currentPlaylist.id);
+            await updateOfflineBadge();
+        }
+
         /* ═══════════════════════════════════════════════════════════════════════════
-           SEQUENTIAL (1-BY-1) OFFLINE DOWNLOAD & DIRECT ZIP DOWNLOAD
+           AUDIO PLAYER ENGINE (100% OFFLINE & RESILIENT)
+           ═══════════════════════════════════════════════════════════════════════════ */
+        async function playTrackAtIndex(idx) {
+            if (idx < 0 || idx >= activePlaylist.length) return;
+            activeIndex = idx;
+            const track = activePlaylist[idx];
+
+            if (currentAudioBlobUrl) {
+                URL.revokeObjectURL(currentAudioBlobUrl);
+                currentAudioBlobUrl = null;
+            }
+
+            let playSrc = '';
+            if ((track.source === 'offline' || track.isSavedOffline) && track.blob) {
+                currentAudioBlobUrl = URL.createObjectURL(track.blob);
+                playSrc = currentAudioBlobUrl;
+            } else {
+                playSrc = track.url || `/api/stream/${encodeURIComponent(track.folder)}/${encodeURIComponent(track.filename)}`;
+            }
+
+            audio.src = playSrc;
+            audio.playbackRate = playbackSpeed;
+
+            try {
+                await audio.play();
+                isPlaying = true;
+                updatePlayerUI(track);
+                savePlaybackState(track);
+            } catch (e) {
+                console.warn("Playback error:", e);
+                isPlaying = false;
+                updatePlayerUI(track);
+            }
+
+            // Lock Screen Controls (MediaSession API)
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.title || track.filename,
+                    artist: track.uploader || track.artist || track.folder || 'Bailando Solo',
+                    album: track.folder || 'Bailando Solo',
+                    artwork: [
+                        { src: track.thumbnail || '/static/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', () => togglePlay());
+                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+                navigator.mediaSession.setActionHandler('seekto', (details) => {
+                    if (details.seekTime) audio.currentTime = details.seekTime;
+                });
+            }
+        }
+
+        function togglePlay() {
+            if (!audio.src) {
+                if (activePlaylist.length > 0) playTrackAtIndex(0);
+                return;
+            }
+
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play();
+                isPlaying = true;
+            }
+            if (activeIndex >= 0 && activeIndex < activePlaylist.length) {
+                updatePlayerUI(activePlaylist[activeIndex]);
+            }
+        }
+
+        /* ─── GRANULAR SHUFFLE & TRACK NAVIGATION ───────────────────────────── */
+        function cycleShuffleMode() {
+            const modes = ['off', 'folder', 'artist', 'global'];
+            const currentIdx = modes.indexOf(shuffleMode);
+            shuffleMode = modes[(currentIdx + 1) % modes.length];
+            localStorage.setItem('bs_shuffle_mode', shuffleMode);
+            updateShuffleButtonUI();
+
+            const currentTrack = activePlaylist[activeIndex] || {};
+            const artistName = currentTrack.artist || currentTrack.uploader || 'Artista Actual';
+
+            if (shuffleMode === 'off') {
+                showToast('🔀 Modo: Secuencial (Aleatorio desactivado)');
+            } else if (shuffleMode === 'folder') {
+                showToast(`🔀 Modo: Aleatorio en Casete / Playlist actual`);
+            } else if (shuffleMode === 'artist') {
+                showToast(`🔀 Modo: Aleatorio por Artista ("${artistName}")`);
+            } else if (shuffleMode === 'global') {
+                showToast('🔀 Modo: Aleatorio Global (Toda la Biblioteca)');
+            }
+        }
+
+        function updateShuffleButtonUI() {
+            const btn = document.getElementById('btnShuffle');
+            const badge = document.getElementById('shuffleModeBadge');
+            if (!btn || !badge) return;
+
+            btn.className = 'expanded-ctrl-btn';
+
+            if (shuffleMode === 'off') {
+                btn.textContent = '🔀';
+                badge.textContent = '🔀 Aleatorio: Desactivado';
+                badge.style.color = 'var(--color-text-muted)';
+                badge.style.borderColor = '#444';
+            } else if (shuffleMode === 'folder') {
+                btn.classList.add('active');
+                btn.textContent = '🔀📁';
+                badge.textContent = '🔀 Aleatorio: En Casete / Lista';
+                badge.style.color = 'var(--color-primary)';
+                badge.style.borderColor = 'var(--color-primary)';
+            } else if (shuffleMode === 'artist') {
+                btn.classList.add('active', 'btn-shuffle-artist');
+                btn.textContent = '🔀🎤';
+                badge.textContent = '🔀 Aleatorio: Por Artista';
+                badge.style.color = '#c77dff';
+                badge.style.borderColor = '#c77dff';
+            } else if (shuffleMode === 'global') {
+                btn.classList.add('active', 'btn-shuffle-global');
+                btn.textContent = '🔀🌐';
+                badge.textContent = '🔀 Aleatorio: Toda la Música (Global)';
+                badge.style.color = '#ffb703';
+                badge.style.borderColor = '#ffb703';
+            }
+        }
+
+        async function startGlobalShufflePlay() {
+            const allSongs = await dbGetAllSongs();
+            if (allSongs.length === 0) {
+                showToast("No tienes canciones guardadas en el teléfono");
+                return;
+            }
+
+            shuffleMode = 'global';
+            localStorage.setItem('bs_shuffle_mode', 'global');
+            updateShuffleButtonUI();
+
+            const shuffled = [...allSongs].sort(() => Math.random() - 0.5);
+            activePlaylist = shuffled.map(s => ({
+                ...s,
+                source: 'offline',
+                isSavedOffline: true
+            }));
+
+            playTrackAtIndex(0);
+            showToast("🔀 Mix Global Activado — Toda tu música en modo aleatorio");
+        }
+
+        async function nextTrack() {
+            if (activePlaylist.length === 0) return;
+
+            if (repeatMode === 'one') {
+                audio.currentTime = 0;
+                audio.play();
+                return;
+            }
+
+            if (shuffleMode === 'off') {
+                let nextIdx = activeIndex + 1;
+                if (nextIdx >= activePlaylist.length) {
+                    if (repeatMode === 'all') nextIdx = 0;
+                    else return;
+                }
+                playTrackAtIndex(nextIdx);
+                return;
+            }
+
+            if (shuffleMode === 'folder') {
+                let nextIdx = Math.floor(Math.random() * activePlaylist.length);
+                if (activePlaylist.length > 1 && nextIdx === activeIndex) {
+                    nextIdx = (nextIdx + 1) % activePlaylist.length;
+                }
+                playTrackAtIndex(nextIdx);
+                return;
+            }
+
+            if (shuffleMode === 'artist') {
+                const currentTrack = activePlaylist[activeIndex] || {};
+                const artistName = (currentTrack.artist || currentTrack.uploader || '').trim().toLowerCase();
+                const allSongs = await dbGetAllSongs();
+                const artistSongs = artistName 
+                    ? allSongs.filter(s => (s.artist || s.uploader || '').toLowerCase().includes(artistName))
+                    : allSongs;
+
+                if (artistSongs.length > 0) {
+                    const randomSong = artistSongs[Math.floor(Math.random() * artistSongs.length)];
+                    activePlaylist = artistSongs.map(s => ({ ...s, source: 'offline', isSavedOffline: true }));
+                    const nextIdx = activePlaylist.findIndex(s => s.id === randomSong.id);
+                    playTrackAtIndex(nextIdx >= 0 ? nextIdx : 0);
+                    return;
+                }
+            }
+
+            if (shuffleMode === 'global') {
+                const allSongs = await dbGetAllSongs();
+                if (allSongs.length > 0) {
+                    let pool = allSongs;
+                    if (allSongs.length > 1 && activePlaylist[activeIndex]) {
+                        pool = allSongs.filter(s => s.id !== activePlaylist[activeIndex].id);
+                    }
+                    const randomSong = pool[Math.floor(Math.random() * pool.length)];
+                    activePlaylist = allSongs.map(s => ({ ...s, source: 'offline', isSavedOffline: true }));
+                    const nextIdx = activePlaylist.findIndex(s => s.id === randomSong.id);
+                    playTrackAtIndex(nextIdx >= 0 ? nextIdx : 0);
+                    return;
+                }
+            }
+
+            let nextIdx = (activeIndex + 1) % activePlaylist.length;
+            playTrackAtIndex(nextIdx);
+        }
+
+        function prevTrack() {
+            if (audio.currentTime > 3) {
+                audio.currentTime = 0;
+                return;
+            }
+            if (activePlaylist.length === 0) return;
+
+            let prevIdx = activeIndex - 1;
+            if (prevIdx < 0) prevIdx = activePlaylist.length - 1;
+            playTrackAtIndex(prevIdx);
+        }
+
+        function toggleRepeat() {
+            const btn = document.getElementById('btnRepeat');
+            if (repeatMode === 'off') {
+                repeatMode = 'all';
+                btn.classList.add('active');
+                btn.textContent = '🔁';
+                showToast('Repetir: Todo');
+            } else if (repeatMode === 'all') {
+                repeatMode = 'one';
+                btn.classList.add('active');
+                btn.textContent = '🔂';
+                showToast('Repetir: Una Canción');
+            } else {
+                repeatMode = 'off';
+                btn.classList.remove('active');
+                btn.textContent = '🔁';
+                showToast('Repetir: Desactivado');
+            }
+            localStorage.setItem('bs_repeat', repeatMode);
+        }
+
+        function cyclePlaybackSpeed() {
+            const speeds = [1.0, 1.25, 1.5, 0.75];
+            const currentIdx = speeds.indexOf(playbackSpeed);
+            playbackSpeed = speeds[(currentIdx + 1) % speeds.length];
+            audio.playbackRate = playbackSpeed;
+            document.getElementById('playbackSpeedText').textContent = `${playbackSpeed}x`;
+            document.getElementById('speedBadge').textContent = `${playbackSpeed}X`;
+            showToast(`Velocidad de reproducción: ${playbackSpeed}x`);
+        }
+
+        function cycleSleepTimer() {
+            const options = [0, 15, 30, 45, 60];
+            const currentIdx = options.indexOf(sleepTimerMinutes);
+            const nextMinutes = options[(currentIdx + 1) % options.length];
+            setSleepTimer(nextMinutes);
+        }
+
+        function setSleepTimer(minutes) {
+            if (sleepTimerId) {
+                clearInterval(sleepTimerId);
+                sleepTimerId = null;
+            }
+            sleepTimerMinutes = minutes;
+
+            if (minutes <= 0) {
+                sleepTimerEndTime = null;
+                updateSleepTimerUI();
+                showToast('Temporizador: Desactivado');
+                return;
+            }
+
+            sleepTimerEndTime = Date.now() + minutes * 60 * 1000;
+            updateSleepTimerUI();
+            showToast(`Temporizador: ${minutes} min`);
+
+            sleepTimerId = setInterval(() => {
+                const remainingMs = sleepTimerEndTime - Date.now();
+                if (remainingMs <= 0) {
+                    clearInterval(sleepTimerId);
+                    sleepTimerId = null;
+                    sleepTimerEndTime = null;
+                    sleepTimerMinutes = 0;
+                    updateSleepTimerUI();
+                    smoothFadeOutAndPause();
+                    showToast('💤 Temporizador finalizado. Música pausada.');
+                } else {
+                    updateSleepTimerUI();
+                }
+            }, 1000);
+        }
+
+        function updateSleepTimerUI() {
+            const el = document.getElementById('sleepTimerText');
+            if (!el) return;
+            if (sleepTimerEndTime) {
+                const remainingSec = Math.max(0, Math.round((sleepTimerEndTime - Date.now()) / 1000));
+                const m = Math.floor(remainingSec / 60);
+                const s = remainingSec % 60;
+                el.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+            } else {
+                el.textContent = 'Off';
+            }
+        }
+
+        function smoothFadeOutAndPause() {
+            const originalVol = audio.volume;
+            let vol = originalVol;
+            const fadeInterval = setInterval(() => {
+                vol -= 0.1;
+                if (vol <= 0.05) {
+                    clearInterval(fadeInterval);
+                    audio.pause();
+                    isPlaying = false;
+                    audio.volume = originalVol;
+                    if (activeIndex >= 0 && activeIndex < activePlaylist.length) {
+                        updatePlayerUI(activePlaylist[activeIndex]);
+                    }
+                } else {
+                    audio.volume = vol;
+                }
+            }, 150);
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            const percent = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('miniProgressFill').style.width = `${percent}%`;
+            document.getElementById('expandedProgressFill').style.width = `${percent}%`;
+
+            document.getElementById('expandedCurrentTime').textContent = formatSeconds(audio.currentTime);
+            document.getElementById('expandedDuration').textContent = formatSeconds(audio.duration);
+        });
+
+        audio.addEventListener('ended', () => nextTrack());
+
+        function seekMiniPlayer(e) {
+            if (!audio.duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        }
+
+        function seekExpanded(e) {
+            if (!audio.duration) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = pos * audio.duration;
+        }
+
+        function updatePlayerUI(track) {
+            if (!track) return;
+            const title = track.title || track.filename;
+            const artist = track.uploader || track.artist || track.folder || 'Bailando Solo';
+            const thumb = track.thumbnail || '/static/icons/icon-192.png';
+
+            document.getElementById('miniTitle').textContent = title;
+            document.getElementById('miniArtist').textContent = artist;
+            document.getElementById('miniThumb').src = thumb;
+            document.getElementById('miniPlayBtn').textContent = isPlaying ? '⏸️' : '▶️';
+
+            document.getElementById('expandedTitle').textContent = title;
+            document.getElementById('expandedArtist').textContent = artist;
+            document.getElementById('expandedCassetteLabel').textContent = (track.folder || 'BAILANDO SOLO').toUpperCase();
+            document.getElementById('expandedPlayBtn').textContent = isPlaying ? '⏸️' : '▶️';
+
+            document.getElementById('reelLeft').classList.toggle('spinning', isPlaying);
+            document.getElementById('reelRight').classList.toggle('spinning', isPlaying);
+
+            updateShuffleButtonUI();
+
+            if (currentFolder || currentPlaylist) {
+                renderSongList(activePlaylist, currentPlaylist ? 'playlist' : (currentView === 'server' ? 'server' : 'offline'));
+            }
+        }
+
+        function openExpandedPlayer() {
+            document.getElementById('expandedPlayerModal').classList.add('open');
+            updateShuffleButtonUI();
+        }
+
+        function closeExpandedPlayer() {
+            document.getElementById('expandedPlayerModal').classList.remove('open');
+        }
+
+        function savePlaybackState(track) {
+            try {
+                if (track) {
+                    localStorage.setItem('bs_last_track', JSON.stringify({
+                        title: track.title || track.filename,
+                        artist: track.uploader || track.artist || track.folder || 'Bailando Solo',
+                        folder: track.folder,
+                        id: track.id,
+                        thumbnail: track.thumbnail
+                    }));
+                }
+            } catch (e) {}
+        }
+
+        function restorePlaybackState() {
+            try {
+                updateShuffleButtonUI();
+
+                const repeatSaved = localStorage.getItem('bs_repeat');
+                if (repeatSaved) {
+                    repeatMode = repeatSaved;
+                    const btn = document.getElementById('btnRepeat');
+                    if (btn) {
+                        btn.classList.toggle('active', repeatMode !== 'off');
+                        btn.textContent = repeatMode === 'one' ? '🔂' : '🔁';
+                    }
+                }
+                const lastTrackJson = localStorage.getItem('bs_last_track');
+                if (lastTrackJson) {
+                    const track = JSON.parse(lastTrackJson);
+                    updatePlayerUI(track);
+                }
+            } catch (e) {}
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
+           SEQUENTIAL DOWNLOAD & DIALOGS
            ═══════════════════════════════════════════════════════════════════════════ */
         async function downloadCurrentFolderSequential() {
             if (!currentFolder || !serverSongs || serverSongs.length === 0) {
@@ -1847,14 +2983,14 @@
                 "GUARDANDO ÁLBUM OFFLINE (1 A 1)",
                 `Iniciando descarga de ${total} pistas al teléfono para escuchar sin conexión...`,
                 0,
-                true // show cancel button
+                true
             );
 
             let saved = 0;
             let failed = 0;
 
             for (let i = 0; i < total; i++) {
-                if (!isDownloadingBatch) break; // User cancelled
+                if (!isDownloadingBatch) break;
 
                 const song = serverSongs[i];
                 const percent = Math.round((i / total) * 100);
@@ -1864,17 +3000,16 @@
                 );
 
                 try {
-                    const downloadUrl = `/api/mobile/download/${encodeURIComponent(`${currentFolder}/${song.filename}`)}`;
+                    const downloadUrl = getApiUrl(`/api/mobile/download/${encodeURIComponent(`${currentFolder}/${song.filename}`)}`);
                     const res = await fetch(downloadUrl, { signal: abortDownloadController.signal });
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
                     const audioBlob = await res.blob();
                     
-                    // Fetch thumbnail if available
                     let thumbDataUrl = song.thumbnail || '';
                     if (song.thumbnail && song.thumbnail.startsWith('/api/')) {
                         try {
-                            const thumbRes = await fetch(song.thumbnail, { signal: abortDownloadController.signal });
+                            const thumbRes = await fetch(getApiUrl(song.thumbnail), { signal: abortDownloadController.signal });
                             if (thumbRes.ok) {
                                 const thumbBlob = await thumbRes.blob();
                                 thumbDataUrl = await blobToDataUrl(thumbBlob);
@@ -1900,7 +3035,6 @@
                     saved++;
                 } catch (err) {
                     if (err.name === 'AbortError') {
-                        console.log('Download batch cancelled');
                         break;
                     }
                     console.warn(`Error downloading track ${song.filename}:`, err);
@@ -1927,7 +3061,7 @@
         function downloadDirectFolderZip() {
             if (!currentFolder) return;
             showToast(`Iniciando descarga de "${currentFolder}.zip"...`);
-            const downloadUrl = `/api/mobile/download-folder/${encodeURIComponent(currentFolder)}`;
+            const downloadUrl = getApiUrl(`/api/mobile/download-folder/${encodeURIComponent(currentFolder)}`);
             const a = document.createElement('a');
             a.href = downloadUrl;
             a.download = `${currentFolder}.zip`;
@@ -1944,7 +3078,7 @@
             for (let i = 0; i < serverSongs.length; i++) {
                 const song = serverSongs[i];
                 const a = document.createElement('a');
-                a.href = `/api/mobile/download/${encodeURIComponent(`${currentFolder}/${song.filename}`)}`;
+                a.href = getApiUrl(`/api/mobile/download/${encodeURIComponent(`${currentFolder}/${song.filename}`)}`);
                 a.download = song.filename;
                 document.body.appendChild(a);
                 a.click();
@@ -1960,7 +3094,7 @@
             showToast(`Descargando "${filename}"...`);
 
             try {
-                const downloadUrl = `/api/mobile/download/${encodeURIComponent(`${folder}/${filename}`)}`;
+                const downloadUrl = getApiUrl(`/api/mobile/download/${encodeURIComponent(`${folder}/${filename}`)}`);
                 const res = await fetch(downloadUrl);
                 if (!res.ok) throw new Error('Error al descargar canción');
 
@@ -2034,9 +3168,7 @@
             }
         }
 
-        /* ═══════════════════════════════════════════════════════════════════════════
-           PURE JAVASCRIPT ID3 TAG PARSER (Title, Artist, Album, Cover Art)
-           ═══════════════════════════════════════════════════════════════════════════ */
+        /* ─── ID3 TAG PARSER ─────────────────────────────────────────────────── */
         async function parseId3Tags(file) {
             let title = file.name.replace(/\.[^/.]+$/, "").replace(/^[0-9\s._-]+/, '');
             let artist = '';
@@ -2047,7 +3179,6 @@
                 const headerBuffer = await file.slice(0, 131072).arrayBuffer();
                 const view = new DataView(headerBuffer);
 
-                // ID3v2 check
                 if (view.byteLength > 10 && view.getUint8(0) === 0x49 && view.getUint8(1) === 0x44 && view.getUint8(2) === 0x33) {
                     const version = view.getUint8(3);
                     const tagSize = ((view.getUint8(6) & 0x7f) << 21) |
@@ -2128,18 +3259,18 @@
             const bytes = new Uint8Array(buffer, offset + 1, length - 1);
 
             try {
-                if (encoding === 0) { // ISO-8859-1
+                if (encoding === 0) {
                     let str = '';
                     for (let i = 0; i < bytes.length; i++) {
                         if (bytes[i] === 0) break;
                         str += String.fromCharCode(bytes[i]);
                     }
                     return str.trim();
-                } else if (encoding === 1) { // UTF-16 with BOM
+                } else if (encoding === 1) {
                     return new TextDecoder('utf-16').decode(bytes).replace(/\0/g, '').trim();
-                } else if (encoding === 2) { // UTF-16BE
+                } else if (encoding === 2) {
                     return new TextDecoder('utf-16be').decode(bytes).replace(/\0/g, '').trim();
-                } else if (encoding === 3) { // UTF-8
+                } else if (encoding === 3) {
                     return new TextDecoder('utf-8').decode(bytes).replace(/\0/g, '').trim();
                 }
             } catch (e) {}
@@ -2161,9 +3292,7 @@
                 p = mimeEnd + 1;
             }
 
-            p++; // skip picture type
-
-            // skip description string
+            p++;
             if (encoding === 1 || encoding === 2) {
                 while (p < length - 1 && !(bytes[p] === 0 && bytes[p + 1] === 0)) p += 2;
                 p += 2;
@@ -2180,9 +3309,7 @@
             return '';
         }
 
-        /* ═══════════════════════════════════════════════════════════════════════════
-           LOCAL SCANNER & IMPORTER FOR ANDROID / IOS
-           ═══════════════════════════════════════════════════════════════════════════ */
+        /* ─── SCANNER & IMPORTERS ────────────────────────────────────────────── */
         function triggerNativeAudioImport() {
             document.getElementById('mediaPickerInput').click();
         }
@@ -2338,9 +3465,7 @@
             }
         }
 
-        /* ═══════════════════════════════════════════════════════════════════════════
-           STORAGE MANAGER & EXPORT MODAL
-           ═══════════════════════════════════════════════════════════════════════════ */
+        /* ─── STORAGE MANAGER MODAL ─────────────────────────────────────────── */
         function openAndroidStorageHelp() {
             document.getElementById('androidHelpOverlay').classList.add('open');
         }
@@ -2357,14 +3482,16 @@
             try {
                 const songs = await dbGetAllSongs();
                 const folders = await dbGetAllFolders();
+                const playlists = await dbGetAllPlaylists();
                 let totalBytes = 0;
                 songs.forEach(s => totalBytes += (s.size || (s.blob ? s.blob.size : 0) || 0));
 
                 const mbUsed = (totalBytes / (1024 * 1024)).toFixed(1);
                 statsCard.innerHTML = `
-                    <strong>Memoria Utilizada:</strong> ${mbUsed} MB<br>
+                    <strong>Memoria en App:</strong> ${mbUsed} MB<br>
                     <strong>Canciones Guardadas:</strong> ${songs.length} pistas<br>
-                    <strong>Casetes / Álbumes:</strong> ${folders.length} álbumes
+                    <strong>Casetes / Álbumes:</strong> ${folders.length} álbumes<br>
+                    <strong>Playlists Creadas:</strong> ${playlists.length} playlists
                 `;
             } catch (e) {
                 statsCard.innerHTML = `Error al calcular almacenamiento.`;
@@ -2448,335 +3575,23 @@
         }
 
         async function clearEntireOfflineDatabase() {
-            if (confirm("¿Estás seguro de que deseas eliminar TODAS las canciones y álbumes guardados en el teléfono?")) {
+            if (confirm("¿Estás seguro de que deseas eliminar TODAS las canciones, álbumes y playlists del teléfono?")) {
                 const database = await openDatabase();
-                const tx = database.transaction(['songs', 'folders'], 'readwrite');
+                const tx = database.transaction(['songs', 'folders', 'playlists'], 'readwrite');
                 tx.objectStore('songs').clear();
                 tx.objectStore('folders').clear();
+                tx.objectStore('playlists').clear();
                 tx.oncomplete = async () => {
                     showToast("Almacenamiento limpiado por completo");
                     closeStorageSettingsModal();
                     await updateOfflineBadge();
                     if (currentView === 'offline') await loadOfflineLibrary();
+                    else if (currentView === 'playlists') await loadPlaylistsView();
                 };
             }
         }
 
-        /* ═══════════════════════════════════════════════════════════════════════════
-           AUDIO PLAYER ENGINE (100% OFFLINE CAPABLE)
-           ═══════════════════════════════════════════════════════════════════════════ */
-        async function playTrackAtIndex(idx) {
-            if (idx < 0 || idx >= activePlaylist.length) return;
-            activeIndex = idx;
-            const track = activePlaylist[idx];
-
-            if (currentAudioBlobUrl) {
-                URL.revokeObjectURL(currentAudioBlobUrl);
-                currentAudioBlobUrl = null;
-            }
-
-            let playSrc = '';
-            if ((track.source === 'offline' || track.isSavedOffline) && track.blob) {
-                currentAudioBlobUrl = URL.createObjectURL(track.blob);
-                playSrc = currentAudioBlobUrl;
-            } else {
-                playSrc = track.url || `/api/stream/${encodeURIComponent(track.folder)}/${encodeURIComponent(track.filename)}`;
-            }
-
-            audio.src = playSrc;
-            audio.playbackRate = playbackSpeed;
-
-            try {
-                await audio.play();
-                isPlaying = true;
-                updatePlayerUI(track);
-                savePlaybackState(track);
-            } catch (e) {
-                console.warn("Playback error:", e);
-                isPlaying = false;
-                updatePlayerUI(track);
-            }
-
-            // Lock Screen Controls (MediaSession API)
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: track.title || track.filename,
-                    artist: track.uploader || track.artist || track.folder || 'Bailando Solo',
-                    album: track.folder || 'Bailando Solo',
-                    artwork: [
-                        { src: track.thumbnail || '/static/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
-                    ]
-                });
-
-                navigator.mediaSession.setActionHandler('play', () => togglePlay());
-                navigator.mediaSession.setActionHandler('pause', () => togglePlay());
-                navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
-                navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
-                navigator.mediaSession.setActionHandler('seekto', (details) => {
-                    if (details.seekTime) audio.currentTime = details.seekTime;
-                });
-            }
-        }
-
-        function togglePlay() {
-            if (!audio.src) {
-                if (activePlaylist.length > 0) playTrackAtIndex(0);
-                return;
-            }
-
-            if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
-            } else {
-                audio.play();
-                isPlaying = true;
-            }
-            if (activeIndex >= 0 && activeIndex < activePlaylist.length) {
-                updatePlayerUI(activePlaylist[activeIndex]);
-            }
-        }
-
-        function nextTrack() {
-            if (activePlaylist.length === 0) return;
-            if (repeatMode === 'one') {
-                audio.currentTime = 0;
-                audio.play();
-                return;
-            }
-
-            let nextIdx = activeIndex + 1;
-            if (isShuffle) {
-                nextIdx = Math.floor(Math.random() * activePlaylist.length);
-            } else if (nextIdx >= activePlaylist.length) {
-                if (repeatMode === 'all') nextIdx = 0;
-                else return;
-            }
-
-            playTrackAtIndex(nextIdx);
-        }
-
-        function prevTrack() {
-            if (audio.currentTime > 3) {
-                audio.currentTime = 0;
-                return;
-            }
-            if (activePlaylist.length === 0) return;
-
-            let prevIdx = activeIndex - 1;
-            if (prevIdx < 0) prevIdx = activePlaylist.length - 1;
-            playTrackAtIndex(prevIdx);
-        }
-
-        function toggleShuffle() {
-            isShuffle = !isShuffle;
-            document.getElementById('btnShuffle').classList.toggle('active', isShuffle);
-            localStorage.setItem('bs_shuffle', isShuffle ? '1' : '0');
-            showToast(isShuffle ? 'Modo Aleatorio: Activado' : 'Modo Aleatorio: Desactivado');
-        }
-
-        function toggleRepeat() {
-            const btn = document.getElementById('btnRepeat');
-            if (repeatMode === 'off') {
-                repeatMode = 'all';
-                btn.classList.add('active');
-                btn.textContent = '🔁';
-                showToast('Repetir: Todo');
-            } else if (repeatMode === 'all') {
-                repeatMode = 'one';
-                btn.classList.add('active');
-                btn.textContent = '🔂';
-                showToast('Repetir: Una Canción');
-            } else {
-                repeatMode = 'off';
-                btn.classList.remove('active');
-                btn.textContent = '🔁';
-                showToast('Repetir: Desactivado');
-            }
-            localStorage.setItem('bs_repeat', repeatMode);
-        }
-
-        function cyclePlaybackSpeed() {
-            const speeds = [1.0, 1.25, 1.5, 0.75];
-            const currentIdx = speeds.indexOf(playbackSpeed);
-            playbackSpeed = speeds[(currentIdx + 1) % speeds.length];
-            audio.playbackRate = playbackSpeed;
-            document.getElementById('playbackSpeedText').textContent = `${playbackSpeed}x`;
-            document.getElementById('speedBadge').textContent = `${playbackSpeed}X`;
-            showToast(`Velocidad de reproducción: ${playbackSpeed}x`);
-        }
-
-        function cycleSleepTimer() {
-            const options = [0, 15, 30, 45, 60];
-            const currentIdx = options.indexOf(sleepTimerMinutes);
-            const nextMinutes = options[(currentIdx + 1) % options.length];
-            setSleepTimer(nextMinutes);
-        }
-
-        function setSleepTimer(minutes) {
-            if (sleepTimerId) {
-                clearInterval(sleepTimerId);
-                sleepTimerId = null;
-            }
-            sleepTimerMinutes = minutes;
-
-            if (minutes <= 0) {
-                sleepTimerEndTime = null;
-                updateSleepTimerUI();
-                showToast('Temporizador: Desactivado');
-                return;
-            }
-
-            sleepTimerEndTime = Date.now() + minutes * 60 * 1000;
-            updateSleepTimerUI();
-            showToast(`Temporizador configurado: ${minutes} min`);
-
-            sleepTimerId = setInterval(() => {
-                const remainingMs = sleepTimerEndTime - Date.now();
-                if (remainingMs <= 0) {
-                    clearInterval(sleepTimerId);
-                    sleepTimerId = null;
-                    sleepTimerEndTime = null;
-                    sleepTimerMinutes = 0;
-                    updateSleepTimerUI();
-                    smoothFadeOutAndPause();
-                    showToast('💤 Temporizador finalizado. Música pausada.');
-                } else {
-                    updateSleepTimerUI();
-                }
-            }, 1000);
-        }
-
-        function updateSleepTimerUI() {
-            const el = document.getElementById('sleepTimerText');
-            if (!el) return;
-            if (sleepTimerEndTime) {
-                const remainingSec = Math.max(0, Math.round((sleepTimerEndTime - Date.now()) / 1000));
-                const m = Math.floor(remainingSec / 60);
-                const s = remainingSec % 60;
-                el.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
-            } else {
-                el.textContent = 'Off';
-            }
-        }
-
-        function smoothFadeOutAndPause() {
-            const originalVol = audio.volume;
-            let vol = originalVol;
-            const fadeInterval = setInterval(() => {
-                vol -= 0.1;
-                if (vol <= 0.05) {
-                    clearInterval(fadeInterval);
-                    audio.pause();
-                    isPlaying = false;
-                    audio.volume = originalVol;
-                    if (activeIndex >= 0 && activeIndex < activePlaylist.length) {
-                        updatePlayerUI(activePlaylist[activeIndex]);
-                    }
-                } else {
-                    audio.volume = vol;
-                }
-            }, 150);
-        }
-
-        audio.addEventListener('timeupdate', () => {
-            if (!audio.duration) return;
-            const percent = (audio.currentTime / audio.duration) * 100;
-            document.getElementById('miniProgressFill').style.width = `${percent}%`;
-            document.getElementById('expandedProgressFill').style.width = `${percent}%`;
-
-            document.getElementById('expandedCurrentTime').textContent = formatSeconds(audio.currentTime);
-            document.getElementById('expandedDuration').textContent = formatSeconds(audio.duration);
-        });
-
-        audio.addEventListener('ended', () => nextTrack());
-
-        function seekMiniPlayer(e) {
-            if (!audio.duration) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            audio.currentTime = pos * audio.duration;
-        }
-
-        function seekExpanded(e) {
-            if (!audio.duration) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            audio.currentTime = pos * audio.duration;
-        }
-
-        function updatePlayerUI(track) {
-            if (!track) return;
-            const title = track.title || track.filename;
-            const artist = track.uploader || track.artist || track.folder || 'Bailando Solo';
-            const thumb = track.thumbnail || '/static/icons/icon-192.png';
-
-            document.getElementById('miniTitle').textContent = title;
-            document.getElementById('miniArtist').textContent = artist;
-            document.getElementById('miniThumb').src = thumb;
-            document.getElementById('miniPlayBtn').textContent = isPlaying ? '⏸️' : '▶️';
-
-            document.getElementById('expandedTitle').textContent = title;
-            document.getElementById('expandedArtist').textContent = artist;
-            document.getElementById('expandedCassetteLabel').textContent = (track.folder || 'BAILANDO SOLO').toUpperCase();
-            document.getElementById('expandedPlayBtn').textContent = isPlaying ? '⏸️' : '▶️';
-
-            document.getElementById('reelLeft').classList.toggle('spinning', isPlaying);
-            document.getElementById('reelRight').classList.toggle('spinning', isPlaying);
-
-            if (currentFolder) {
-                renderSongList(activePlaylist);
-            }
-        }
-
-        function openExpandedPlayer() {
-            document.getElementById('expandedPlayerModal').classList.add('open');
-        }
-
-        function closeExpandedPlayer() {
-            document.getElementById('expandedPlayerModal').classList.remove('open');
-        }
-
-        function savePlaybackState(track) {
-            try {
-                if (track) {
-                    localStorage.setItem('bs_last_track', JSON.stringify({
-                        title: track.title || track.filename,
-                        artist: track.uploader || track.artist || track.folder || 'Bailando Solo',
-                        folder: track.folder,
-                        id: track.id,
-                        thumbnail: track.thumbnail
-                    }));
-                }
-            } catch (e) {}
-        }
-
-        function restorePlaybackState() {
-            try {
-                const shuffleSaved = localStorage.getItem('bs_shuffle');
-                if (shuffleSaved === '1') {
-                    isShuffle = true;
-                    document.getElementById('btnShuffle')?.classList.add('active');
-                }
-                const repeatSaved = localStorage.getItem('bs_repeat');
-                if (repeatSaved) {
-                    repeatMode = repeatSaved;
-                    const btn = document.getElementById('btnRepeat');
-                    if (btn) {
-                        btn.classList.toggle('active', repeatMode !== 'off');
-                        btn.textContent = repeatMode === 'one' ? '🔂' : '🔁';
-                    }
-                }
-                const lastTrackJson = localStorage.getItem('bs_last_track');
-                if (lastTrackJson) {
-                    const track = JSON.parse(lastTrackJson);
-                    updatePlayerUI(track);
-                }
-            } catch (e) {}
-        }
-
-        /* ═══════════════════════════════════════════════════════════════════════════
-           DIALOGS & HELPERS
-           ═══════════════════════════════════════════════════════════════════════════ */
+        /* ─── UI HELPERS & TOASTS ────────────────────────────────────────────── */
         function showDialog(title, desc, percent, allowCancel = false) {
             document.getElementById('dialogTitle').textContent = title;
             document.getElementById('dialogDesc').textContent = desc;
@@ -2832,9 +3647,7 @@
             if (serverUp) {
                 await switchView('server');
             } else {
-                // If PC is off, seamlessly switch directly to Offline View!
                 await switchView('offline');
-                showToast('📱 Modo Offline Activo — Música en tu Teléfono');
             }
         });
     </script>

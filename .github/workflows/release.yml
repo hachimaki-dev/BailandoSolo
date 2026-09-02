@@ -19,15 +19,23 @@ jobs:
         include:
           - os: macos-latest
             target_name: mac-arm64
+            python_arch: arm64
+            pyinstaller_arch: --target-arch arm64
             builder_flag: --mac --arm64
-          - os: macos-13
+          - os: macos-latest
             target_name: mac-intel
+            python_arch: x64
+            pyinstaller_arch: --target-arch x86_64
             builder_flag: --mac --x64
           - os: windows-latest
             target_name: windows-x64
+            python_arch: x64
+            pyinstaller_arch: ""
             builder_flag: --win --x64
           - os: ubuntu-latest
             target_name: linux-x64
+            python_arch: x64
+            pyinstaller_arch: ""
             builder_flag: --linux
 
     steps:
@@ -44,6 +52,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          architecture: ${{ matrix.python_arch }}
           cache: 'pip'
 
       - name: Install Python Dependencies
@@ -55,7 +64,7 @@ jobs:
       - name: Build Python Backend Binary (PyInstaller - Unix)
         if: runner.os != 'Windows'
         run: |
-          pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+          pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp ${{ matrix.pyinstaller_arch }} server.py
           chmod +x dist/bailandosolo-server
 
       - name: Build Python Backend Binary (PyInstaller - Windows)
