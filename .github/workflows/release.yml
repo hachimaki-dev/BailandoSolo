@@ -52,6 +52,7 @@ jobs:
           cache: 'pip'
 
       - name: Install Python Dependencies
+        shell: bash
         run: |
           if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
             arch -x86_64 python -m pip install --upgrade pip
