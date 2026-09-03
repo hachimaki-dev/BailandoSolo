@@ -1,201 +1,123 @@
-# Bailando Solo
+# 📼 Bailando Solo
 
-**Tu música. Tus reglas. Tu disco duro.**
+<p align="center">
+  <img src="build/icon.png" width="128" height="128" alt="Bailando Solo" />
+</p>
 
-Bailando Solo es un descargador de playlists de alta fidelidad hecho para gente que todavía cree que *poseer* su música tiene más sentido que pagar 14 suscripciones para escuchar el mismo álbum comprimido a bitrate de sopa instantánea.
+<p align="center">
+  <strong>Tu música. Tus reglas. Tu disco duro.</strong><br>
+  <em>Reproductor y descargador retro para los que no quieren pagar arriendo mensual por escuchar música.</em>
+</p>
 
-Busca, descarga y organiza música desde YouTube con una app de escritorio rápida, multiusuario y sin humo corporativo.
-Porque sí, el streaming es cómodo… hasta que desaparece una canción, cambian la versión del álbum o te meten anuncios cada 12 segundos.
-
----
-
-## ¿Qué hace?
-
-* Descarga playlists completas.
-* Convierte y organiza automáticamente.
-* Soporta perfiles multiusuario.
-* Guarda estadísticas y configuraciones localmente.
-* Funciona en Linux, Windows y macOS.
-* Usa `yt-dlp`, porque claramente los héroes usan capa.
-
-Todo corre en tu máquina.
-Nada de “sube tus datos a nuestra nube revolucionaria impulsada por IA blockchain web3 cuántica”.
+<p align="center">
+  <img src="https://img.shields.io/badge/Versi%C3%B3n-2.1.0-ff007f?style=for-the-badge&logo=retroarch&logoColor=white" alt="Versión 2.1.0" />
+  <img src="https://img.shields.io/badge/Estilo-Retro_16--bit-00f0ff?style=for-the-badge" alt="Retro 16-bit" />
+  <img src="https://img.shields.io/badge/Nube-0%25-39ff14?style=for-the-badge" alt="0% Nube" />
+  <img src="https://img.shields.io/badge/Suscripciones-$0-ffb703?style=for-the-badge" alt="$0 Suscripciones" />
+</p>
 
 ---
 
-# 📥 Instalación (Humanos Normales)
+## ⚡ ¿Por qué existe?
 
-¿Solo quieres bajar música y seguir con tu vida?
+Pagar $12 USD al mes para que un día te borren canciones por "problemas de licencia" es ridículo.
 
-1. Ve a **Releases** en GitHub.
-2. Descarga el instalador:
-
-   * `.exe` → Windows
-   * `.AppImage` o `.deb` → Linux
-3. Instala.
-4. Disfruta de escuchar música sin rezarle a un algoritmo.
+**Bailando Solo** baja música desde YouTube, la guarda en tu disco duro y la reproduce con interfaz de consola clásica. Sin cuentas, sin algoritmos invasivos y sin suscripciones.
 
 ---
 
-# 🛠️ Desarrollo
+## 🕹️ Estudio Desktop & Temas Retro
 
-¿Quieres mirar las tripas del monstruo? Excelente.
+<p align="center">
+  <img src="docs/assets/desktop_visualizer_themes.gif" alt="Desktop Visualizer & Themes" width="100%" />
+</p>
 
-Bailando Solo está construido con:
-
-* Frontend: Electron + Vue 3 + Vite
-* Backend: Python + Flask + `yt-dlp`
-
-Porque mezclar tecnologías como un científico loco también es arte.
-
----
-
-## Requisitos
-
-* Node.js 18+
-* Python 3.10+
-* `pip`
-* `ffmpeg` (opcional… pero en realidad no quieres vivir sin él)
+* **Visualizador FFT:** Frecuencias en tiempo real estilo minicomponente noventero.
+* **Ecualizador multibanda:** Control manual de graves y agudos.
+* **Temas al instante:** SNES 🕹️, PlayStation 2 🌌, Wii U 🎮, Cassette 📼 y Puerto Montt 🌧️ (con lluvia animada).
 
 ---
 
-# 🚀 Arranque Rápido
+## 📼 Casetes y Carpetas Locales
 
-Abrir terminal. Ejecutar. Fingir que sabes DevOps.
+<p align="center">
+  <img src="docs/assets/desktop_library_collection.gif" alt="Colección de Casetes" width="100%" />
+</p>
 
+* **Colección tangible:** Organizada en casetes y carpetas físicas, no en listas infinitas.
+* **Buscador global (`Ctrl+K`):** Filtra temas y carpetas en milisegundos.
+* **Multi-perfil:** Carpetas aisladas por usuario para no mezclar gustos incompatibles.
+
+---
+
+## 📥 Descargas y Sala Arcade
+
+<p align="center">
+  <img src="docs/assets/desktop_downloader_features.gif" alt="Descargas, QR y Logros" width="100%" />
+</p>
+
+* **Descargas hasta 320 kbps:** Videos sueltos o playlists completas impulsadas por `yt-dlp`.
+* **Nombres limpios:** Plantillas automáticas estilo `{artist} - {title}.mp3`.
+* **Logros Arcade:** Estadísticas de horas escuchadas, giros de disco y trofeos retro sin tener que esperar un "Wrapped" a fin de año.
+
+---
+
+## 📱 Móvil PWA (Sin App Store)
+
+<p align="center">
+  <img src="docs/assets/mobile_demo.gif" alt="Móvil PWA" width="380" />
+</p>
+
+Escanea el código QR desde tu PC y listo. Sin descargar 300MB de una tienda:
+
+* **Casetes Offline:** Guarda álbumes enteros en la memoria del teléfono (IndexedDB) para escuchar sin señal.
+* **Descarga directa:** Exporta carpetas completas en `.zip` o `.mp3`.
+* **Control remoto:** Controla el reproductor del computador desde la cama.
+* **Temas Game Boy y Cyberpunk.**
+
+---
+
+## 🌐 La Plaza (P2P Nostr)
+
+Comparte playlists e intercambia música con otros usuarios mediante relays descentralizados de Nostr. Sin cuentas, sin contraseñas y sin intermediarios registrando lo que escuchas.
+
+---
+
+## 🚀 Instalación Rápida
+
+### Para mortales
+Descarga el instalador directo en [**Releases**](../../releases):
+* **Windows:** `.exe`
+* **Linux:** `.AppImage` o `.deb`
+* **macOS:** `.dmg`
+
+### Para desarrolladores
 ```bash
-chmod +x start.sh
-./start.sh
+# Iniciar en desarrollo (levanta Python, Flask, Vite y Electron juntos)
+chmod +x start.sh && ./start.sh
 ```
 
-El script:
-
-* crea el entorno virtual,
-* instala dependencias,
-* levanta Flask,
-* levanta Vite,
-* abre Electron,
-* y probablemente hace más trabajo que varios CTOs.
-
----
-
-# 📦 Empaquetar Instaladores
-
-¿Modificaste el proyecto y ahora quieres distribuir tu propia versión mutante? Perfecto. Así empieza el software libre.
-
-## 1. Compilar Backend
-
+**Compilar instaladores:**
 ```bash
-chmod +x build_backend.sh
-./build_backend.sh
+# 1. Compilar backend
+chmod +x build_backend.sh && ./build_backend.sh
+
+# 2. Empaquetar Electron
+npm run dist
 ```
 
-Esto genera el binario Python en `dist/`.
+---
+
+## 📂 Privacidad
+
+Tus archivos y datos viven solo en tu equipo:
+* **macOS / Linux:** `~/.bailandosolo/`
+* **Windows:** `C:\Users\TuUsuario\.bailandosolo\`
+
+Borras esa carpeta y no queda rastro en ningún servidor.
 
 ---
 
-## 2. Empaquetar Electron
+## ⚠️ Disclaimer
 
-```bash
-pnpm run dist
-```
-
-Esto:
-
-* compila Vue,
-* une el backend,
-* empaqueta Electron,
-* y genera instaladores en `release/`.
-
----
-
-## Nota para Windows™
-
-Sí, para generar `.exe`, necesitas compilar desde Windows.
-Porque el sufrimiento construye carácter.
-
----
-
-# 🏴 Filosofía del Proyecto
-
-Bailando Solo existe porque internet olvidó algo importante:
-
-> Si comprar música no significa poseerla,
-> entonces “alquilar acceso” no significa libertad.
-
-La idea no es piratear artistas independientes ni hacer daño a músicos.
-La idea es recuperar control sobre tu biblioteca musical, tus archivos y tu experiencia.
-
-Descarga legalmente el contenido al que tengas derecho de acceso.
-*Guiño guiño.*
-
----
-
-# 🍴 Haz Fork. Rómpelo. Mejóralo.
-
-Este proyecto no quiere ser una catedral.
-Quiere ser un garaje lleno de cables, commits sospechosos y gente construyendo cosas interesantes.
-
-Haz forks.
-Cámbiale la UI.
-Agrégale soporte para metadata absurda.
-Conecta Last.fm.
-Haz una versión cyberpunk.
-Reescribe el backend en Rust porque claramente todos terminan haciendo eso.
-O convierte el reproductor en un visualizador psicodélico alimentado por FFTs.
-
-Si mejoras algo:
-
-* abre un PR,
-* comparte ideas,
-* o simplemente roba código con estilo.
-
-El software libre vive de gente curiosa y peligrosamente motivada.
-
----
-
-# 📂 Privacidad
-
-Todo se guarda localmente:
-
-* Linux/macOS:
-  `~/.bailandosolo`
-
-* Windows:
-  `C:\Users\TuUsuario\.bailandosolo`
-
-Sin cuentas.
-Sin trackers.
-Sin analytics invasivos.
-Sin “mejoramos tu experiencia” mientras venden tus hábitos musicales a un fondo de inversión.
-
----
-
-# 📦 Créditos y Licencias
-
-Bailando Solo se construye sobre los hombros de gigantes del software libre y de código abierto. Agradecemos y respetamos la propiedad intelectual de las siguientes herramientas:
-
-*   **[yt-dlp](https://github.com/yt-dlp/yt-dlp)** (Licencia Unlicense) - Motor de línea de comandos para descargas de audio y video.
-*   **[Electron](https://github.com/electron/electron)** (Licencia MIT) - Framework de escritorio multiplataforma.
-*   **[Vue.js 3](https://github.com/vuejs/core)** (Licencia MIT) - Interfaz reactiva interactiva.
-*   **[Vite](https://github.com/vitejs/vite)** (Licencia MIT) - Servidor de desarrollo y compilador de frontend.
-*   **[Flask](https://github.com/pallets/flask)** (Licencia BSD-3-Clause) - Microservidor web local de Python.
-*   **[qrcode](https://github.com/soldair/node-qrcode)** (Licencia MIT) - Generación de códigos QR para acceso móvil.
-
-Apoya el desarrollo de software libre: si te gusta la app, considera dejarnos una estrellita ⭐ en el repositorio o una reseña en las Issues.
-
----
-
-# ⚠️ Disclaimer Legal Súper Serio™
-
-Bailando Solo es simplemente una herramienta.
-
-Como un martillo.
-O `ffmpeg`.
-O una katana emocional para recuperar soberanía digital.
-
-Úsalo responsablemente y respeta las leyes de tu país.
-
-Nosotros jamás te diríamos que descargues compulsivamente discografías enteras a las 3 AM mientras miras la terminal como hacker de película.
-
-Jamás.
+Esto es software libre, igual que un martillo o `ffmpeg`. Lo que descargues es responsabilidad tuya y de tu consciencia. Úsalo con criterio. 😉

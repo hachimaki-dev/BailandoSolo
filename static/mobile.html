@@ -73,6 +73,92 @@
             --font-mono: 'JetBrains Mono', monospace;
         }
 
+        /* ─── RETRO THEMES ENGINE ─── */
+        body[data-theme="cyberpunk"] {
+            --color-bg: #0f0f1a;
+            --color-panel: #1e1e2f;
+            --color-panel-light: #2a2a40;
+            --color-border: #000000;
+            --color-primary: #00f0ff;
+            --color-accent: #ff007f;
+            --color-success: #39ff14;
+            --color-warning: #ffb703;
+            --color-retro-blue: #5a5aff;
+            --color-text: #ffffff;
+            --color-text-muted: #a0a0b8;
+        }
+
+        body[data-theme="gameboy"] {
+            --color-bg: #8b956d;
+            --color-panel: #9bbc0f;
+            --color-panel-light: #a4c619;
+            --color-border: #0f380f;
+            --color-primary: #0f380f;
+            --color-accent: #306230;
+            --color-success: #0f380f;
+            --color-warning: #306230;
+            --color-retro-blue: #306230;
+            --color-text: #0f380f;
+            --color-text-muted: #306230;
+        }
+
+        body[data-theme="ps2"] {
+            --color-bg: #000411;
+            --color-panel: #061138;
+            --color-panel-light: #0d226b;
+            --color-border: #000000;
+            --color-primary: #0084ff;
+            --color-accent: #00d4ff;
+            --color-success: #00ffcc;
+            --color-warning: #ffd166;
+            --color-retro-blue: #0051ba;
+            --color-text: #ffffff;
+            --color-text-muted: #82a0d8;
+        }
+
+        body[data-theme="snes"] {
+            --color-bg: #2b2b36;
+            --color-panel: #434354;
+            --color-panel-light: #58586f;
+            --color-border: #14141a;
+            --color-primary: #b57edc;
+            --color-accent: #5d3f9e;
+            --color-success: #5cdb95;
+            --color-warning: #f4d06f;
+            --color-retro-blue: #795290;
+            --color-text: #ffffff;
+            --color-text-muted: #b8b8cc;
+        }
+
+        body[data-theme="vaporwave"] {
+            --color-bg: #150524;
+            --color-panel: #290f3f;
+            --color-panel-light: #441865;
+            --color-border: #000000;
+            --color-primary: #05ffa1;
+            --color-accent: #ff71ce;
+            --color-success: #01cdfe;
+            --color-warning: #fffb96;
+            --color-retro-blue: #b967ff;
+            --color-text: #ffffff;
+            --color-text-muted: #c9a7eb;
+        }
+
+        body[data-theme="cassette"] {
+            --color-bg: #1e1711;
+            --color-panel: #33261c;
+            --color-panel-light: #4a3829;
+            --color-border: #0d0a08;
+            --color-primary: #fca311;
+            --color-accent: #e63946;
+            --color-success: #2a9d8f;
+            --color-warning: #e76f51;
+            --color-retro-blue: #d47a1e;
+            --color-text: #fdf0d5;
+            --color-text-muted: #cbb29b;
+        }
+
+
         * {
             margin: 0;
             padding: 0;
@@ -251,8 +337,8 @@
         /* Action Toolbar */
         .action-toolbar {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 38px;
-            gap: 5px;
+            grid-template-columns: 1fr 1fr 1fr 1fr 36px;
+            gap: 4px;
             margin-bottom: 12px;
         }
 
@@ -718,31 +804,412 @@
             width: 0%;
         }
 
-        /* Fullscreen Player Modal / Expanded View */
+        /* Fullscreen Player Modal / Expanded View (Slide-Up Bottom Sheet) */
         .player-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: #12121e;
+            background: var(--color-bg);
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(90, 90, 255, 0.15) 0%, transparent 65%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .3) 2px, rgba(0, 0, 0, .3) 4px);
             z-index: 2000;
-            display: none;
+            display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 16px;
+            padding: 10px 16px 20px;
             overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .player-modal.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Drag Handle for Pull-Down Dismiss */
+        .modal-drag-bar-area {
+            width: 100%;
             display: flex;
+            justify-content: center;
+            padding: 4px 0 8px;
+            cursor: grab;
+            touch-action: none;
+        }
+
+        .modal-drag-handle {
+            width: 48px;
+            height: 5px;
+            background: var(--color-primary);
+            border-radius: 4px;
+            box-shadow: 0 0 6px var(--color-primary);
+            opacity: 0.8;
         }
 
         .modal-top-bar {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 6px;
         }
+
+        /* Mode Tabs inside Player: Cassette | Lyrics | Queue | EQ */
+        .deck-mode-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            background: #11111a;
+            border: 2px solid #000;
+            padding: 3px;
+            margin-bottom: 8px;
+        }
+
+        .deck-tab-btn {
+            font-family: var(--font-pixel);
+            font-size: 6.5px;
+            padding: 7px 2px;
+            border: 1.5px solid #000;
+            background: #252538;
+            color: #a0a0b8;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: inset 1px 1px 0 #444455;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .deck-tab-btn.active {
+            background: var(--color-primary);
+            color: #000000;
+            font-weight: bold;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+        }
+
+        /* Switchable Deck Panels */
+        .deck-panel-view {
+            display: none;
+            width: 100%;
+            animation: fadeInDeck 0.2s ease;
+        }
+
+        .deck-panel-view.active {
+            display: block;
+        }
+
+        @keyframes fadeInDeck {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Visualizer Spectrum Canvas */
+        .deck-spectrum-canvas {
+            width: 100%;
+            height: 38px;
+            background: #0b0b14;
+            border: 2px solid #000;
+            margin: 6px auto 0;
+            display: block;
+            box-shadow: inset 1px 1px 0 #222;
+        }
+
+        /* ─── LYRICS / KARAOKE VIEW ─── */
+        .lyrics-panel-box {
+            background: #161626;
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0 #333348, 4px 4px 0 #000;
+            height: 220px;
+            overflow-y: auto;
+            padding: 14px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+            border-radius: 4px;
+        }
+
+        .lyric-line {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0.55;
+        }
+
+        .lyric-line.active {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-shadow: 0 0 10px var(--color-primary), 1px 1px 0 #000;
+            opacity: 1;
+            transform: scale(1.04);
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px dashed var(--color-primary);
+        }
+
+        .lyric-line.past {
+            opacity: 0.7;
+            color: #dddddd;
+        }
+
+        /* ─── QUEUE ("UP NEXT") VIEW ─── */
+        .queue-panel-box {
+            background: #161626;
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0 #333348, 4px 4px 0 #000;
+            height: 220px;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-radius: 4px;
+        }
+
+        .queue-header-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-pixel);
+            font-size: 7.5px;
+            color: var(--color-primary);
+            padding-bottom: 6px;
+            border-bottom: 2px solid #222;
+        }
+
+        .queue-item-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #202035;
+            border: 1.5px solid #000;
+            padding: 6px 8px;
+            cursor: pointer;
+        }
+
+        .queue-item-row.current-playing {
+            border-color: var(--color-success);
+            background: #192a20;
+        }
+
+        .queue-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .queue-item-title {
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-item-artist {
+            font-size: 9px;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-queue-remove {
+            background: #441111;
+            border: 1px solid #ff4d4d;
+            color: #ff9999;
+            padding: 3px 6px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* ─── EQUALIZER VIEW ─── */
+        .eq-panel-box {
+            background: #161626;
+            border: 3px solid #000;
+            box-shadow: inset 2px 2px 0 #333348, 4px 4px 0 #000;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-radius: 4px;
+        }
+
+        .eq-sliders-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 120px;
+            padding: 6px 0;
+            background: #0e0e18;
+            border: 2px solid #000;
+        }
+
+        .eq-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .eq-slider {
+            -webkit-appearance: slider-vertical;
+            writing-mode: bt-lr;
+            width: 24px;
+            height: 80px;
+            cursor: pointer;
+        }
+
+        .eq-freq-label {
+            font-family: var(--font-pixel);
+            font-size: 6px;
+            color: var(--color-primary);
+        }
+
+        .eq-db-label {
+            font-size: 9px;
+            font-family: var(--font-mono);
+            color: var(--color-text-muted);
+        }
+
+        .eq-presets-row {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .eq-preset-chip {
+            font-family: var(--font-pixel);
+            font-size: 6.5px;
+            background: #252538;
+            color: #fff;
+            border: 1.5px solid #000;
+            padding: 5px 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 1px 1px 0 #000;
+        }
+
+        .eq-preset-chip.active {
+            background: var(--color-accent);
+            border-color: #ff80bf;
+            color: #fff;
+        }
+
+        .btn-mega-bass {
+            font-family: var(--font-pixel);
+            font-size: 7px;
+            padding: 6px 10px;
+            border: 2px solid #000;
+            background: #222;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-mega-bass.active {
+            background: linear-gradient(90deg, #ff007f, #9d4edd);
+            border-color: #ff80bf;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+        }
+
+        /* ─── SCRUBBER TOOLTIP ─── */
+        .scrubber-container {
+            position: relative;
+        }
+
+        .scrubber-tooltip {
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-primary);
+            color: #000;
+            font-family: var(--font-pixel);
+            font-size: 7px;
+            padding: 2px 6px;
+            border: 1px solid #000;
+            border-radius: 2px;
+            pointer-events: none;
+            display: none;
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .scrubber-tooltip.show {
+            display: block;
+        }
+
+        /* ─── THEME SELECTOR MODAL ─── */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 12px 0;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .theme-card {
+            background: #252538;
+            border: 2px solid #000;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+            box-shadow: 2px 2px 0 #000;
+            transition: transform 0.1s ease;
+        }
+
+        .theme-card:active {
+            transform: translate(1px, 1px);
+        }
+
+        .theme-card.active {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 8px var(--color-primary), 2px 2px 0 #000;
+        }
+
+        .theme-card-title {
+            font-family: var(--font-pixel);
+            font-size: 7px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .theme-swatches {
+            display: flex;
+            gap: 4px;
+            height: 12px;
+        }
+
+        .theme-swatch {
+            flex: 1;
+            border-radius: 2px;
+            border: 1px solid #000;
+        }
+
 
         /* Animated Retro Cassette Display */
         .cassette-hero-deck {
@@ -1103,18 +1570,21 @@
             </nav>
         </header>
 
-        <!-- Actions Toolbar (Scanner, Importer, Playlists, Settings) -->
+        <!-- Actions Toolbar (Scanner, Importer, Downloader, Themes, Settings) -->
         <div class="action-toolbar">
-            <button class="btn-retro-action btn-retro-accent" onclick="triggerNativeAudioImport()" title="Importar música desde cualquier carpeta de tu teléfono">
+            <button class="btn-retro-action btn-retro-accent" onclick="triggerNativeAudioImport()" title="Importar música desde tu teléfono">
                 🎵 Importar
             </button>
-            <button class="btn-retro-action btn-retro-gold" onclick="startGlobalShufflePlay()" title="Mix Global: Reproduce toda la biblioteca en modo aleatorio">
-                🔀 Mix Global
+            <button class="btn-retro-action" style="background: linear-gradient(180deg, #00b4d8 0%, #0077b6 100%); border-color: #00f0ff;" onclick="openRemoteDownloadModal()" title="Descargar de YouTube directo a la PC y teléfono">
+                ⚡ Bajar
             </button>
-            <button class="btn-retro-action btn-retro-pink" onclick="openCreatePlaylistModal()" title="Crear nueva playlist personalizada">
-                ➕ Playlist
+            <button class="btn-retro-action btn-retro-gold" onclick="startGlobalShufflePlay()" title="Mix Global">
+                🔀 Mix
             </button>
-            <button class="btn-retro-action btn-retro-icon-only" onclick="openStorageSettingsModal()" title="Gestor de Almacenamiento & Opciones">
+            <button class="btn-retro-action btn-retro-pink" onclick="openThemeSelectorModal()" title="Temas retro">
+                🎨 Temas
+            </button>
+            <button class="btn-retro-action btn-retro-icon-only" onclick="openStorageSettingsModal()" title="Gestor de Almacenamiento">
                 ⚙️
             </button>
         </div>
@@ -1204,28 +1674,116 @@
         </div>
     </div>
 
-    <!-- Fullscreen Player Modal -->
+    <!-- Fullscreen Player Modal (Slide-Up Bottom Sheet) -->
     <div class="player-modal" id="expandedPlayerModal">
+        <!-- Drag Handle for Pull-Down Dismiss -->
+        <div class="modal-drag-bar-area" id="modalDragBar" onclick="closeExpandedPlayer()">
+            <div class="modal-drag-handle"></div>
+        </div>
+
         <div class="modal-top-bar">
             <button class="btn-back" onclick="closeExpandedPlayer()">↓ Minimizar</button>
             <span style="font-family: var(--font-pixel); font-size: 9px; color: var(--color-primary);">DECK REPRODUCTOR</span>
             <button class="btn-retro-action" id="btnSaveToOffline" onclick="saveCurrentTrackToOffline()" style="font-size: 8px;">
-                💾 Guardar Offline
+                💾 Guardar
             </button>
         </div>
 
-        <!-- Animated Cassette Graphic -->
-        <div class="cassette-hero-deck">
-            <div class="cassette-label-strip" id="expandedCassetteLabel">BAILANDO SOLO</div>
-            <div class="cassette-window">
-                <div class="cassette-reel" id="reelLeft"></div>
-                <div class="tape-strip"></div>
-                <div class="cassette-reel" id="reelRight"></div>
+        <!-- Mode Switcher Tabs -->
+        <div class="deck-mode-tabs">
+            <button class="deck-tab-btn active" id="deckTabCassette" onclick="switchDeckMode('cassette')">📼 Casete</button>
+            <button class="deck-tab-btn" id="deckTabLyrics" onclick="switchDeckMode('lyrics')">🎤 Letras</button>
+            <button class="deck-tab-btn" id="deckTabQueue" onclick="switchDeckMode('queue')">📜 Cola (<span id="queueCountBadge">0</span>)</button>
+            <button class="deck-tab-btn" id="deckTabEq" onclick="switchDeckMode('eq')">🎚️ EQ</button>
+        </div>
+
+        <!-- Panel 1: Cassette Deck + Spectrum -->
+        <div class="deck-panel-view active" id="deckPanelCassette">
+            <div class="cassette-hero-deck" id="cassetteHeroDeck">
+                <div class="cassette-label-strip" id="expandedCassetteLabel">BAILANDO SOLO</div>
+                <div class="cassette-window">
+                    <div class="cassette-reel" id="reelLeft"></div>
+                    <div class="tape-strip"></div>
+                    <div class="cassette-reel" id="reelRight"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 8px; font-family: var(--font-pixel); color: #888;">
+                    <span>SIDE A</span>
+                    <span id="speedBadge">1.0X</span>
+                    <span>HI-FI STEREO</span>
+                </div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 8px; font-family: var(--font-pixel); color: #888;">
-                <span>SIDE A</span>
-                <span id="speedBadge">1.0X</span>
-                <span>HI-FI STEREO</span>
+            <!-- Live Audio Visualizer Spectrum -->
+            <canvas id="spectrumCanvas" class="deck-spectrum-canvas" width="320" height="38"></canvas>
+        </div>
+
+        <!-- Panel 2: Synchronized Lyrics / Karaoke -->
+        <div class="deck-panel-view" id="deckPanelLyrics">
+            <div class="lyrics-panel-box" id="lyricsContainer">
+                <div style="margin: auto; color: var(--color-text-muted); font-size: 11px;">
+                    <p>⏳ Esperando reproducción para cargar letras...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 3: Queue ("Up Next") -->
+        <div class="deck-panel-view" id="deckPanelQueue">
+            <div class="queue-panel-box">
+                <div class="queue-header-strip">
+                    <span>A CONTINUACIÓN</span>
+                    <button class="btn-retro-action" style="padding: 2px 6px; font-size: 6.5px;" onclick="clearPlayQueue()">🧹 Vaciar Cola</button>
+                </div>
+                <div id="queueListContent" style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+                    <div style="text-align: center; color: var(--color-text-muted); font-size: 10px; padding: 20px 0;">
+                        No hay canciones añadidas a la cola.<br>Toca <strong>📜+</strong> en cualquier canción para escucharla a continuación.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 4: 5-Band Graphic Equalizer -->
+        <div class="deck-panel-view" id="deckPanelEq">
+            <div class="eq-panel-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-family: var(--font-pixel); font-size: 7.5px; color: var(--color-primary);">ECUALIZADOR 5 BANDAS</span>
+                    <button class="btn-mega-bass" id="btnMegaBass" onclick="toggleMegaBass()">
+                        🔊 BASS BOOST
+                    </button>
+                </div>
+                <div class="eq-sliders-row">
+                    <div class="eq-col">
+                        <span class="eq-db-label" id="eqDb0">0dB</span>
+                        <input type="range" min="-12" max="12" step="1" value="0" class="eq-slider" id="eqBand0" oninput="updateEqBand(0, this.value)">
+                        <span class="eq-freq-label">60Hz</span>
+                    </div>
+                    <div class="eq-col">
+                        <span class="eq-db-label" id="eqDb1">0dB</span>
+                        <input type="range" min="-12" max="12" step="1" value="0" class="eq-slider" id="eqBand1" oninput="updateEqBand(1, this.value)">
+                        <span class="eq-freq-label">250Hz</span>
+                    </div>
+                    <div class="eq-col">
+                        <span class="eq-db-label" id="eqDb2">0dB</span>
+                        <input type="range" min="-12" max="12" step="1" value="0" class="eq-slider" id="eqBand2" oninput="updateEqBand(2, this.value)">
+                        <span class="eq-freq-label">1kHz</span>
+                    </div>
+                    <div class="eq-col">
+                        <span class="eq-db-label" id="eqDb3">0dB</span>
+                        <input type="range" min="-12" max="12" step="1" value="0" class="eq-slider" id="eqBand3" oninput="updateEqBand(3, this.value)">
+                        <span class="eq-freq-label">4kHz</span>
+                    </div>
+                    <div class="eq-col">
+                        <span class="eq-db-label" id="eqDb4">0dB</span>
+                        <input type="range" min="-12" max="12" step="1" value="0" class="eq-slider" id="eqBand4" oninput="updateEqBand(4, this.value)">
+                        <span class="eq-freq-label">12kHz</span>
+                    </div>
+                </div>
+                <div class="eq-presets-row">
+                    <button class="eq-preset-chip active" id="presetFlat" onclick="applyEqPreset('flat')">Plano</button>
+                    <button class="eq-preset-chip" id="presetBass" onclick="applyEqPreset('bass')">Mega Bass 🔊</button>
+                    <button class="eq-preset-chip" id="presetRock" onclick="applyEqPreset('rock')">Rock 🎸</button>
+                    <button class="eq-preset-chip" id="presetElectro" onclick="applyEqPreset('electro')">Electrónica ⚡</button>
+                    <button class="eq-preset-chip" id="presetVocal" onclick="applyEqPreset('vocal')">Voces 🎤</button>
+                    <button class="eq-preset-chip" id="presetLofi" onclick="applyEqPreset('lofi')">Lo-Fi 👾</button>
+                </div>
             </div>
         </div>
 
@@ -1239,9 +1797,10 @@
             </div>
         </div>
 
-        <!-- Scrubber -->
-        <div class="expanded-progress-box">
-            <div class="scrubber-bar" onclick="seekExpanded(event)">
+        <!-- Scrubber with Touch Floating Tooltip -->
+        <div class="expanded-progress-box scrubber-container">
+            <div id="scrubberTooltip" class="scrubber-tooltip">0:00</div>
+            <div class="scrubber-bar" id="expandedScrubberBar" onclick="seekExpanded(event)">
                 <div class="scrubber-fill" id="expandedProgressFill"></div>
             </div>
             <div class="time-labels">
@@ -1266,6 +1825,105 @@
             </div>
             <div class="tool-chip" onclick="cycleSleepTimer()">
                 💤 Sleep: <strong id="sleepTimerText">Off</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Selector Modal -->
+    <div class="dialog-overlay" id="themeSelectorModal">
+        <div class="dialog-box" style="border-color: var(--color-primary);">
+            <div class="dialog-title" style="color: var(--color-primary);">🎨 SELECTOR DE TEMAS RETRO</div>
+            <div class="dialog-desc">
+                <p style="margin-bottom: 8px; font-size: 11px;">Elige la estética visual de tu reproductor móvil:</p>
+                <div class="theme-grid">
+                    <div class="theme-card" onclick="setAppTheme('cyberpunk')" id="themeCard_cyberpunk">
+                        <div class="theme-card-title"><span>Cyberpunk</span><span>🌃</span></div>
+                        <div class="theme-swatches">
+                            <div class="theme-swatch" style="background:#0f0f1a;"></div>
+                            <div class="theme-swatch" style="background:#00f0ff;"></div>
+                            <div class="theme-swatch" style="background:#ff007f;"></div>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="setAppTheme('gameboy')" id="themeCard_gameboy">
+                        <div class="theme-card-title"><span>GameBoy</span><span>🎮</span></div>
+                        <div class="theme-swatches">
+                            <div class="theme-swatch" style="background:#8b956d;"></div>
+                            <div class="theme-swatch" style="background:#9bbc0f;"></div>
+                            <div class="theme-swatch" style="background:#0f380f;"></div>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="setAppTheme('ps2')" id="themeCard_ps2">
+                        <div class="theme-card-title"><span>PlayStation 2</span><span>🌌</span></div>
+                        <div class="theme-swatches">
+                            <div class="theme-swatch" style="background:#000411;"></div>
+                            <div class="theme-swatch" style="background:#0084ff;"></div>
+                            <div class="theme-swatch" style="background:#00d4ff;"></div>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="setAppTheme('snes')" id="themeCard_snes">
+                        <div class="theme-card-title"><span>Super NES</span><span>🕹️</span></div>
+                        <div class="theme-swatches">
+                            <div class="theme-swatch" style="background:#2b2b36;"></div>
+                            <div class="theme-swatch" style="background:#b57edc;"></div>
+                            <div class="theme-swatch" style="background:#5cdb95;"></div>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="setAppTheme('vaporwave')" id="themeCard_vaporwave">
+                        <div class="theme-card-title"><span>Vaporwave</span><span>🌴</span></div>
+                        <div class="theme-swatches">
+                            <div class="theme-swatch" style="background:#150524;"></div>
+                            <div class="theme-swatch" style="background:#ff71ce;"></div>
+                            <div class="theme-swatch" style="background:#05ffa1;"></div>
+                        </div>
+                    </div>
+                    <div class="theme-card" onclick="setAppTheme('cassette')" id="themeCard_cassette">
+                        <div class="theme-card-title"><span>Cassette 80s</span><span>📼</span></div>
+                        <div class="theme-swatches">
+                            <div class="theme-swatch" style="background:#1e1711;"></div>
+                            <div class="theme-swatch" style="background:#fca311;"></div>
+                            <div class="theme-swatch" style="background:#e63946;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-retro-action btn-retro-accent" onclick="closeThemeSelectorModal()">
+                    Listo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remote YouTube Downloader Modal -->
+    <div class="dialog-overlay" id="remoteDownloadModal">
+        <div class="dialog-box" style="border-color: #00f0ff;">
+            <div class="dialog-title" style="color: #00f0ff;">⚡ DESCARGA REMOTA (YOUTUBE A TU PC)</div>
+            <div class="dialog-desc">
+                <p style="margin-bottom: 8px; font-size: 11px;">
+                    Escribe el nombre de la canción o pega un enlace de YouTube. Tu PC descargará el MP3 en máxima calidad:
+                </p>
+                <div class="search-strip" style="background:#111; border-color:#00f0ff; margin-bottom: 10px;">
+                    <input type="text" id="remoteQueryInput" placeholder="Ej: Soda Stereo De Musica Ligera o URL..." style="color:#00f0ff; width:100%;">
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center; margin-bottom: 12px;">
+                    <span style="font-size: 10px; color: var(--color-text-muted);">Guardar en:</span>
+                    <input type="text" id="remoteFolderInput" placeholder="Descargas" value="Descargas" style="background:#222; border:1px solid #444; color:#fff; font-family:var(--font-mono); font-size:11px; padding:4px 6px; flex:1;">
+                </div>
+                <!-- Progress Box -->
+                <div id="remoteDownloadProgressBox" style="display: none; margin-bottom: 10px;">
+                    <div class="dialog-progress-bar" style="margin-bottom: 6px;">
+                        <div class="dialog-progress-fill" id="remoteProgressFill" style="width: 10%;"></div>
+                    </div>
+                    <small id="remoteProgressStage" style="font-size: 10px; color: var(--color-primary); display: block;">Iniciando...</small>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button class="btn-retro-action btn-retro-accent" id="btnStartRemoteDownload" onclick="confirmStartRemoteDownload()">
+                    ⚡ Descargar Ahora
+                </button>
+                <button class="btn-retro-action btn-retro-pink" onclick="closeRemoteDownloadModal()">
+                    Cancelar
+                </button>
             </div>
         </div>
     </div>
@@ -1442,7 +2100,7 @@
            INDEXEDDB ENGINE & STORAGE PERSISTENCE
            ═══════════════════════════════════════════════════════════════════════════ */
         const DB_NAME = 'BailandoSoloDB';
-        const DB_VERSION = 2;
+        const DB_VERSION = 3;
         let db = null;
 
         function openDatabase() {
@@ -1463,6 +2121,9 @@
                     if (!database.objectStoreNames.contains('playlists')) {
                         database.createObjectStore('playlists', { keyPath: 'id' });
                     }
+                    if (!database.objectStoreNames.contains('lyrics')) {
+                        database.createObjectStore('lyrics', { keyPath: 'id' });
+                    }
                 };
 
                 req.onsuccess = (e) => {
@@ -1472,6 +2133,32 @@
 
                 req.onerror = (e) => reject(e.target.error);
             });
+        }
+
+        async function dbSaveLyrics(songId, lyricsData) {
+            try {
+                const database = await openDatabase();
+                return new Promise((resolve) => {
+                    const tx = database.transaction('lyrics', 'readwrite');
+                    const store = tx.objectStore('lyrics');
+                    store.put({ id: songId, data: lyricsData, timestamp: Date.now() });
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (e) { return false; }
+        }
+
+        async function dbGetLyrics(songId) {
+            try {
+                const database = await openDatabase();
+                return new Promise((resolve) => {
+                    const tx = database.transaction('lyrics', 'readonly');
+                    const store = tx.objectStore('lyrics');
+                    const req = store.get(songId);
+                    req.onsuccess = () => resolve(req.result ? req.result.data : null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (e) { return null; }
         }
 
         // Request storage persistence so Android OS / Safari never clears offline songs
@@ -1712,6 +2399,21 @@
 
         let deferredPwaPrompt = null;
         let isServerReachable = false;
+
+        // Queue, Deck mode & Lyrics state
+        let playQueue = []; // Priority queue items
+        let currentDeckMode = 'cassette'; // 'cassette' | 'lyrics' | 'queue' | 'eq'
+        let currentLyrics = []; // [{ time: number, text: string }]
+        let activeLyricIndex = -1;
+
+        // Equalizer & Web Audio API
+        let audioCtx = null;
+        let audioSourceNode = null;
+        let analyserNode = null;
+        let eqFilters = [];
+        let bassBoostNode = null;
+        let isBassBoostActive = false;
+        let visualizerAnimFrame = null;
 
         /* ═══════════════════════════════════════════════════════════════════════════
            PWA SERVICE WORKER
@@ -2259,6 +2961,9 @@
                             </div>
                         </div>
                         <div class="song-actions" onclick="event.stopPropagation()">
+                            <button class="btn-song-action" onclick="addTrackToQueueByIndex(${idx})" title="Añadir a la cola (Reproducir a continuación)">
+                                📜+
+                            </button>
                             ${song.source === 'server' ? `
                                 <button class="btn-song-action" onclick="downloadSingleSongOffline('${encodeURIComponent(song.folder)}', '${encodeURIComponent(song.filename)}')" title="Guardar offline">
                                     💾
@@ -2539,10 +3244,26 @@
         }
 
         /* ═══════════════════════════════════════════════════════════════════════════
+           HAPTIC FEEDBACK ENGINE (TACTILE IMMERSION)
+           ═══════════════════════════════════════════════════════════════════════════ */
+        function hapticFeedback(type = 'light') {
+            if (!('vibrate' in navigator)) return;
+            try {
+                if (type === 'light') navigator.vibrate(12);
+                else if (type === 'medium') navigator.vibrate(28);
+                else if (type === 'heavy') navigator.vibrate(48);
+                else if (type === 'success') navigator.vibrate([15, 40, 25]);
+            } catch (e) {}
+        }
+
+        /* ═══════════════════════════════════════════════════════════════════════════
            AUDIO PLAYER ENGINE (100% OFFLINE & RESILIENT)
            ═══════════════════════════════════════════════════════════════════════════ */
         async function playTrackAtIndex(idx) {
             if (idx < 0 || idx >= activePlaylist.length) return;
+            hapticFeedback('light');
+            initWebAudio();
+
             activeIndex = idx;
             const track = activePlaylist[idx];
 
@@ -2567,6 +3288,8 @@
                 isPlaying = true;
                 updatePlayerUI(track);
                 savePlaybackState(track);
+                loadLyricsForTrack(track);
+                updateQueueUI();
             } catch (e) {
                 console.warn("Playback error:", e);
                 isPlaying = false;
@@ -2595,6 +3318,9 @@
         }
 
         function togglePlay() {
+            hapticFeedback('medium');
+            initWebAudio();
+
             if (!audio.src) {
                 if (activePlaylist.length > 0) playTrackAtIndex(0);
                 return;
@@ -2614,6 +3340,7 @@
 
         /* ─── GRANULAR SHUFFLE & TRACK NAVIGATION ───────────────────────────── */
         function cycleShuffleMode() {
+            hapticFeedback('light');
             const modes = ['off', 'folder', 'artist', 'global'];
             const currentIdx = modes.indexOf(shuffleMode);
             shuffleMode = modes[(currentIdx + 1) % modes.length];
@@ -2668,6 +3395,7 @@
         }
 
         async function startGlobalShufflePlay() {
+            hapticFeedback('medium');
             const allSongs = await dbGetAllSongs();
             if (allSongs.length === 0) {
                 showToast("No tienes canciones guardadas en el teléfono");
@@ -2691,10 +3419,21 @@
 
         async function nextTrack() {
             if (activePlaylist.length === 0) return;
+            hapticFeedback('light');
 
             if (repeatMode === 'one') {
                 audio.currentTime = 0;
                 audio.play();
+                return;
+            }
+
+            // ─── QUEUE PRIORITY (SPOTIFY STYLE) ──────────────────────────────
+            if (playQueue.length > 0) {
+                const nextQueued = playQueue.shift();
+                updateQueueUI();
+                // Insert right after current track in active playlist and play
+                activePlaylist.splice(activeIndex + 1, 0, nextQueued);
+                playTrackAtIndex(activeIndex + 1);
                 return;
             }
 
@@ -2754,6 +3493,7 @@
         }
 
         function prevTrack() {
+            hapticFeedback('light');
             if (audio.currentTime > 3) {
                 audio.currentTime = 0;
                 return;
@@ -2766,6 +3506,7 @@
         }
 
         function toggleRepeat() {
+            hapticFeedback('light');
             const btn = document.getElementById('btnRepeat');
             if (repeatMode === 'off') {
                 repeatMode = 'all';
@@ -2787,6 +3528,7 @@
         }
 
         function cyclePlaybackSpeed() {
+            hapticFeedback('light');
             const speeds = [1.0, 1.25, 1.5, 0.75];
             const currentIdx = speeds.indexOf(playbackSpeed);
             playbackSpeed = speeds[(currentIdx + 1) % speeds.length];
@@ -2797,6 +3539,7 @@
         }
 
         function cycleSleepTimer() {
+            hapticFeedback('light');
             const options = [0, 15, 30, 45, 60];
             const currentIdx = options.indexOf(sleepTimerMinutes);
             const nextMinutes = options[(currentIdx + 1) % options.length];
@@ -2877,6 +3620,9 @@
 
             document.getElementById('expandedCurrentTime').textContent = formatSeconds(audio.currentTime);
             document.getElementById('expandedDuration').textContent = formatSeconds(audio.duration);
+
+            // Synchronize karaoke lyrics line
+            syncLyricsWithTime(audio.currentTime);
         });
 
         audio.addEventListener('ended', () => nextTrack());
@@ -2884,15 +3630,39 @@
         function seekMiniPlayer(e) {
             if (!audio.duration) return;
             const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
+            const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             audio.currentTime = pos * audio.duration;
+            hapticFeedback('light');
         }
 
         function seekExpanded(e) {
             if (!audio.duration) return;
             const rect = e.currentTarget.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
+            const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
             audio.currentTime = pos * audio.duration;
+            hapticFeedback('light');
+        }
+
+        function handleScrubberTouch(e) {
+            if (!audio.duration) return;
+            const scrubber = document.getElementById('expandedScrubberBar');
+            const tooltip = document.getElementById('scrubberTooltip');
+            if (!scrubber || !tooltip) return;
+
+            const rect = scrubber.getBoundingClientRect();
+            const touch = e.touches[0];
+            const clampedX = Math.max(rect.left, Math.min(rect.right, touch.clientX));
+            const ratio = (clampedX - rect.left) / rect.width;
+            const targetSec = ratio * audio.duration;
+
+            tooltip.textContent = formatSeconds(targetSec);
+            tooltip.style.left = `${(clampedX - rect.left)}px`;
+            tooltip.classList.add('show');
+        }
+
+        function hideScrubberTooltip() {
+            const tooltip = document.getElementById('scrubberTooltip');
+            if (tooltip) tooltip.classList.remove('show');
         }
 
         function updatePlayerUI(track) {
@@ -2922,13 +3692,682 @@
         }
 
         function openExpandedPlayer() {
-            document.getElementById('expandedPlayerModal').classList.add('open');
+            hapticFeedback('light');
+            const modal = document.getElementById('expandedPlayerModal');
+            modal.style.transform = 'translateY(0)';
+            modal.classList.add('open');
             updateShuffleButtonUI();
+            updateQueueUI();
         }
 
         function closeExpandedPlayer() {
-            document.getElementById('expandedPlayerModal').classList.remove('open');
+            hapticFeedback('light');
+            const modal = document.getElementById('expandedPlayerModal');
+            modal.style.transform = 'translateY(100%)';
+            modal.classList.remove('open');
         }
+
+        /* ─── DECK MODE SWITCHER: CASSETTE / LYRICS / QUEUE / EQ ─────────────── */
+        function switchDeckMode(mode) {
+            hapticFeedback('light');
+            currentDeckMode = mode;
+            document.querySelectorAll('.deck-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.deck-panel-view').forEach(panel => panel.classList.remove('active'));
+
+            if (mode === 'cassette') {
+                document.getElementById('deckTabCassette').classList.add('active');
+                document.getElementById('deckPanelCassette').classList.add('active');
+            } else if (mode === 'lyrics') {
+                document.getElementById('deckTabLyrics').classList.add('active');
+                document.getElementById('deckPanelLyrics').classList.add('active');
+                if (currentLyrics.length === 0 && activePlaylist[activeIndex]) {
+                    loadLyricsForTrack(activePlaylist[activeIndex]);
+                }
+            } else if (mode === 'queue') {
+                document.getElementById('deckTabQueue').classList.add('active');
+                document.getElementById('deckPanelQueue').classList.add('active');
+                updateQueueUI();
+            } else if (mode === 'eq') {
+                document.getElementById('deckTabEq').classList.add('active');
+                document.getElementById('deckPanelEq').classList.add('active');
+                initWebAudio();
+            }
+        }
+
+        /* ─── WEB AUDIO API 5-BAND EQUALIZER & SPECTRUM VISUALIZER ───────────── */
+        function initWebAudio() {
+            if (audioCtx) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                return;
+            }
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return;
+
+                audioCtx = new AudioContextClass();
+                audioSourceNode = audioCtx.createMediaElementSource(audio);
+
+                analyserNode = audioCtx.createAnalyser();
+                analyserNode.fftSize = 64;
+
+                const freqs = [60, 250, 1000, 4000, 12000];
+                const types = ['lowshelf', 'peaking', 'peaking', 'peaking', 'highshelf'];
+
+                eqFilters = freqs.map((f, i) => {
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = types[i];
+                    filter.frequency.value = f;
+                    filter.gain.value = 0;
+                    return filter;
+                });
+
+                bassBoostNode = audioCtx.createBiquadFilter();
+                bassBoostNode.type = 'lowshelf';
+                bassBoostNode.frequency.value = 80;
+                bassBoostNode.gain.value = 0;
+
+                // Chain: Source -> Filter0 -> Filter1 -> Filter2 -> Filter3 -> Filter4 -> BassBoost -> Analyser -> Destination
+                let lastNode = audioSourceNode;
+                eqFilters.forEach(f => {
+                    lastNode.connect(f);
+                    lastNode = f;
+                });
+                lastNode.connect(bassBoostNode);
+                bassBoostNode.connect(analyserNode);
+                analyserNode.connect(audioCtx.destination);
+
+                loadSavedEqualizer();
+                startVisualizer();
+            } catch (e) {
+                console.warn("[WebAudio] Init error:", e);
+            }
+        }
+
+        function updateEqBand(index, dbValue) {
+            const val = parseFloat(dbValue);
+            document.getElementById(`eqDb${index}`).textContent = `${val > 0 ? '+' : ''}${val}dB`;
+            if (eqFilters[index]) {
+                eqFilters[index].gain.value = val;
+            }
+            saveEqualizerSettings();
+        }
+
+        function toggleMegaBass() {
+            hapticFeedback('medium');
+            initWebAudio();
+            isBassBoostActive = !isBassBoostActive;
+            const btn = document.getElementById('btnMegaBass');
+            btn.classList.toggle('active', isBassBoostActive);
+            if (bassBoostNode) {
+                bassBoostNode.gain.value = isBassBoostActive ? 9 : 0;
+            }
+            showToast(isBassBoostActive ? '🔊 Mega Bass Boost Activado' : 'Bass Boost Desactivado');
+            saveEqualizerSettings();
+        }
+
+        const EQ_PRESETS = {
+            flat: { gains: [0, 0, 0, 0, 0], bassBoost: false },
+            bass: { gains: [7, 5, 0, 2, 3], bassBoost: true },
+            rock: { gains: [5, 3, -1, 4, 5], bassBoost: false },
+            electro: { gains: [6, 4, 1, 3, 6], bassBoost: true },
+            vocal: { gains: [-2, 1, 5, 3, 1], bassBoost: false },
+            lofi: { gains: [-4, 3, 4, -3, -6], bassBoost: false }
+        };
+
+        function applyEqPreset(presetName) {
+            hapticFeedback('light');
+            initWebAudio();
+            const preset = EQ_PRESETS[presetName];
+            if (!preset) return;
+
+            document.querySelectorAll('.eq-preset-chip').forEach(c => c.classList.remove('active'));
+            const chip = document.getElementById(`preset${presetName.charAt(0).toUpperCase() + presetName.slice(1)}`);
+            if (chip) chip.classList.add('active');
+
+            preset.gains.forEach((g, i) => {
+                const slider = document.getElementById(`eqBand${i}`);
+                if (slider) slider.value = g;
+                updateEqBand(i, g);
+            });
+
+            isBassBoostActive = preset.bassBoost;
+            const btn = document.getElementById('btnMegaBass');
+            if (btn) btn.classList.toggle('active', isBassBoostActive);
+            if (bassBoostNode) bassBoostNode.gain.value = isBassBoostActive ? 9 : 0;
+
+            saveEqualizerSettings();
+        }
+
+        function saveEqualizerSettings() {
+            try {
+                const gains = eqFilters.map(f => f.gain.value);
+                localStorage.setItem('bs_eq_settings', JSON.stringify({
+                    gains: gains,
+                    bassBoost: isBassBoostActive
+                }));
+            } catch (e) {}
+        }
+
+        function loadSavedEqualizer() {
+            try {
+                const saved = localStorage.getItem('bs_eq_settings');
+                if (!saved) return;
+                const data = JSON.parse(saved);
+                if (data.gains && Array.isArray(data.gains)) {
+                    data.gains.forEach((g, i) => {
+                        const slider = document.getElementById(`eqBand${i}`);
+                        if (slider) slider.value = g;
+                        updateEqBand(i, g);
+                    });
+                }
+                if (typeof data.bassBoost === 'boolean') {
+                    isBassBoostActive = data.bassBoost;
+                    const btn = document.getElementById('btnMegaBass');
+                    if (btn) btn.classList.toggle('active', isBassBoostActive);
+                    if (bassBoostNode) bassBoostNode.gain.value = isBassBoostActive ? 9 : 0;
+                }
+            } catch (e) {}
+        }
+
+        function startVisualizer() {
+            if (visualizerAnimFrame) return;
+            const canvas = document.getElementById('spectrumCanvas');
+            if (!canvas || !analyserNode) return;
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyserNode.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function render() {
+                visualizerAnimFrame = requestAnimationFrame(render);
+                if (!isPlaying) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    return;
+                }
+                analyserNode.getByteFrequencyData(dataArray);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const barCount = 20;
+                const barWidth = (canvas.width / barCount) - 2;
+                let x = 0;
+
+                for (let i = 0; i < barCount; i++) {
+                    const val = dataArray[i] || 0;
+                    const barHeight = Math.max(2, (val / 255) * canvas.height);
+
+                    const grad = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - barHeight);
+                    grad.addColorStop(0, '#00f0ff');
+                    grad.addColorStop(0.6, '#ff007f');
+                    grad.addColorStop(1, '#39ff14');
+
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 2;
+                }
+            }
+            render();
+        }
+
+        /* ─── REAL-TIME SYNCHRONIZED LYRICS / KARAOKE ENGINE ────────────────── */
+        async function loadLyricsForTrack(track) {
+            if (!track) return;
+            const container = document.getElementById('lyricsContainer');
+            if (!container) return;
+
+            activeLyricIndex = -1;
+            currentLyrics = [];
+
+            // 1. Check cached lyrics in IndexedDB
+            const cached = await dbGetLyrics(track.id || track.filename);
+            if (cached && Array.isArray(cached) && cached.length > 0) {
+                currentLyrics = cached;
+                renderLyricsLines();
+                return;
+            }
+
+            container.innerHTML = '<div style="margin:auto; color:var(--color-primary); font-size:11px;"><p>⏳ Buscando letras en vivo...</p></div>';
+
+            let cleanTitle = (track.title || track.filename || '').replace(/\.[^/.]+$/, '').replace(/^[0-9\s._-]+/, '').trim();
+            let cleanArtist = (track.artist || track.uploader || '').replace(/[-_]/g, ' ').trim();
+            if (cleanArtist.toLowerCase() === 'desconocido' || cleanArtist.toLowerCase() === 'descargas') {
+                cleanArtist = '';
+            }
+
+            try {
+                let url = '';
+                if (cleanArtist && cleanTitle) {
+                    url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(cleanArtist)}&track_name=${encodeURIComponent(cleanTitle)}`;
+                } else {
+                    url = `https://lrclib.net/api/search?q=${encodeURIComponent(cleanTitle)}`;
+                }
+
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 4500);
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeout);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    const item = Array.isArray(data) ? data[0] : data;
+                    if (item && (item.syncedLyrics || item.plainLyrics)) {
+                        if (item.syncedLyrics) {
+                            currentLyrics = parseLrcString(item.syncedLyrics);
+                        } else {
+                            currentLyrics = item.plainLyrics.split('\n').filter(Boolean).map(line => ({ time: -1, text: line }));
+                        }
+                        if (currentLyrics.length > 0) {
+                            await dbSaveLyrics(track.id || track.filename, currentLyrics);
+                            renderLyricsLines();
+                            return;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("[Lyrics] Could not fetch from LRCLIB:", e);
+            }
+
+            container.innerHTML = `
+                <div style="margin:auto; color:var(--color-text-muted); font-size:11px; line-height:1.6;">
+                    <p>🎤 Letras no sincronizadas automáticamente.</p>
+                    <small>Se intentará de nuevo al reproducir con conexión.</small>
+                </div>
+            `;
+        }
+
+        function parseLrcString(lrc) {
+            const lines = lrc.split('\n');
+            const result = [];
+            const regex = /\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\](.*)/;
+
+            for (const line of lines) {
+                const match = line.match(regex);
+                if (match) {
+                    const min = parseInt(match[1], 10);
+                    const sec = parseInt(match[2], 10);
+                    const ms = match[3] ? parseInt(match[3].padEnd(3, '0').slice(0, 3), 10) : 0;
+                    const time = min * 60 + sec + ms / 1000;
+                    const text = match[4].trim();
+                    if (text) {
+                        result.push({ time, text });
+                    }
+                }
+            }
+            return result.sort((a, b) => a.time - b.time);
+        }
+
+        function renderLyricsLines() {
+            const container = document.getElementById('lyricsContainer');
+            if (!container) return;
+
+            if (currentLyrics.length === 0) {
+                container.innerHTML = '<div style="margin:auto; color:#888;">Sin letras disponibles</div>';
+                return;
+            }
+
+            let html = '';
+            currentLyrics.forEach((l, idx) => {
+                html += `
+                    <div class="lyric-line" id="lyricLine_${idx}" onclick="seekToLyricTime(${l.time})">
+                        ${l.text}
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function seekToLyricTime(time) {
+            if (time >= 0 && audio.duration) {
+                hapticFeedback('light');
+                audio.currentTime = time;
+            }
+        }
+
+        function syncLyricsWithTime(currentTime) {
+            if (!currentLyrics || currentLyrics.length === 0 || currentLyrics[0].time < 0) return;
+
+            let foundIdx = -1;
+            for (let i = 0; i < currentLyrics.length; i++) {
+                if (currentTime >= currentLyrics[i].time) {
+                    foundIdx = i;
+                } else {
+                    break;
+                }
+            }
+
+            if (foundIdx !== activeLyricIndex && foundIdx >= 0) {
+                if (activeLyricIndex >= 0) {
+                    const prevEl = document.getElementById(`lyricLine_${activeLyricIndex}`);
+                    if (prevEl) {
+                        prevEl.classList.remove('active');
+                        prevEl.classList.add('past');
+                    }
+                }
+                activeLyricIndex = foundIdx;
+                const curEl = document.getElementById(`lyricLine_${foundIdx}`);
+                if (curEl) {
+                    curEl.classList.add('active');
+                    curEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+
+        /* ─── QUEUE ("UP NEXT") ENGINE ───────────────────────────────────────── */
+        function addTrackToQueueByIndex(idx) {
+            hapticFeedback('medium');
+            if (idx < 0 || idx >= activePlaylist.length) return;
+            const song = activePlaylist[idx];
+            playQueue.push(song);
+            updateQueueUI();
+            showToast(`✓ "${song.title || song.filename}" en cola`);
+        }
+
+        function removeFromPlayQueue(queueIdx) {
+            hapticFeedback('light');
+            if (queueIdx >= 0 && queueIdx < playQueue.length) {
+                playQueue.splice(queueIdx, 1);
+                updateQueueUI();
+                showToast(`Pista quitada de la cola`);
+            }
+        }
+
+        function clearPlayQueue() {
+            hapticFeedback('light');
+            playQueue = [];
+            updateQueueUI();
+            showToast("Cola vaciada");
+        }
+
+        function updateQueueUI() {
+            const badge = document.getElementById('queueCountBadge');
+            if (badge) badge.textContent = playQueue.length;
+
+            const listEl = document.getElementById('queueListContent');
+            if (!listEl) return;
+
+            let html = '';
+            const currentSong = activePlaylist[activeIndex];
+            if (currentSong) {
+                html += `
+                    <div style="font-family: var(--font-pixel); font-size: 6.5px; color: var(--color-success); margin-bottom: 2px;">REPRODUCIENDO AHORA:</div>
+                    <div class="queue-item-row current-playing">
+                        <span style="font-size: 14px;">▶️</span>
+                        <div class="queue-item-info">
+                            <div class="queue-item-title">${currentSong.title || currentSong.filename}</div>
+                            <div class="queue-item-artist">${currentSong.artist || currentSong.uploader || currentSong.folder || ''}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (playQueue.length > 0) {
+                html += `<div style="font-family: var(--font-pixel); font-size: 6.5px; color: var(--color-primary); margin: 6px 0 2px;">EN COLA PRIORITARIA (${playQueue.length}):</div>`;
+                playQueue.forEach((song, qIdx) => {
+                    html += `
+                        <div class="queue-item-row">
+                            <span style="font-family:var(--font-pixel); font-size:8px; color:var(--color-primary);">${qIdx + 1}</span>
+                            <div class="queue-item-info">
+                                <div class="queue-item-title">${song.title || song.filename}</div>
+                                <div class="queue-item-artist">${song.artist || song.uploader || song.folder || ''}</div>
+                            </div>
+                            <button class="btn-queue-remove" onclick="removeFromPlayQueue(${qIdx})" title="Quitar de cola">✖</button>
+                        </div>
+                    `;
+                });
+            }
+
+            // Up next from current album / playlist
+            let upcomingCount = 0;
+            let upcomingHtml = '';
+            for (let i = activeIndex + 1; i < activePlaylist.length && upcomingCount < 10; i++) {
+                const s = activePlaylist[i];
+                upcomingCount++;
+                upcomingHtml += `
+                    <div class="queue-item-row" style="opacity: 0.75;" onclick="playTrackAtIndex(${i})">
+                        <span style="font-family:var(--font-pixel); font-size:8px; color:#777;">#${i + 1}</span>
+                        <div class="queue-item-info">
+                            <div class="queue-item-title">${s.title || s.filename}</div>
+                            <div class="queue-item-artist">${s.artist || s.uploader || s.folder || ''}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (upcomingCount > 0) {
+                html += `<div style="font-family: var(--font-pixel); font-size: 6.5px; color: var(--color-text-muted); margin: 6px 0 2px;">SIGUIENTES EN LA LISTA:</div>` + upcomingHtml;
+            }
+
+            if (!currentSong && playQueue.length === 0 && upcomingCount === 0) {
+                html = '<div style="text-align:center; color:#888; font-size:10px; padding:20px;">Cola vacía.</div>';
+            }
+
+            listEl.innerHTML = html;
+        }
+
+        /* ─── TOUCH GESTURES (SWIPE TO DISMISS, SKIP, SCRUB TOOLTIP) ─────────── */
+        function initTouchGestures() {
+            // 1. Pull down to dismiss expanded player modal
+            const modal = document.getElementById('expandedPlayerModal');
+            let dragStartY = 0;
+            let currentDragY = 0;
+            let isDragging = false;
+
+            if (modal) {
+                modal.addEventListener('touchstart', (e) => {
+                    if (modal.scrollTop <= 5 && e.touches[0].clientY < 220) {
+                        dragStartY = e.touches[0].clientY;
+                        isDragging = true;
+                    }
+                }, { passive: true });
+
+                modal.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    currentDragY = e.touches[0].clientY;
+                    const dy = currentDragY - dragStartY;
+                    if (dy > 0) {
+                        modal.style.transition = 'none';
+                        modal.style.transform = `translateY(${dy}px)`;
+                    }
+                }, { passive: true });
+
+                modal.addEventListener('touchend', () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    const dy = currentDragY - dragStartY;
+                    modal.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease';
+                    if (dy > 85) {
+                        closeExpandedPlayer();
+                    } else {
+                        modal.style.transform = 'translateY(0)';
+                    }
+                    dragStartY = 0;
+                    currentDragY = 0;
+                });
+            }
+
+            // 2. Swipe on cassette deck to skip track
+            const cassetteDeck = document.getElementById('cassetteHeroDeck');
+            let cassetteTouchStartX = 0;
+            if (cassetteDeck) {
+                cassetteDeck.addEventListener('touchstart', (e) => {
+                    cassetteTouchStartX = e.touches[0].clientX;
+                }, { passive: true });
+
+                cassetteDeck.addEventListener('touchend', (e) => {
+                    const dx = e.changedTouches[0].clientX - cassetteTouchStartX;
+                    if (dx < -55) {
+                        hapticFeedback('medium');
+                        cassetteDeck.style.transform = 'translateX(-25px)';
+                        setTimeout(() => {
+                            cassetteDeck.style.transform = '';
+                            nextTrack();
+                        }, 100);
+                    } else if (dx > 55) {
+                        hapticFeedback('medium');
+                        cassetteDeck.style.transform = 'translateX(25px)';
+                        setTimeout(() => {
+                            cassetteDeck.style.transform = '';
+                            prevTrack();
+                        }, 100);
+                    }
+                });
+            }
+
+            // 3. Swipe up on mini player to expand
+            const miniPlayer = document.getElementById('miniPlayerDeck');
+            let miniStartY = 0;
+            if (miniPlayer) {
+                miniPlayer.addEventListener('touchstart', (e) => {
+                    miniStartY = e.touches[0].clientY;
+                }, { passive: true });
+
+                miniPlayer.addEventListener('touchend', (e) => {
+                    const dy = e.changedTouches[0].clientY - miniStartY;
+                    if (dy < -40) {
+                        openExpandedPlayer();
+                    }
+                });
+            }
+
+            // 4. Scrubber touch preview tooltip
+            const scrubber = document.getElementById('expandedScrubberBar');
+            if (scrubber) {
+                scrubber.addEventListener('touchmove', (e) => handleScrubberTouch(e), { passive: true });
+                scrubber.addEventListener('touchend', () => hideScrubberTooltip(), { passive: true });
+            }
+        }
+
+        /* ─── RETRO THEME ENGINE ─────────────────────────────────────────────── */
+        function setAppTheme(themeName) {
+            hapticFeedback('medium');
+            document.body.setAttribute('data-theme', themeName);
+            localStorage.setItem('bs_theme', themeName);
+            updateThemeCardsUI(themeName);
+            showToast(`✓ Tema ${themeName.toUpperCase()} activado`);
+        }
+
+        function updateThemeCardsUI(activeTheme) {
+            document.querySelectorAll('.theme-card').forEach(card => card.classList.remove('active'));
+            const activeCard = document.getElementById(`themeCard_${activeTheme}`);
+            if (activeCard) activeCard.classList.add('active');
+        }
+
+        function loadSavedTheme() {
+            const saved = localStorage.getItem('bs_theme') || 'cyberpunk';
+            document.body.setAttribute('data-theme', saved);
+            updateThemeCardsUI(saved);
+        }
+
+        function openThemeSelectorModal() {
+            hapticFeedback('light');
+            document.getElementById('themeSelectorModal').classList.add('open');
+            updateThemeCardsUI(localStorage.getItem('bs_theme') || 'cyberpunk');
+        }
+
+        function closeThemeSelectorModal() {
+            document.getElementById('themeSelectorModal').classList.remove('open');
+        }
+
+        /* ─── REMOTE YOUTUBE DOWNLOADER ENGINE ───────────────────────────────── */
+        function openRemoteDownloadModal() {
+            hapticFeedback('light');
+            if (!isServerReachable) {
+                showToast("⚠️ Conecta primero con la PC para descargar");
+            }
+            document.getElementById('remoteDownloadProgressBox').style.display = 'none';
+            document.getElementById('remoteQueryInput').value = '';
+            document.getElementById('remoteDownloadModal').classList.add('open');
+        }
+
+        function closeRemoteDownloadModal() {
+            document.getElementById('remoteDownloadModal').classList.remove('open');
+        }
+
+        async function confirmStartRemoteDownload() {
+            const query = document.getElementById('remoteQueryInput').value.trim();
+            const folder = document.getElementById('remoteFolderInput').value.trim() || 'Descargas';
+
+            if (!query) {
+                showToast("Escribe un nombre de canción o pega una URL");
+                return;
+            }
+
+            hapticFeedback('medium');
+            const progressBox = document.getElementById('remoteDownloadProgressBox');
+            const progressFill = document.getElementById('remoteProgressFill');
+            const progressStage = document.getElementById('remoteProgressStage');
+            const btn = document.getElementById('btnStartRemoteDownload');
+
+            progressBox.style.display = 'block';
+            progressFill.style.width = '10%';
+            progressStage.textContent = 'Enviando orden a la PC...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(getApiUrl('/api/mobile/quick-download'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, folder })
+                });
+
+                if (!res.ok) throw new Error("Error al iniciar descarga");
+                const data = await res.json();
+                const taskId = data.task_id;
+
+                progressStage.textContent = 'PC procesando audio y carátula...';
+
+                // Poll status
+                let attempts = 0;
+                const pollInterval = setInterval(async () => {
+                    attempts++;
+                    try {
+                        const statusRes = await fetch(getApiUrl(`/api/mobile/quick-status/${taskId}`));
+                        if (statusRes.ok) {
+                            const task = await statusRes.json();
+                            const pct = Math.max(15, Math.min(100, task.percent || 15));
+                            progressFill.style.width = `${pct}%`;
+                            progressStage.textContent = task.stage || `Descargando (${pct}%)...`;
+
+                            if (task.status === 'error') {
+                                clearInterval(pollInterval);
+                                btn.disabled = false;
+                                progressFill.style.width = '0%';
+                                progressStage.textContent = `❌ ${task.stage || task.error || 'Error en la descarga'}`;
+                                hapticFeedback('heavy');
+                                showToast(task.stage || 'Error en la descarga');
+                                return;
+                            }
+
+                            if (task.status === 'finished' || pct >= 99) {
+                                clearInterval(pollInterval);
+                                btn.disabled = false;
+                                progressFill.style.width = '100%';
+                                progressStage.textContent = '✓ ¡Descarga finalizada en tu PC!';
+                                hapticFeedback('success');
+                                showToast('✓ ¡Canción descargada con éxito en tu PC!');
+                                setTimeout(async () => {
+                                    closeRemoteDownloadModal();
+                                    await loadServerLibrary();
+                                    if (currentView !== 'server') {
+                                        await switchView('server');
+                                    }
+                                }, 1400);
+                            }
+                        }
+                    } catch (pe) {}
+
+                    if (attempts > 90) {
+                        clearInterval(pollInterval);
+                        btn.disabled = false;
+                        progressStage.textContent = 'Descargando en segundo plano en la PC.';
+                    }
+                }, 1000);
+
+            } catch (e) {
+                btn.disabled = false;
+                progressStage.textContent = 'Error: ' + e.message;
+                showToast("Error de conexión con la PC");
+            }
+        }
+
 
         function savePlaybackState(track) {
             try {
@@ -3637,6 +5076,8 @@
             await openDatabase();
             await requestStoragePersistence();
             await updateOfflineBadge();
+            loadSavedTheme();
+            initTouchGestures();
             restorePlaybackState();
 
             // Check if server is available

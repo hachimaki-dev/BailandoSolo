@@ -126,6 +126,8 @@ npm run start  # Production build
 | GET | `/api/mobile/info` | Network info for mobile |
 | GET | `/api/mobile/download/<path>` | Force-download a file |
 | GET | `/api/mobile/download-folder/<folder>` | Download folder as ZIP |
+| POST | `/api/mobile/quick-download` | Remote YouTube download to PC `{query, folder}` |
+| GET | `/api/mobile/quick-status/<task_id>` | Status/progress of remote mobile download |
 | GET | `/api/tunnel/status` | Current status of Cloudflare/Localtunnel HTTPS tunnel |
 | POST | `/api/tunnel/start` | Start HTTPS tunnel to bypass AP isolation/firewall |
 | POST | `/api/tunnel/stop` | Stop running HTTPS tunnel |

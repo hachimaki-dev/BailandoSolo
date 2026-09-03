@@ -9,7 +9,7 @@
  * - AUDIO: Pass-through (audio blobs are stored in IndexedDB by the app)
  */
 
-const CACHE_NAME = 'bailandosolo-mobile-v3.2';
+const CACHE_NAME = 'bailandosolo-mobile-v4.0';
 
 // Critical shell assets — ALL must be cached for offline to work
 const PRECACHE_URLS = [

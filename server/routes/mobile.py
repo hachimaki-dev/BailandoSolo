@@ -8,11 +8,16 @@ import socket
 import shutil
 import tempfile
 
-from flask import Blueprint, jsonify, send_file, after_this_request
+import time
+import threading
+from flask import Blueprint, jsonify, send_file, after_this_request, request
 
 from server.config import PORT, DOWNLOADS_DIR, STATIC_DIR
 from server.routes.profiles import load_profiles
 from server.tunnel import start_tunnel, stop_tunnel, get_tunnel_status
+from server.state import get_download_status, update_download_status
+import yt_dlp
+from server.routes.downloads import _build_ydl_options
 
 mobile_bp = Blueprint('mobile', __name__)
 
@@ -179,5 +184,178 @@ def tunnel_stop():
     """Stop the running HTTPS tunnel."""
     result = stop_tunnel()
     return jsonify(result), 200
+
+
+def _mobile_download_thread(raw_query, folder_name, task_id):
+    """
+    Dedicated background download thread for mobile requests.
+    Supports search queries and direct YouTube URLs.
+    Accurately reports real-time progress to task_id in server.state.
+    """
+    try:
+        config = load_profiles()
+        active_profile = config.get('active', 'Default')
+        base_dir = os.path.join(DOWNLOADS_DIR, active_profile, folder_name)
+        os.makedirs(base_dir, exist_ok=True)
+
+        is_url = raw_query.startswith('http://') or raw_query.startswith('https://')
+        resolved_url = raw_query
+        title_for_stage = raw_query
+
+        # If it's a search term, resolve it to an actual YouTube video first
+        if not is_url:
+            update_download_status(task_id, {
+                'status': 'searching',
+                'stage': f'Buscando "{raw_query}" en YouTube...',
+                'percent': 10.0,
+                'speed': 0,
+                'eta': 0
+            })
+
+            search_opts = _build_ydl_options({'extract_flat': True, 'quiet': True})
+            with yt_dlp.YoutubeDL(search_opts) as s_ydl:
+                search_res = s_ydl.extract_info(f"ytsearch1:{raw_query}", download=False)
+                entries = search_res.get('entries', []) if search_res else []
+                if not entries or not entries[0]:
+                    update_download_status(task_id, {
+                        'status': 'error',
+                        'stage': 'No se encontraron resultados en YouTube',
+                        'percent': 0,
+                        'error': 'No results found'
+                    })
+                    return
+
+                first_entry = entries[0]
+                resolved_id = first_entry.get('id')
+                resolved_url = f"https://www.youtube.com/watch?v={resolved_id}"
+                title_for_stage = first_entry.get('title') or raw_query
+
+        # Progress hook for yt-dlp
+        def hook(d):
+            status = d.get('status')
+            if status == 'downloading':
+                total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
+                downloaded = d.get('downloaded_bytes', 0)
+                raw_pct = (downloaded / total) * 100.0 if total > 0 else 0.0
+                scaled_pct = min(92.0, max(15.0, round(raw_pct * 0.9, 1)))
+                update_download_status(task_id, {
+                    'status': 'downloading',
+                    'stage': f'Descargando audio ({int(scaled_pct)}%)...',
+                    'percent': scaled_pct,
+                    'downloaded_bytes': downloaded,
+                    'total_bytes': total,
+                    'speed': d.get('speed') or 0,
+                    'eta': d.get('eta') or 0,
+                    'filename': os.path.basename(d.get('filename') or 'audio.mp3')
+                })
+            elif status == 'finished':
+                update_download_status(task_id, {
+                    'status': 'processing',
+                    'stage': 'Extrayendo audio a MP3 y carátula...',
+                    'percent': 95.0,
+                    'speed': 0,
+                    'eta': 0
+                })
+
+        update_download_status(task_id, {
+            'status': 'downloading',
+            'stage': f'Iniciando descarga: {title_for_stage[:35]}...',
+            'percent': 15.0,
+            'speed': 0,
+            'eta': 0
+        })
+
+        base_ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [
+                {
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '192',
+                },
+                {
+                    'key': 'FFmpegMetadata',
+                    'add_metadata': True,
+                }
+            ],
+            'outtmpl': os.path.join(base_dir, '%(title)s.%(ext)s'),
+            'writethumbnail': True,
+            'ignoreerrors': False,
+            'progress_hooks': [hook],
+            'quiet': True,
+            'no_warnings': True,
+        }
+
+        ydl_opts = _build_ydl_options(base_ydl_opts)
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(resolved_url, download=True)
+            downloaded_title = info.get('title') if info else title_for_stage
+
+        update_download_status(task_id, {
+            'status': 'finished',
+            'stage': 'Completado con éxito en tu PC',
+            'percent': 100.0,
+            'speed': 0,
+            'eta': 0,
+            'title': downloaded_title
+        })
+
+    except Exception as e:
+        err_msg = str(e)
+        print(f"[Mobile Download Error] {task_id}: {err_msg}")
+        update_download_status(task_id, {
+            'status': 'error',
+            'stage': f'Error: {err_msg[:60]}',
+            'percent': 0,
+            'error': err_msg
+        })
+
+
+@mobile_bp.route('/api/mobile/quick-download', methods=['POST'])
+def quick_download():
+    """Trigger a fast download from mobile via YouTube URL or search query to active profile."""
+    data = request.json or {}
+    raw_query = (data.get('query') or data.get('url') or '').strip()
+    folder_name = data.get('folder', 'Descargas').strip() or 'Descargas'
+
+    if not raw_query:
+        return jsonify({'error': 'Enlace de YouTube o nombre de canción requerido'}), 400
+
+    task_id = f"mobile_{int(time.time() * 1000)}"
+
+    update_download_status(task_id, {
+        'status': 'waiting',
+        'stage': 'Iniciando descarga en la PC...',
+        'percent': 5.0,
+        'speed': 0,
+        'eta': 0
+    })
+
+    # Start download in background thread using dedicated mobile engine
+    thread = threading.Thread(
+        target=_mobile_download_thread,
+        args=(raw_query, folder_name, task_id)
+    )
+    thread.daemon = True
+    thread.start()
+
+    return jsonify({
+        'status': 'started',
+        'task_id': task_id,
+        'folder': folder_name,
+        'query': raw_query
+    }), 200
+
+
+@mobile_bp.route('/api/mobile/quick-status/<task_id>', methods=['GET'])
+def quick_status(task_id):
+    """Check progress of a specific mobile-initiated download."""
+    all_status = get_download_status()
+    task = all_status.get(task_id)
+    if not task:
+        return jsonify({'status': 'unknown', 'percent': 0}), 404
+    return jsonify(task), 200
+
 
 
