@@ -54,9 +54,16 @@ jobs:
       - name: Install Python Dependencies
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install pyinstaller
+          if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
+            arch -x86_64 python3 -m venv venv_intel
+            arch -x86_64 ./venv_intel/bin/python -m pip install --upgrade pip
+            arch -x86_64 ./venv_intel/bin/python -m pip install -r requirements.txt
+            arch -x86_64 ./venv_intel/bin/python -m pip install pyinstaller
+          else
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install pyinstaller
+          fi
 
       - name: Setup FFmpeg for Bundling
         shell: bash
@@ -96,7 +103,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
-            python -m PyInstaller --name bailandosolo-server --onefile --target-arch x86_64 --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+            arch -x86_64 ./venv_intel/bin/python -m PyInstaller --name bailandosolo-server --onefile --target-arch x86_64 --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
           elif [ "${{ matrix.target_name }}" = "mac-arm64" ]; then
             python -m PyInstaller --name bailandosolo-server --onefile --target-arch arm64 --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
           else
