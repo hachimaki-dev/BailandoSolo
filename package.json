@@ -1,6 +1,6 @@
 {
   "name": "bailandosolo",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Reproductor y Descargador de Música Retro",
   "main": "main.js",
   "scripts": {
@@ -31,7 +31,9 @@
         "to": ".",
         "filter": [
           "bailandosolo-server",
-          "bailandosolo-server.exe"
+          "bailandosolo-server.exe",
+          "ffmpeg",
+          "ffmpeg.exe"
         ]
       }
     ],
@@ -41,7 +43,8 @@
         "dmg",
         "zip"
       ],
-      "category": "public.app-category.music"
+      "category": "public.app-category.music",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "dmg": {
       "background": "build/background.png",
@@ -58,7 +61,8 @@
         "AppImage",
         "deb"
       ],
-      "category": "Audio"
+      "category": "Audio",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "win": {
       "icon": "build/icon.ico",
@@ -71,7 +75,11 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "uninstallerIcon": "build/icon.ico",
+      "artifactName": "${productName} Setup ${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName} ${version} Portable.exe"
     }
   },
   "keywords": [],

@@ -1,12 +1,10 @@
 
-import { API_BASE } from '../config'
-
-const API_URL = `${API_BASE}/stats`;
+import { apiUrl } from '../config'
 
 export const StatsService = {
     async trackPlay(song) {
         try {
-            await fetch(`${API_URL}/track`, {
+            await fetch(apiUrl('/api/stats/track'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -22,7 +20,7 @@ export const StatsService = {
 
     async trackTime(song, duration) {
         try {
-            await fetch(`${API_URL}/track`, {
+            await fetch(apiUrl('/api/stats/track'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -38,7 +36,7 @@ export const StatsService = {
 
     async getStats() {
         try {
-            const res = await fetch(API_URL);
+            const res = await fetch(apiUrl('/api/stats'));
             if (!res.ok) {
                 console.error(`Stats API returned ${res.status}: ${res.statusText}`);
                 const text = await res.text();

@@ -4,6 +4,7 @@ Handles YouTube analysis, download initiation, progress tracking and duplicate h
 with resilient networking options for restrictive environments (university networks/AP isolation/firewalls).
 """
 
+import sys
 import os
 import re
 import json
@@ -19,6 +20,52 @@ from server.state import get_download_status, update_download_status
 from server.routes.profiles import load_profiles
 
 downloads_bp = Blueprint('downloads', __name__)
+
+
+# ─── FFmpeg Locator ────────────────────────────────────────────────────────────
+
+def _find_ffmpeg():
+    """Find ffmpeg binary in bundled application resources or system PATH."""
+    candidates = []
+
+    # Check bundled paths (PyInstaller / Electron Resources)
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.extend([
+            os.path.join(exe_dir, 'ffmpeg.exe'),
+            os.path.join(exe_dir, 'ffmpeg'),
+            os.path.join(getattr(sys, '_MEIPASS', ''), 'ffmpeg.exe'),
+            os.path.join(getattr(sys, '_MEIPASS', ''), 'ffmpeg'),
+        ])
+
+    # Project dist / resources fallback
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    candidates.extend([
+        os.path.join(project_root, 'dist', 'ffmpeg.exe'),
+        os.path.join(project_root, 'dist', 'ffmpeg'),
+    ])
+
+    # System PATH and standard OS binaries
+    system_ffmpeg = shutil.which('ffmpeg')
+    if system_ffmpeg:
+        candidates.append(system_ffmpeg)
+
+    candidates.extend([
+        '/opt/homebrew/bin/ffmpeg',
+        '/usr/local/bin/ffmpeg',
+        '/usr/bin/ffmpeg',
+        r'C:\ProgramData\chocolatey\bin\ffmpeg.exe'
+    ])
+
+    for c in candidates:
+        if c and os.path.isfile(c):
+            if os.name != 'nt' and not os.access(c, os.X_OK):
+                try:
+                    os.chmod(c, 0o755)
+                except Exception:
+                    pass
+            return c
+    return None
 
 
 # ─── Resilient Options Builder ────────────────────────────────────────────────
@@ -129,17 +176,26 @@ def _download_thread(url, folder_name, selected_ids, quality='192', naming_templ
     else:
         outtmpl = os.path.join(base_dir, '%(title)s.%(ext)s')
 
-    base_ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
+    ffmpeg_bin = _find_ffmpeg()
+    postprocessors = []
+    if ffmpeg_bin:
+        postprocessors.append({
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': str(quality),
-        }],
+        })
+    else:
+        print("[Audio Engine] ffmpeg no detectado en el sistema ni en recursos. Descargando pista de audio directa (bestaudio)...")
+
+    base_ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': postprocessors,
         'outtmpl': outtmpl,
         'writethumbnail': True,
         'ignoreerrors': False,
     }
+    if ffmpeg_bin:
+        base_ydl_opts['ffmpeg_location'] = ffmpeg_bin
 
     ydl_opts = _build_ydl_options(base_ydl_opts, cookies_browser=cookies_browser, proxy=proxy)
 

@@ -317,13 +317,17 @@ def delete_song():
 @library_bp.route('/api/stream/<path:filepath>', methods=['GET'])
 def stream_file(filepath):
     """Serve a file from the active profile's directory."""
-    base_dir = _get_profile_dir()
-    safe_path = os.path.normpath(os.path.join(base_dir, filepath))
-    if not safe_path.startswith(base_dir):
+    base_dir = os.path.abspath(_get_profile_dir())
+    safe_path = os.path.abspath(os.path.normpath(os.path.join(base_dir, filepath)))
+    try:
+        if os.path.commonpath([base_dir, safe_path]) != base_dir:
+            return jsonify({'error': 'Access denied'}), 403
+    except ValueError:
         return jsonify({'error': 'Access denied'}), 403
+
     if not os.path.exists(safe_path):
         return jsonify({'error': 'File not found'}), 404
-    return send_file(safe_path)
+    return send_file(safe_path, conditional=True)
 
 
 @library_bp.route('/api/library/random', methods=['GET'])

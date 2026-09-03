@@ -332,7 +332,7 @@ const updateSongTime = ({ currentTime, duration }) => {
 
 // ─── Data Fetching ─────────────────────────────────────────────────────────────
 
-const refreshLibraryData = async () => {
+const refreshLibraryData = async (retries = 2) => {
   try {
     const [fList, sList, pList, stats] = await Promise.all([
       LibraryService.getFolders(),
@@ -346,6 +346,9 @@ const refreshLibraryData = async () => {
     rawStatsData.value = stats || {}
   } catch (e) {
     console.error('Error loading library data:', e)
+    if (retries > 0) {
+      setTimeout(() => refreshLibraryData(retries - 1), 1000)
+    }
   }
 }
 

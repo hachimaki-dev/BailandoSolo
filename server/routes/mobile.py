@@ -17,7 +17,7 @@ from server.routes.profiles import load_profiles
 from server.tunnel import start_tunnel, stop_tunnel, get_tunnel_status
 from server.state import get_download_status, update_download_status
 import yt_dlp
-from server.routes.downloads import _build_ydl_options
+from server.routes.downloads import _build_ydl_options, _find_ffmpeg
 
 mobile_bp = Blueprint('mobile', __name__)
 
@@ -106,8 +106,12 @@ def download_file(filepath):
     config = load_profiles()
     active_profile = config.get('active', 'Default')
 
-    safe_path = os.path.normpath(os.path.join(DOWNLOADS_DIR, active_profile, filepath))
-    if not safe_path.startswith(os.path.join(DOWNLOADS_DIR, active_profile)):
+    base_downloads = os.path.abspath(os.path.join(DOWNLOADS_DIR, active_profile))
+    safe_path = os.path.abspath(os.path.normpath(os.path.join(base_downloads, filepath)))
+    try:
+        if os.path.commonpath([base_downloads, safe_path]) != base_downloads:
+            return jsonify({'error': 'Access denied'}), 403
+    except ValueError:
         return jsonify({'error': 'Access denied'}), 403
 
     if not os.path.exists(safe_path):
@@ -123,11 +127,13 @@ def download_folder(folder):
     config = load_profiles()
     active_profile = config.get('active', 'Default')
 
-    folder_path = os.path.join(DOWNLOADS_DIR, active_profile, folder)
-    safe_path = os.path.normpath(folder_path)
-    base_downloads = os.path.join(DOWNLOADS_DIR, active_profile)
+    base_downloads = os.path.abspath(os.path.join(DOWNLOADS_DIR, active_profile))
+    safe_path = os.path.abspath(os.path.normpath(os.path.join(base_downloads, folder)))
 
-    if not safe_path.startswith(base_downloads):
+    try:
+        if os.path.commonpath([base_downloads, safe_path]) != base_downloads:
+            return jsonify({'error': 'Access denied'}), 403
+    except ValueError:
         return jsonify({'error': 'Access denied'}), 403
 
     if not os.path.exists(safe_path):
@@ -265,9 +271,10 @@ def _mobile_download_thread(raw_query, folder_name, task_id):
             'eta': 0
         })
 
-        base_ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [
+        ffmpeg_bin = _find_ffmpeg()
+        postprocessors = []
+        if ffmpeg_bin:
+            postprocessors.extend([
                 {
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
@@ -277,7 +284,11 @@ def _mobile_download_thread(raw_query, folder_name, task_id):
                     'key': 'FFmpegMetadata',
                     'add_metadata': True,
                 }
-            ],
+            ])
+
+        base_ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': postprocessors,
             'outtmpl': os.path.join(base_dir, '%(title)s.%(ext)s'),
             'writethumbnail': True,
             'ignoreerrors': False,
@@ -285,6 +296,8 @@ def _mobile_download_thread(raw_query, folder_name, task_id):
             'quiet': True,
             'no_warnings': True,
         }
+        if ffmpeg_bin:
+            base_ydl_opts['ffmpeg_location'] = ffmpeg_bin
 
         ydl_opts = _build_ydl_options(base_ydl_opts)
 

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versi%C3%B3n-2.1.0-ff007f?style=for-the-badge&logo=retroarch&logoColor=white" alt="Versión 2.1.0" />
+  <img src="https://img.shields.io/badge/Versi%C3%B3n-1.2.0-ff007f?style=for-the-badge&logo=retroarch&logoColor=white" alt="Versión 1.2.0" />
   <img src="https://img.shields.io/badge/Estilo-Retro_16--bit-00f0ff?style=for-the-badge" alt="Retro 16-bit" />
   <img src="https://img.shields.io/badge/Nube-0%25-39ff14?style=for-the-badge" alt="0% Nube" />
   <img src="https://img.shields.io/badge/Suscripciones-$0-ffb703?style=for-the-badge" alt="$0 Suscripciones" />
@@ -85,11 +85,16 @@ Comparte playlists e intercambia música con otros usuarios mediante relays desc
 
 ## 🚀 Instalación Rápida
 
-### Para mortales
+### Para usuarios
 Descarga el instalador directo en [**Releases**](../../releases):
-* **Windows:** `.exe`
-* **Linux:** `.AppImage` o `.deb`
-* **macOS:** `.dmg`
+* **Windows:** `.exe` (Instalador NSIS o versión Portable).
+* **macOS (Apple Silicon M1/M2/M3/M4):** `-arm64.dmg` o `-arm64.zip`.
+* **macOS (Intel Core i5/i7/i9):** `-x64.dmg` o `-x64.zip`.
+  > *Nota macOS:* Al ser software libre sin certificado comercial de pago de Apple, si macOS te muestra aviso de desarrollador no identificado, abre Terminal y ejecuta:
+  > ```bash
+  > xattr -cr "/Applications/Bailando Solo.app"
+  > ```
+* **Linux:** `.AppImage` o `.deb`.
 
 ### Para desarrolladores
 ```bash

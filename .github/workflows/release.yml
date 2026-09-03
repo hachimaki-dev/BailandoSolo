@@ -54,30 +54,68 @@ jobs:
       - name: Install Python Dependencies
         shell: bash
         run: |
-          if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
-            arch -x86_64 python -m pip install --upgrade pip
-            arch -x86_64 pip install -r requirements.txt
-            arch -x86_64 pip install pyinstaller
-          else
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install pyinstaller
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Setup FFmpeg for Bundling
+        shell: bash
+        run: |
+          mkdir -p dist
+          if [ "${{ matrix.target_name }}" = "mac-arm64" ]; then
+            if [ -f "/opt/homebrew/bin/ffmpeg" ]; then
+              cp /opt/homebrew/bin/ffmpeg dist/ffmpeg
+            else
+              brew install ffmpeg
+              cp "$(which ffmpeg)" dist/ffmpeg
+            fi
+            chmod +x dist/ffmpeg
+          elif [ "${{ matrix.target_name }}" = "mac-intel" ]; then
+            curl -L -o ffmpeg-mac-x64.zip https://evermeet.cx/ffmpeg/getrelease/zip
+            unzip -q ffmpeg-mac-x64.zip -d dist/
+            chmod +x dist/ffmpeg
+          elif [ "${{ matrix.target_name }}" = "windows-x64" ]; then
+            if command -v ffmpeg &> /dev/null; then
+              cp "$(which ffmpeg)" dist/ffmpeg.exe
+            else
+              curl -L -o ffmpeg-win.zip https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+              unzip -q ffmpeg-win.zip
+              cp ffmpeg-*/bin/ffmpeg.exe dist/ffmpeg.exe
+            fi
+          elif [ "${{ matrix.target_name }}" = "linux-x64" ]; then
+            if ! command -v ffmpeg &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y ffmpeg
+            fi
+            cp "$(which ffmpeg)" dist/ffmpeg
+            chmod +x dist/ffmpeg
           fi
+          echo "FFmpeg bundled in dist/:"
+          ls -la dist/
 
       - name: Build Python Backend Binary (PyInstaller - Unix)
         if: runner.os != 'Windows'
         run: |
           if [ "${{ matrix.target_name }}" = "mac-intel" ]; then
-            arch -x86_64 pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+            python -m PyInstaller --name bailandosolo-server --onefile --target-arch x86_64 --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+          elif [ "${{ matrix.target_name }}" = "mac-arm64" ]; then
+            python -m PyInstaller --name bailandosolo-server --onefile --target-arch arm64 --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
           else
-            pyinstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+            python -m PyInstaller --name bailandosolo-server --onefile --add-data "static:static" --hidden-import flask_cors --hidden-import yt_dlp server.py
           fi
           chmod +x dist/bailandosolo-server
+
+      - name: Verify Binary Architecture (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          file dist/bailandosolo-server
+          if [ -f "dist/ffmpeg" ]; then
+            file dist/ffmpeg
+          fi
 
       - name: Build Python Backend Binary (PyInstaller - Windows)
         if: runner.os == 'Windows'
         run: |
-          pyinstaller --name bailandosolo-server --onefile --add-data "static;static" --hidden-import flask_cors --hidden-import yt_dlp server.py
+          python -m PyInstaller --name bailandosolo-server --onefile --add-data "static;static" --hidden-import flask_cors --hidden-import yt_dlp server.py
 
       - name: Install Frontend & Electron Dependencies
         run: |
@@ -107,3 +145,4 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

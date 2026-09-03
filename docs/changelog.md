@@ -5,6 +5,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
 ---
 
+## [1.2.0] — 2026-09-03
+
+### Estabilidad Multiplataforma y Lanzamiento Universal
+- **Compatibilidad Total con Mac Intel (x64)**:
+  - Corregida la compilación del backend en GitHub Actions: PyInstaller compila nativamente en x86_64 bajo Rosetta 2 sin contaminación de librerías ARM64.
+  - Verificación formal de arquitectura con `file dist/bailandosolo-server` en el pipeline de CI/CD (`Mach-O 64-bit executable x86_64`).
+  - Permisos de ejecución automáticos (`chmod 755`) aplicados antes del lanzamiento del backend en macOS.
+- **Estabilidad y Ciclo de Vida en Windows (x64)**:
+  - Eliminada la condición de carrera en el arranque: Electron espera a que el servidor Flask termine de descomprimirse e inicializarse antes de cargar la interfaz, garantizando que la biblioteca y perfiles carguen al primer intento sin peticiones fallidas.
+  - Eliminación limpia de subprocesos zombies (`taskkill /T /F` en Windows al salir) evitando el error de puerto ocupado (`Address already in use`).
+  - Ocultamiento de ventana de consola (`windowsHide: true`) para una experiencia de usuario nativa y sin parpadeos.
+- **FFmpeg Universal y Descargas a Prueba de Fallos**:
+  - Empaquetado directo de binarios estáticos de `ffmpeg` en las releases de Windows, Mac ARM64, Mac Intel y Linux.
+  - Localizador dinámico (`_find_ffmpeg`) que prioriza los recursos internos de la app antes del `PATH` del sistema.
+  - Fallback resiliente: en caso de no contar con FFmpeg, se descarga la pista de audio de alta fidelidad directa (`bestaudio`) sin interrumpir la cola de descargas con errores fatales.
+- **Rutas y Streaming de Audio**:
+  - Normalización de rutas con `os.path.commonpath` en Flask para evitar errores `403 Access Denied` por discrepancias de mayúsculas/minúsculas en Windows.
+  - Soporte explícito de peticiones HTTP 206 Partial Content (`conditional=True`) para rebobinado instantáneo y cálculo de duración de audio.
+- **Claridad de Descargas en GitHub Releases**:
+  - Sufijos de arquitectura explícitos: `Bailando Solo-1.2.0-arm64.dmg`, `Bailando Solo-1.2.0-x64.dmg`, `Bailando Solo Setup 1.2.0.exe`, `Bailando Solo 1.2.0 Portable.exe`, `Bailando Solo-1.2.0-x86_64.AppImage`, `bailandosolo_1.2.0_amd64.deb`.
+
+---
+
 ## [1.1.0] — 2026-09-02
 
 ### Novedades y Resiliencia de Red
